@@ -59,7 +59,7 @@ once Phase 1's API contract is fixed. Phase numbering follows the PRD's own §19
 
 | Phase | Delivers | Key gate |
 |---|---|---|
-| **0A** PRD remediation | Resolve the 15 contradictions found during design; PRD → v1.1 | No `[OPEN]` item blocks Phases 1–4; every ambiguity has a decided answer |
+| **0A** PRD remediation ✅ | Resolve the 15 contradictions found during design; PRD → v1.1 | **Done** — PRD v1.1 committed, 35 `[RESOLVED-1.1]` markers, no remaining item blocks Phases 1–4 |
 | **0B** Fixtures | Regression corpus, category catalog, v1 prompt, baseline pin | Corpus loads; Sinhala round-trips byte-exact |
 | **1** Batch domain | 9 tables, Alembic, storage, job dispatch, `202` upload + progress + retry | `kill -9` mid-batch → resumes; retry → no duplicates; **existing tests pass unchanged** |
 | **2** Structured OCR | `OcrProvider` protocol + 3 env-switchable engines, blocks/bboxes/confidence, preprocessing | Fixture blocks stable; unknown `OCR_PROVIDER` dies at startup |

@@ -6,9 +6,9 @@
 |---|---|
 | Product | LankaListings |
 | Capability | Bulk newspaper-image ingestion with Sinhala OCR, multi-ad extraction, and human review |
-| Status | Proposed for implementation |
-| Version | 1.0 |
-| Date | 2026-09-04 |
+| Status | Approved for implementation |
+| Version | 1.1 |
+| Date | 2026-09-05 |
 | Primary client | Management portal (Vite + React) |
 | Processing service | Media service (FastAPI) |
 | Public clients | Responsive web (Next.js) and mobile (Expo React Native) |
@@ -20,6 +20,31 @@
 - `[DERIVED]`: inferred from existing UI, code, or architecture artifacts.
 - `[PROPOSED]`: recommended implementation or policy that still may be changed.
 - `[OPEN]`: a decision that is not required for local development but must be resolved before production.
+- `[RESOLVED-1.1]`: a contradiction or undefined decision in v1.0 that was settled in v1.1.
+
+### Changelog
+
+**v1.1 (2026-09-05)** — reconciliation pass before implementation. Design review of v1.0 found 15 places
+where the document contradicted itself or left a decision undefined that the build could not proceed past.
+All are now settled and marked `[RESOLVED-1.1]`:
+
+| Area | v1.0 problem | v1.1 resolution |
+|---|---|---|
+| §8.2, §11.6 | "retries one time" vs "bounded retries with backoff" | 3 attempts + 1 schema repair, as independent budgets |
+| §10.1 | No transition re-opened a finished batch, yet FR-JOB-005 requires retry | `partial_failed`/`failed` → `processing`, clearing `completed_at` |
+| §10.2 | `retry` drawn as a state; no `queued` state despite FR-JOB-001 | `retry` is a transition; `uploaded` maps to the `queued` count |
+| §11.5 | Structural and semantic validation conflated | Split into two tiers with opposite failure handling |
+| §11.4, §11.2 | `language` values never enumerated | Locked to `si\|en\|ta\|mixed\|unknown` |
+| §12.2 | Both `status` and `current_stage` stored | `current_stage` derived; `failed_stage` stored |
+| §12.7 | `ReviewEvent` requires an item-scoped action but keys on an advertisement | `subject_type` added; `advertisement_id` nullable |
+| §13.1 | `counts` omitted states FR-JOB-001 requires | 7-key superset |
+| §13.4 | Missing codes; HTTP and item-level namespaces mixed | Codes added; table split in two |
+| §15.1 | 25 × 10 MiB contradicts the 100 MiB cap | Total is binding and checked first |
+| §6, §9.1 | Invariant 12 appeared to contradict FR-ING-008 | Dedup applies to bytes, flagging to items |
+| §9.3 | FR-LLM-002 (one request) vs FR-LLM-015 (chunking) | v1 truncates on block boundaries; no chunking |
+| §11.6 | Heuristic-extractor restriction had no enforcement | Environment-gated; now a requirement |
+| §11.2 | Category catalog undefined; code shipped 6 without `Other` | The nine locked top-level categories |
+| §6, §10.3 | `pending_review` vs `pending` | `pending` is canonical; `pending_review` is a wire alias |
 
 ## 1. Capability Summary
 
@@ -121,7 +146,9 @@ The initial capability will not:
 The following rules must hold in every implementation:
 
 1. Only an `active` advertisement is publicly readable. `[LOCKED]`
-2. Every OCR/LLM-created advertisement starts as `pending_review`. `[CONFIRMED]`
+2. Every OCR/LLM-created advertisement starts in the pending review state. The canonical stored value is
+   `pending` (§10.3); `pending_review` is retained as a wire-level alias for the existing portal contract.
+   `[CONFIRMED]` `[RESOLVED-1.1]`
 3. An image may create zero, one, or many candidate advertisements. `[CONFIRMED]`
 4. Candidates from the same image must remain independently reviewable.
 5. Missing information must remain `null` or explicitly unresolved; it must not be invented.
@@ -132,6 +159,9 @@ The following rules must hold in every implementation:
 10. OCR text and LLM output are untrusted inputs.
 11. Provider credentials must remain server-side and must never be sent to browser or mobile clients.
 12. The same source image must be stored once and referenced by all candidates created from it.
+    This applies to **bytes**, not to items: identical images are stored once and shared, while every
+    uploaded item remains a distinct, independently reviewable record. It therefore does not conflict with
+    FR-ING-008, which requires duplicates to be flagged rather than discarded. `[RESOLVED-1.1]`
 13. Moderation actions must be recorded with actor, timestamp, decision, and changed values.
 14. In the target architecture, only the listing service may change advertisement lifecycle state.
     `[LOCKED]`
@@ -210,7 +240,10 @@ pipeline. `[PROPOSED]`
 6. Usable OCR blocks are placed into the versioned LLM extraction prompt.
 7. The LLM returns an `advertisements` array.
 8. Pydantic validates types, enums, source references, lengths, and numeric formats.
-9. The system retries one time for transient provider errors or repairable schema errors.
+9. The system retries transient provider errors with bounded exponential backoff, and may issue one
+   schema-repair request for a parseable but non-conforming response. These are two independent budgets:
+   a transport retry never consumes the repair budget. Defaults are 3 attempts and 1 repair (§11.6).
+   `[RESOLVED-1.1]`
 10. A valid response creates one pending draft per array element in a single item-level transaction.
 11. An empty valid array marks the item `no_ads` and creates no drafts.
 12. Unrecoverable OCR or LLM failures mark only that item `needs_attention` or `failed`.
@@ -269,19 +302,30 @@ pipeline. `[PROPOSED]`
 - **FR-LLM-003:** The LLM provider must be accessed through an application interface so the provider can
   be replaced without changing pipeline business logic.
 - **FR-LLM-004:** The prompt must be versioned and every run must record its prompt version.
-- **FR-LLM-005:** The prompt must explicitly support Sinhala, English, and mixed-language OCR.
+- **FR-LLM-005:** The prompt must explicitly support Sinhala, English, and mixed-language OCR. The
+  `language` field of a candidate is a closed set: `si`, `en`, `ta`, `mixed`, `unknown`. Because this is a
+  schema enum, any value outside the set is a hard validation failure, so the set must be amended here
+  before it is widened in code. `[RESOLVED-1.1]`
 - **FR-LLM-006:** The prompt must instruct the model to separate independent ads and never merge them
   because they share a page or category.
 - **FR-LLM-007:** The response must be structured JSON conforming to the application schema.
 - **FR-LLM-008:** Unknown fields must be `null`; placeholder claims must not be generated.
 - **FR-LLM-009:** Every candidate must include source block identifiers that support its extraction.
 - **FR-LLM-010:** Every candidate must include overall and per-field confidence in the range `0.0..1.0`.
-- **FR-LLM-011:** The application must reject unknown categories or map them to `Other` with a warning.
+- **FR-LLM-011:** The application must map an unknown category to `Other` and attach a
+  `CATEGORY_UNMAPPED` warning. This is a **semantic** rule (§11.5 Tier 2), not a structural one: an unknown
+  category must never fail schema validation, because that would trigger a paid repair request for
+  something the policy says to map and warn about. The active taxonomy is the nine locked top-level
+  categories in §11.7. `[RESOLVED-1.1]`
 - **FR-LLM-012:** Model output must not directly activate or publish an advertisement.
 - **FR-LLM-013:** The service may attempt one schema-repair call after a structurally invalid response.
 - **FR-LLM-014:** Provider timeouts and retryable failures must use bounded retries with backoff.
-- **FR-LLM-015:** The application must cap OCR input length and reject or chunk oversized content using
-  a deterministic policy.
+- **FR-LLM-015:** The application must cap OCR input length using a deterministic policy. In v1 that policy
+  is **truncation on block boundaries**, never mid-block, with the dropped block identifiers recorded and an
+  `OCR_INPUT_TRUNCATED` warning attached to every candidate from that image. Chunking into multiple requests
+  is explicitly **not** implemented in v1 because it would contradict FR-LLM-002. Should chunking become
+  necessary, FR-LLM-002 must be amended so that "primary request" means the first run of a linked set.
+  `[RESOLVED-1.1]`
 
 ### 9.4 Candidate Creation
 
@@ -341,7 +385,18 @@ pipeline. `[PROPOSED]`
 queued -> processing -> completed
                     -> partial_failed
                     -> failed
+
+partial_failed -> processing        (an item was retried)
+failed         -> processing        (an item was retried)
 ```
+
+Batch status is **derived** from the states of its items and is never assigned directly by a client
+(FR-JOB-003). Retrying an item re-opens a finished batch: the batch returns to `processing` and
+`completed_at` is cleared until it reaches a terminal state again. `[RESOLVED-1.1]`
+
+A batch is terminal when every item has stopped moving. `awaiting_review` counts as terminal for the
+**batch**, because the batch tracks extraction progress, not review progress — otherwise the batch progress
+view could never reach completion.
 
 ### 10.2 Image Item Lifecycle
 
@@ -353,10 +408,22 @@ uploaded
   -> awaiting_review
   -> completed
 
-Any processing state -> needs_attention -> retry -> processing state
-Any processing state -> failed -> retry -> processing state
-llm_processing -> no_ads
+llm_processing       -> no_ads
+Any processing state -> needs_attention
+Any processing state -> failed
+needs_attention      -> uploaded          (retry)
+failed               -> uploaded          (retry)
 ```
+
+Notes on this model: `[RESOLVED-1.1]`
+
+- **Retry is a transition, not a state.** A retried item returns to `uploaded` and is claimed again by a
+  worker. An item that is waiting to be retried is therefore `uploaded` with a non-zero attempt count and a
+  future scheduled run time; no separate `retry_scheduled` state exists.
+- **There is no distinct `queued` item state.** FR-JOB-001 and the §13.1 response require a `queued`
+  *count*; that count is the number of items in the `uploaded` state.
+- Retrying an item that already succeeded is rejected with `INVALID_STATUS_TRANSITION`. Reprocessing such
+  an item is a separate, explicit operation (§9.6).
 
 ### 10.3 Advertisement Lifecycle
 
@@ -368,8 +435,16 @@ draft -> pending -> active -> sold
         -> rejected -> pending after revision
 ```
 
-OCR/LLM candidates enter at `pending`. The current prototype wire value `pending_review` may be retained
-temporarily and mapped to the target listing status `pending`. `[PROPOSED]`
+OCR/LLM candidates enter at `pending`.
+
+**`pending` is the canonical stored value.** `pending_review` is a wire-level alias only, emitted for
+backward compatibility with the existing management portal and mapped at the API boundary. Storing the
+target vocabulary now means the handover of advertisement ownership to the listing service needs no data
+migration, and the alias can be withdrawn by a portal release rather than a database change.
+`[RESOLVED-1.1]`
+
+The six advertisement states are `draft`, `pending`, `active`, `rejected`, `expired`, and `sold`, matching
+the platform data model. Only `active` is publicly readable (invariant 1).
 
 ## 11. LLM Extraction Contract
 
@@ -388,7 +463,7 @@ The initial prompt must tell the model to:
 3. Preserve Sinhala wording for title and description when it is the clearest source wording.
 4. Normalize phone numbers and numeric prices without changing their meaning.
 5. Use `LKR` only when the source indicates Sri Lankan rupees or the notation is unambiguous.
-6. Select a category only from the supplied category list.
+6. Select a category only from the supplied category list (§11.7).
 7. Return `Other` and a warning when no category confidently applies.
 8. Return `null` for missing values.
 9. Include evidence block identifiers and field-level confidence.
@@ -468,29 +543,83 @@ each advertisement and warnings for possible OCR corruption.
 
 ### 11.5 Application Validation
 
-The LLM response must be validated independently of provider-side structured-output enforcement:
+The LLM response must be validated by the application independently of provider-side structured-output
+enforcement, and **always** — including when the provider claims to have enforced the schema. Provider
+enforcement is not sufficient: some response modes have none at all, some structured-output modes cannot
+express numeric bounds, and any response can be truncated mid-object.
+
+Validation happens in **two tiers with deliberately different failure handling**. v1.0 listed these
+together, which is incorrect: treating a semantic problem as a structural one triggers a paid repair
+request for something policy says to accept with a warning. `[RESOLVED-1.1]`
+
+**Tier 1 — structural. Failure is repairable (§11.6).**
 
 - Schema version is supported.
-- Candidate count does not exceed a configurable per-image maximum.
-- Source block IDs exist in the recorded OCR result.
-- Strings meet length and control-character constraints.
-- Category belongs to the active taxonomy or is `Other`.
-- Confidence values are finite and within `0.0..1.0`.
+- Response parses and conforms to the declared response schema.
+- Types are correct; strings meet length and control-character constraints.
+- Confidence values are finite and within `0.0..1.0`. Non-finite values such as `NaN` are rejected.
 - Price amount is a non-negative integer when present.
 - Currency is `LKR` or `null` for the initial Sri Lankan marketplace scope.
-- Phone numbers remain strings and pass normalization rules when present.
-- Unknown fields are rejected to detect prompt/schema drift.
+- Unknown fields are rejected, to detect prompt/schema drift.
+
+**Tier 2 — semantic. Failure produces a warning or drops a single candidate. Never a retry or repair.**
+
+- Candidate count does not exceed the configured per-image maximum; excess candidates are dropped with a
+  `CANDIDATE_LIMIT_EXCEEDED` warning.
+- Source block IDs must exist in the recorded OCR result. Unknown identifiers are stripped with an
+  `EVIDENCE_BLOCK_UNKNOWN` warning; a candidate left with no supporting evidence is discarded with
+  `EVIDENCE_MISSING`. This is the primary detector for invented advertisements.
+- Category belongs to the active taxonomy, or is mapped to `Other` with `CATEGORY_UNMAPPED` (FR-LLM-011).
+- Phone numbers remain strings, are normalized where possible, and carry `PHONE_UNPARSEABLE` otherwise.
+- Text is normalized to Unicode NFC and stripped of control and bidirectional-override characters.
+  Compatibility normalization (NFKC) must **not** be used: it corrupts Sinhala conjunct forms and would
+  breach AC-012.
 
 ### 11.6 Retry and Failure Policy
 
 - Retry transient timeout, rate-limit, and provider `5xx` failures with bounded exponential backoff.
-- Do not retry authentication, malformed request, or unsupported-model errors.
-- Permit one repair request when the provider returns content that can be parsed but fails the schema.
-- Record every attempt as a separate LLM run.
+  Honour a provider-supplied `Retry-After` when present.
+- Do not retry authentication, malformed request, unsupported-model, or content-blocked errors.
+- **Transport retries and schema repairs are independent budgets.** Defaults: 3 attempts, 1 repair. A
+  transport retry must never consume the repair budget, and vice versa. `[RESOLVED-1.1]`
+- A truncated response caused by an output-token limit is a **transport** failure, not a schema failure.
+  It must be retried with a raised output limit rather than repaired, because repair cannot fix it and
+  would consume the one repair the item is allowed. `[RESOLVED-1.1]`
+- Permit one repair request when the provider returns content that can be parsed but fails Tier 1
+  validation. The repair request must contain only field paths and error messages — never the offending
+  values, which may carry personal data (§15.4).
+- Record every attempt as a separate LLM run, written before the call is made so that an interrupted
+  attempt is still visible.
 - Mark the item `needs_attention` after retry exhaustion.
-- Do not fall back silently to heuristic advertisement creation in production.
-- A deterministic rule-based extractor may remain available for automated tests and explicit local-demo
-  mode only. `[PROPOSED]`
+- **Do not fall back to heuristic advertisement creation in production.** A deterministic rule-based
+  extractor may remain available for automated tests and explicit local-demo mode only. This must be
+  enforced by configuration rather than convention: the service must refuse to construct a fake or
+  rule-based extraction provider when the deployment environment is not local or test, and must fail at
+  startup rather than at extraction time. `[RESOLVED-1.1]`
+
+### 11.7 Category Catalog
+
+The active taxonomy is the nine locked top-level categories from the platform data model. `[LOCKED]`
+`[RESOLVED-1.1]`
+
+```text
+vehicles, property, land, jobs, electronics, services, home_garden, fashion, other
+```
+
+v1.0 left this undefined, and the prototype shipped six categories (`Vehicles`, `Property`,
+`Electronics`, `Jobs`, `Home`, `Land`) which **omitted `Other`** and fell back to `Home` when nothing
+matched — silently mis-filing every unrecognised advertisement into a real category. That behaviour
+contradicts FR-LLM-011 and prompt rule 7 and must not survive into the pipeline.
+
+Requirements:
+
+- The catalog is defined in exactly one place in the service and injected into the prompt; it must not be
+  duplicated in client code.
+- The catalog is versioned, and its version is recorded on every extraction run alongside the prompt and
+  schema versions, so a taxonomy change is visible in provenance.
+- `other` must always be present, because it is the required destination for an unmapped category.
+- Subcategories are out of scope for extraction in v1; a reviewer assigns them where the platform
+  requires them.
 
 ## 12. Data Requirements
 
@@ -512,11 +641,17 @@ The LLM response must be validated independently of provider-side structured-out
 |---|---|
 | `id`, `batch_id` | Item identity and parent batch. |
 | `source_asset_id` | Original media asset reference. |
-| `original_filename` | Display-only source filename. |
-| `status`, `current_stage` | Processing state. |
+| `original_filename` | Display-only source filename. Must never influence a storage path (FR-ING-009). |
+| `status` | Processing state (§10.2). The single source of truth. |
 | `attempt_count` | Number of processing attempts. |
+| `failed_stage` | Which stage last failed. Stored, because it cannot be derived from `status`. |
 | `error_code`, `error_message` | Sanitized latest failure. |
+| `is_duplicate_of` | Set when an identical image appears more than once in a batch (FR-ING-008). |
 | `created_at`, `updated_at`, `completed_at` | UTC lifecycle timestamps. |
+
+`current_stage` is **derived** from `status`, not stored. v1.0 listed both; storing one truth in two
+columns lets them drift, and a stage that disagrees with a status is unreconcilable after the fact. What is
+genuinely not derivable — *which* stage failed — is kept as `failed_stage`. `[RESOLVED-1.1]`
 
 ### 12.3 MediaAsset and MediaDerivative
 
@@ -529,6 +664,11 @@ creation time. Required derivative purposes are `ocr_input`, `page_preview`, `th
 
 Stores item ID, raw Unicode text, structured blocks JSON, engine, trained-data/model version, languages,
 mean confidence, dimensions, preprocessing version, duration, status, and timestamps.
+
+`mean_confidence` is **numeric** (FR-OCR-009). The existing prototype exposes a coarse confidence *string*
+(`low`/`medium`/`high`) which the management portal already reads. The numeric field is therefore added
+**alongside** it rather than replacing it; the string remains for wire compatibility and is derived from
+the numeric value. `[RESOLVED-1.1]`
 
 ### 12.5 LlmExtractionRun
 
@@ -544,9 +684,18 @@ accepted values, and reviewer identity.
 
 ### 12.7 ReviewEvent
 
-Stores advertisement ID, reviewer ID, action, reason, before values, after values, correlation ID, and
-timestamp. Required actions are `created_by_extraction`, `edited`, `approved`, `rejected`, and
-`reprocessed`.
+Append-only. Stores subject type, subject identifiers, actor ID, action, reason, before values, after
+values, changed field names, correlation ID, and timestamp. Required actions are `created_by_extraction`,
+`edited`, `approved`, `rejected`, `reprocessed`, and `superseded`.
+
+`subject_type` is required and `advertisement_id` is nullable. v1.0 keyed every event on an advertisement
+while also requiring a `reprocessed` action — but reprocessing is scoped to an **image item** and may occur
+when no advertisement exists yet, or when several do. An event therefore identifies its subject explicitly
+as an advertisement, an ingestion item, or a batch. `[RESOLVED-1.1]`
+
+`changed_fields` is stored separately from the before/after payloads because §15.5 requires reporting the
+manual correction rate **per field**; deriving that by diffing two JSON documents at query time is not
+practical.
 
 ### 12.8 Storage and Ownership Rules
 
@@ -585,7 +734,9 @@ Example upload response:
       "processing": 0,
       "awaiting_review": 0,
       "no_ads": 0,
-      "failed": 0
+      "needs_attention": 0,
+      "failed": 0,
+      "completed": 0
     },
     "items": [
       { "id": "item_01", "filename": "page-1.png", "status": "uploaded" },
@@ -599,6 +750,22 @@ Example upload response:
 ```
 
 The response should include a `Location` header pointing to the batch status resource.
+
+The `counts` object carries all seven item states required by FR-JOB-001. v1.0's example omitted
+`needs_attention` and `completed`, which FR-JOB-001 requires; the keys are additive, so a client reading
+only the original five is unaffected. `queued` is the count of items in the `uploaded` state (§10.2).
+`[RESOLVED-1.1]`
+
+`POST /api/v1/ingestion-batches` accepts an optional `Idempotency-Key` header (FR-ING-006). Repeating a
+request with the same key and the same files replays the original response instead of creating a second
+batch. Reusing a key with *different* files is a client error and returns `IDEMPOTENCY_KEY_CONFLICT`.
+`[RESOLVED-1.1]`
+
+`POST /api/v1/ingestion-items/{item_id}/retry` supports two modes. The default resumes an unsuccessful item
+from its earliest invalid stage, reusing artifacts that are still valid — notably a completed OCR result,
+so an LLM-stage failure does not pay for OCR again. An explicit reprocess mode discards prior artifacts and
+starts a new extraction generation; candidates from the superseded generation that no reviewer has decided
+on are marked `superseded`, and **approved candidates are never superseded**. `[RESOLVED-1.1]`
 
 ### 13.2 Review Endpoints
 
@@ -619,20 +786,47 @@ the new batch workflow is live. `[PROPOSED]`
 
 ### 13.4 Error Codes
 
-| Code | Typical status | Meaning |
+These are **two separate namespaces**, which v1.0 merged into one table. An API error code is returned to a
+caller in the `error.code` field of a response envelope and describes a failed request. An item error code
+is persisted on an ingestion item and describes why processing stopped; it is never an HTTP status. Merging
+them made `OCR_EMPTY` appear to be an HTTP outcome, which it is not. `[RESOLVED-1.1]`
+
+#### 13.4.1 API error codes
+
+| Code | Status | Meaning |
 |---|---:|---|
 | `VALIDATION_FAILED` | `422` | One or more request fields are invalid. |
-| `BATCH_LIMIT_EXCEEDED` | `422` | File count or total bytes exceeds configuration. |
+| `BATCH_LIMIT_EXCEEDED` | `422` | File count or total bytes exceeds configuration (§15.1). |
 | `UNSUPPORTED_CONTENT_TYPE` | `422` | The detected media type is not supported. |
 | `INVALID_IMAGE` | `422` | The uploaded bytes cannot be safely decoded. |
+| `APPROVAL_VALIDATION_FAILED` | `422` | Candidate is missing required publishable values. |
+| `UNAUTHENTICATED` | `401` | No valid operator credential was supplied. `[RESOLVED-1.1]` |
+| `FORBIDDEN` | `403` | The operator is not permitted to perform this action. `[RESOLVED-1.1]` |
 | `INGESTION_BATCH_NOT_FOUND` | `404` | Batch does not exist or is not visible to the operator. |
 | `INGESTION_ITEM_NOT_FOUND` | `404` | Item does not exist or is not visible to the operator. |
+| `ADVERTISEMENT_NOT_FOUND` | `404` | Advertisement does not exist. `[RESOLVED-1.1]` |
+| `EXTRACTION_NOT_FOUND` | `404` | Extraction result does not exist. `[RESOLVED-1.1]` |
+| `MEDIA_ASSET_NOT_FOUND` | `404` | Asset or derivative does not exist. `[RESOLVED-1.1]` |
 | `INVALID_STATUS_TRANSITION` | `409` | Requested retry, approval, or rejection is invalid for the current state. |
+| `VERSION_CONFLICT` | `409` | The record changed since it was read; §13.2 optimistic version check failed. `[RESOLVED-1.1]` |
+| `IDEMPOTENCY_KEY_CONFLICT` | `409` | The `Idempotency-Key` was reused with a different payload. `[RESOLVED-1.1]` |
+| `MEDIA_BYTES_UNAVAILABLE` | `410` | Metadata exists but the stored bytes were purged by retention. `[RESOLVED-1.1]` |
+| `RATE_LIMITED` | `429` | Too many requests; §15.3 rate limiting. `[RESOLVED-1.1]` |
 | `OCR_UNAVAILABLE` | `503` | OCR runtime is unavailable. |
-| `OCR_EMPTY` | Item state | OCR completed without usable text. |
-| `LLM_UNAVAILABLE` | `503` or item state | Provider is temporarily unavailable. |
-| `LLM_INVALID_RESPONSE` | Item state | Output remained invalid after repair policy. |
-| `APPROVAL_VALIDATION_FAILED` | `422` | Candidate is missing required publishable values. |
+| `LLM_UNAVAILABLE` | `503` | Provider is unavailable for a synchronous request. |
+
+#### 13.4.2 Item error codes
+
+Persisted on an ingestion item and shown to the moderator. These never appear as an HTTP status.
+
+| Code | Resulting item state | Meaning |
+|---|---|---|
+| `OCR_EMPTY` | `needs_attention` | OCR completed without usable text; the LLM was not called. |
+| `OCR_FAILED` | `needs_attention` | The OCR engine errored on this image. |
+| `LLM_UNAVAILABLE` | `needs_attention` | Provider remained unavailable after retry exhaustion. |
+| `LLM_INVALID_RESPONSE` | `needs_attention` | Output remained invalid after the repair policy. |
+| `IMAGE_UNREADABLE` | `failed` | The stored bytes could not be decoded during processing. |
+| `WORKER_LEASE_EXPIRED` | requeued | A worker stopped without completing; the item was returned to the queue. |
 
 ## 14. Management Portal Requirements
 
@@ -681,7 +875,10 @@ Initial configurable defaults: `[PROPOSED]`
 
 - Maximum 25 images per batch.
 - Maximum 10 MiB per image.
-- Maximum 100 MiB total request payload.
+- Maximum 100 MiB total request payload. **This total is binding and is checked first.** The three limits
+  are not simultaneously satisfiable at their maxima — 25 images at 10 MiB each is 250 MiB — so a batch of
+  25 large scans is rejected on total size, not on count. Clients must apply the same three numbers so the
+  operator sees the failure before uploading. `[RESOLVED-1.1]`
 - Maximum 20 candidate advertisements per image.
 - Return `202 Accepted` promptly after the complete upload has been validated and persisted.
 - Process images independently with configurable worker concurrency.
@@ -951,20 +1148,34 @@ No business success threshold is locked yet. Baseline measurement must precede t
 
 ## 24. Open Decisions
 
-These decisions do not prevent implementing the local vertical slice, but they affect production:
+These decisions do not prevent implementing the local vertical slice, but they affect production.
 
-1. Which LLM provider and model will be used first?
+### Settled in v1.1
+
+1. **Which LLM provider and model will be used first?** No single provider is committed. The provider is
+   selected by environment variable across an OpenAI-compatible adapter (covering OpenAI, OpenRouter, Groq,
+   and self-hosted servers), Google Gemini, and Anthropic, plus a deterministic fake used by all automated
+   tests. The choice is deployment configuration, not an architectural commitment. `[RESOLVED-1.1]`
+10. **Which relational database?** PostgreSQL, in every environment including local development and tests.
+    Object storage and the durable queue transport remain `[OPEN]`. `[RESOLVED-1.1]`
+
+### Still open
+
+3. What batch limits should production operators receive? The §15.1 defaults are provisional until measured
+   against representative Sri Lankan newspaper scans.
 2. What is the maximum acceptable processing cost per image or approved ad?
-3. What batch limits should production operators receive?
 4. What accuracy and false-merge threshold is required before wider rollout?
 5. How long should source images, raw OCR, rejected candidates, and raw LLM responses be retained?
 6. Should contact phone numbers be public, sign-in gated, or masked?
 7. Which fields are mandatory for approval in each advertisement category?
 8. Should reviewers be able to merge and split candidates directly, or only reject and create another?
 9. Should a failed LLM extraction support a fully manual draft from the same source image?
-10. Which durable queue, relational database, object store, and deployment environment will be used?
+10. Which durable queue, object store, and deployment environment will be used?
 11. When will the listing service replace temporary advertisement persistence in the media service?
 12. Which operator roles may view raw source images and contact information?
+
+None of the remaining items blocks Phases 0–4. Items 2 and 4–7 are policy decisions needed before a public
+rollout; items 10–12 are infrastructure and ownership decisions needed before production deployment.
 
 ## 25. Definition of Done
 
@@ -992,8 +1203,13 @@ structured OCR and the provider-independent LLM boundary before changing the man
 
 ## 27. Related Documents
 
+- [`ocr-ad-ingestion-implementation-plan.md`](ocr-ad-ingestion-implementation-plan.md) — the phase-by-phase
+  execution plan for this PRD, including schema, provider design, and verification steps.
 - [`../architecture.md`](../architecture.md)
-- [`../../media-service/README.md`](../../media-service/README.md)
+- [`lankalistings-media-service`](https://github.com/malith-kavinda/lankalistings-media-service) — the
+  implementing service (separate repository).
+- [`lankalistings-portal`](https://github.com/malith-kavinda/lankalistings-portal) — the operator client
+  (separate repository).
 - [`../../lankalistings-harness/.forge/discovery/docs/01-product-requirements.md`](../../lankalistings-harness/.forge/discovery/docs/01-product-requirements.md)
 - [`../../lankalistings-harness/.forge/discovery/docs/03-architecture.md`](../../lankalistings-harness/.forge/discovery/docs/03-architecture.md)
 - [`../../lankalistings-harness/.forge/discovery/docs/04-data-model.md`](../../lankalistings-harness/.forge/discovery/docs/04-data-model.md)
