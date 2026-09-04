@@ -1,0 +1,566 @@
+# LankaListings — Tracker
+# Source of truth for project and feature status.
+# Leadership uses this for visibility. Claude updates this as part of every workflow action.
+#
+# Do not duplicate information that lives in spec/plan files.
+# This file tracks: what exists, what phase it's in, who owns it, what's blocking it.
+
+project: "LankaListings"
+harness_version: "0.36.1"      # Last synced version from forge-harness template
+last_updated: "2026-08-24T17:40:00"  # ISO 8601 timestamp
+github_org: ""                 # GitHub org/owner that all project repos live under (e.g. "acme-io").
+                               # Read by /forge-deliver + /forge-pr-open for `gh ... --repo <github_org>/<repo>`
+                               # and by the dashboard (window.TRACKER.github_org) to build PR links.
+                               # Leave "" until set; the dashboard falls back to a neutral placeholder.
+
+# ------------------------------------------------------------------
+# Project Setup
+# ------------------------------------------------------------------
+# Pre-development readiness. Once all items are approved/complete
+# and features are populated below, the project moves to active.
+#
+# Statuses: not-started | in-progress | in-review | approved | done
+
+setup:
+  status: in-progress        # not-started | in-progress | ready
+                             # Discovery input layer complete (.forge/discovery/); PRD + architecture
+                             # drafted; no gate has been run yet.
+
+  project_prd:
+    status: gate1-failed         # not-started | in-progress | gate1-passed | gate1-passed-with-risks | gate1-failed
+    last_gate_run: "2026-08-24"  # ISO date of most recent /forge-prd-check full run
+    owner: null
+    notes: >-
+      Gate 1 Run 1 (2026-08-24) FAILED — 9 of 26 checklist items. Six are authoring gaps closed by
+      re-running forge-prd-author in fill mode (per-role x per-resource capability matrix; entity
+      cardinality; S-9 Hardening has no Functional Surface subsection; out-of-scope won't-build reasons;
+      Sinhala/Tamil listed as both out-of-scope and deferred; no buyer-discovery or auth journey). Three
+      need product answers, now tracked as OQ-35 (performance targets), OQ-36 (Account lifecycle /
+      suspension), OQ-37 (AdReport resolution states). PRD was drafted 2026-08-24 from a RECONSTRUCTED
+      discovery pack — only the pack's index ever existed; the other 7 docs were rebuilt from real
+      artefacts (locked decision table, 2 design systems, 17 Stitch screens, 3 app skeletons) plus a
+      product-owner scoping conversation that has NO recorded artefact (a Gate 1 finding). 37 open
+      questions live in project-prd-signals.md; OQ-01 (in-app messaging scope), OQ-02 (AI/OCR intake
+      scope) and OQ-20 (team size + delivery window) still gate all sizing.
+    accepted_risks: []           # populated by /forge-prd-check (full mode)
+    # Risk entry shape:
+    #   - id: R-PRD-001
+    #     description: "Short statement of the gap"
+    #     accepted_by: "Name"
+    #     accepted_date: "YYYY-MM-DD"
+    #     notes: "Reasoning, mitigation, follow-up trigger"
+
+  architecture:
+    status: in-progress          # not-started | in-progress | gate2-passed | gate2-passed-with-risks | gate2-passed-with-spikes | gate2-failed
+    last_gate_run: null          # ISO date of most recent /forge-arch-probe full run
+    owner: null
+    notes: >-
+      Drafted 2026-08-24. LOCKED: microservices using both Spring Boot and FastAPI, with FastAPI serving
+      the management portal's CRUD surface; three client surfaces including mobile. PROPOSED and awaiting
+      Gate 2: a five-service split (identity/listing/payment on Spring Boot; admin/media on FastAPI), the
+      capability-based language boundary, PostgreSQL per service, and the whole deployment shape. 13
+      architecture open questions (OQ-21..OQ-33). Two spikes are pre-identified: F-002 two-service
+      gateway/auth/observability spike (gates all of foundation, with a documented fallback to two
+      deployables), and the category attribute-schema mechanism (shapes four surfaces at once).
+      §Resource & Timeline Reality CANNOT be completed until OQ-20 lands.
+    accepted_risks: []           # populated by /forge-arch-probe (full mode)
+    spikes: []                   # populated by /forge-arch-probe (full mode)
+    # Spike entry shape:
+    #   - id: SP-ARCH-001
+    #     description: "Short statement of the deferred decision"
+    #     scoped_by: "Name"
+    #     scoped_date: "YYYY-MM-DD"
+    #     trigger: "Revisit when X happens (e.g., before first DB-touching feature)"
+
+  foundation:
+    # Scaffolding code built between Gate 2 and Gate 3.
+    # See docs/methodology/framework.md §4.10 in the harness repo for the full doctrine.
+    # Discipline rule: foundation = anything required to run the app and write a
+    # user-story feature spec. User-visible behavior with its own flows = feature.
+    status: not-started          # not-started | in-progress | done
+    last_updated: null           # ISO date when the slice list or status last changed
+    owner: null                  # Lead/dev responsible for the foundation phase as a whole (slice-level assignees live below)
+    backlog_source: ".forge/design/architecture.md → Foundation Backlog section"
+    review_completed: null       # ISO date of the manual foundation review session
+    review_audit_ref: null       # e.g., "engagement-gate-runs.md → Gate 3 Run 1 precondition note"
+    notes: >-
+      Blocked until architecture (Gate 2) passes. A 13-slice draft backlog (F-001..F-013) is already
+      enumerated in .forge/design/architecture.md → Foundation Backlog; Gate 2 confirms or replaces it.
+      This is the largest single block in the plan — the direct consequence of the polyglot-microservice
+      decision — and all of it lands before the first user-visible feature. F-002 (gateway + one service
+      per runtime, shared JWT validation, correlated logging, one-command local boot) gates everything
+      else; if it overruns its time box, the two-deployable fallback triggers before feature work starts.
+    slices: []
+    # Slice entry shape:
+    #   - id: F-001
+    #     title: "App shell"
+    #     spec: .forge/specs/foundation/001-app-shell-spec.md
+    #     plan: .forge/plans/foundation/001-app-shell-plan.md
+    #     status: not-started      # not-started | spec | plan | dev | review | done
+    #     assignee: null
+    #     started: null            # ISO date
+    #     last_updated: null       # ISO date
+    #     notes: ""
+
+  decomposition:
+    status: not-started          # not-started | in-progress | gate3-passed | gate3-failed
+    last_gate_run: null          # ISO date of most recent /forge-decompose full run
+    owner: null
+    notes: >-
+      Blocked until PRD (Gate 1), architecture (Gate 2), and foundation (§4.10) all complete. Additionally
+      blocked on OQ-01, OQ-02 and OQ-20 — two undecided large capabilities and the complete absence of any
+      team size or delivery window. Nothing sized before those three land is trustworthy. A proposed
+      slicing principle (vertical by journey step, all affected clients per slice) and its rejected
+      alternatives are recorded in .forge/features.md for Gate 3 to accept or replace.
+
+  technical_decisions:
+    status: in-progress
+    owner: null
+    notes: >-
+      10 locked decisions recorded in .claude/CLAUDE.md → "Architecture Decisions (DO NOT REVERSE)".
+      16 further engineering decisions are PROPOSED and awaiting gate confirmation — see
+      .forge/discovery/docs/08-decision-log.md Part A. Do not promote a proposed row into CLAUDE.md until
+      its gate confirms it.
+
+  claude_md:
+    status: done
+    owner: null
+    notes: >-
+      Authored 2026-08-24 — project overview, stack (clients committed / backend proposed), the 10 locked
+      decisions, reference map including the discovery pack and the three client repos, real command list
+      with its caveats, and active context. Per-repo CLAUDE.md files and the '## Backend Stack' /
+      '## Frontend Stack' profiles that the wave-mode implementer agents read on turn 1 are NOT yet
+      authored in any repo — needed before the first wave-mode feature.
+
+  environment:
+    status: not-started
+    owner: null
+    notes: >-
+      Client skeletons boot (npm workspaces at ../). Gaps: `advertising/` is not a git repository; no test
+      framework in any workspace; `lint` is aliased to `tsc --noEmit` so no linter is enforced; no
+      .env.example anywhere; no CI; no API client layer; mobile native projects not generated. No backend
+      code exists. All of this lands in foundation (F-001, F-008, F-011).
+
+  feature_breakdown:
+    status: in-progress
+    owner: null
+    notes: >-
+      Produced by /forge-decompose (Gate 3). A PRE-GATE-3 HAND SEED of 42 provisional rows exists in
+      .forge/features.md so early planning conversations have something concrete — IDs are not stable and
+      no specs should be written against them. tracker `features:` below stays empty until Gate 3.
+
+# ------------------------------------------------------------------
+# Delivery Phases
+# ------------------------------------------------------------------
+# Stakeholder-facing delivery milestones. Each phase groups a set of
+# features that ship as one coherent, demonstrable slice. Phases are
+# layered ON TOP OF the dependency graph — dependencies still drive
+# sequencing within a phase; phases drive stakeholder narrative.
+#
+# Populated by /forge-decompose (Gate 3) after the slicing principle
+# and dependency graph are locked. Optional for small projects (under
+# ~10 features) — leave `phases: []` and the dashboard hides this view.
+#
+# Phase statuses:
+#   planning      — being shaped (during Gate 3 prep or replanning)
+#   in-progress   — currently active (exactly one phase at a time)
+#   complete      — sealed; `sealed: <ISO date>` must be set
+#   locked        — defined but not opened yet
+#
+# Invariant: at most one phase carries status `in-progress`, and
+# `current_phase` equals that phase's `id` (or null if no phase is
+# active). See .claude/rules/tracker.md "Delivery Phase Rules".
+#
+# Foundation slices (F-001..) are NOT delivery phases — they are
+# pre-feature scaffolding and live under `setup.foundation`.
+
+delivery:
+  # Engagement-level shipment unit (ship_unit).
+  #   wave    — features ship one wave at a time via /forge-deliver +
+  #             /forge-wave-decompose (wave-as-ship-unit). A decomposed feature
+  #             carries nested `waves[].workitems[]` + a `decomposition_plan`
+  #             sibling (see the Features wave-mode schema block below).
+  #   feature — the whole feature ships as a single integration PR; no per-wave
+  #             shipping. A decomposed feature carries a FLAT `workitems[]` list
+  #             instead of `waves[]`.
+  # Per-feature override lives at `features[<id>].ship_unit` and is immutable once
+  # set at decomposition time — an in-flight feature keeps its original mode through
+  # its lifecycle even when this engagement default flips.
+  ship_unit: wave                # wave | feature — engagement default
+  current_phase: null            # int | null — id of the phase currently in-progress
+  phases: []
+  # Phase entry shape:
+  #   - id: 1
+  #     title: "Platform Core"
+  #     theme: "Short stakeholder-facing description of what this phase delivers"
+  #     status: planning         # planning | in-progress | complete | locked
+  #     started: null            # ISO date — set when status flips to `in-progress` (preserved on `complete`)
+  #     sealed: null             # ISO date — set when status flips to `complete`
+  #     due_date: null           # ISO date — phase target delivery date; set via the /forge-set-dates command (not during decomposition)
+
+# ------------------------------------------------------------------
+# Features
+# ------------------------------------------------------------------
+# Populated by /forge-decompose (Gate 3) when the PRD is broken down into features.
+# Each feature follows: backlog -> spec -> plan -> dev -> review -> ship -> done
+# Exit states (from any phase): paused | dropped
+#
+# Artifact statuses (spec/plan): n/a | draft | in-review | approved
+# Priority: high | medium | low
+# delivery_phase: int referencing delivery.phases[*].id, or null if unassigned
+
+features: {}
+
+# Example entry (uncomment and copy when adding a feature):
+#
+#   example-feature:
+#     title: "Example Feature"
+#     jira: PROJ-123
+#     phase: backlog           # backlog|spec|plan|dev|review|ship|done|paused|dropped
+#     delivery_phase: null     # int referencing delivery.phases[*].id, or null
+#     owner: null              # Person accountable for landing this feature (matches PRD's Owner column)
+#     priority: medium
+#     started: null
+#     due_date: null           # ISO date — optional feature target date; set via /forge-set-dates (opt-in) from phase due_date + feature weight
+#     spec: n/a
+#     plan: n/a
+#     blocked_by: []          # dependency / sequencing — "can't start until these land"
+#     follow_up_of: []        # rework lineage — "this is a later pass over these features".
+#                             # Distinct from blocked_by. Drives the dashboard Rework signal.
+#                             # Example: a UI-conformance feature reworking two earlier ones →
+#                             #   follow_up_of: [feature-a, feature-b]
+#     last_updated: "YYYY-MM-DDTHH:MM:SS"
+#     notes: ""
+#
+# Field-name note: features use `owner:` (aligns with setup-level `owner` and the
+# /forge-decompose PRD's Owner column). Foundation slices under `setup.foundation`
+# use `assignee:` — that's slice-level role tracking, separate from feature ownership.
+# The dashboard reads `f.owner ?? f.assignee` so projects that predate this
+# convention still render correctly.
+#
+# ------------------------------------------------------------------
+# Decomposed features — wave-mode & feature-mode schema (doc only)
+# ------------------------------------------------------------------
+# A feature that /forge-wave-decompose (or the legacy decomposer) has broken into
+# work items gains the fields below. Until a feature is decomposed it carries none
+# of them — leave them absent, not null. /forge-deliver mutates impl_status/branch/
+# pr_* as the wave pipeline advances; the dashboard renders `f.waves[]` when present.
+#
+# Feature-level fields added on decomposition:
+#   decomposed: true
+#   spec_branch: "feature/<feature-id>-<desc>"   # the shared branch all WI sessions
+#                                                #   commit onto; null when the spec has
+#                                                #   no user-facing ACs (no E2E branch)
+#   ship_unit: wave | feature                    # per-feature override of delivery.ship_unit;
+#                                                #   immutable once set at decomposition time
+#   decomposition_plan:                          # wave-mode only — the orchestrator's plan
+#     path: ".forge/plans/<feature-id>/<feature-id>-decomposition-plan.md"
+#     status: draft | in-review | approved
+#
+# WAVE MODE (ship_unit: wave) — nested waves[].workitems[]:
+#   waves:
+#     - wave: 1                  # int, 1-based; first SHIPPING wave (no "wave 1 = Key WI")
+#       status: planned | pr-open | merged    # wave lifecycle
+#       merged_at: null          # ISO date the wave PR merged to main; null until merged
+#       depends_on: []           # upstream wave numbers this wave needs on main (e.g. [1])
+#       workitems:
+#         - id: "<feature-id>-WI-1.1"
+#           title: "<one-line>"
+#           type: sub | verify | e2e          # see _TEMPLATE-decomposition-plan.md
+#           tier: T1 | T2 | T3 | T-E2E        # test tier (see .forge/test-strategy.md)
+#           plan_path: ".forge/plans/<feature-id>/<feature-id>-WI-1.1-plan.md"  # null until authored
+#           plan_status: backlog | draft | in-review | approved
+#           impl_status: pending | dispatched | pr-open | wave-closed
+#                       #   pending     — not yet dispatched
+#                       #   dispatched  — implementer agent in flight
+#                       #   pr-open     — per-WI PR open; barrier-ready for wave integration
+#                       #   wave-closed — folded into the merged wave PR (per-WI PR superseded)
+#           branch: "feature/<feature-id>-WI-1.1-<desc>"   # null until worktree created
+#           base_branch: "main"               # "main" for cross-repo seam sub-WIs;
+#                                             #   the OWNER's branch when a same-repo compile
+#                                             #   coupling forces stacking (L-027); re-pointed
+#                                             #   to feature/<feature-id>-wave-<N> for verify/e2e
+#                                             #   WIs at Stage 7 integration
+#           touched_repos: ["<backend-repo>"] # repos this WI's branch touches
+#           depends_on: []                    # sibling WI ids — only verify/e2e WIs, or a
+#                                             #   compile-coupled consumer, may depend within a wave
+#           pr_number: null                   # per-WI PR number, set at pr-open
+#           pr_url: null                      # full PR URL (https://github.com/<github_org>/<repo>/pull/N)
+#           pr_role: review                   # role of this PR (e.g. review)
+#
+# FEATURE MODE (ship_unit: feature) — FLAT workitems[] (no waves[] wrapper):
+#   workitems:
+#     - id: "<feature-id>-WI-2.1"
+#       type: sub
+#       wave: 2                  # wave is a plain field, not a nesting level, in feature mode
+#       plan_path: ".forge/plans/<feature-id>/<feature-id>-WI-2.1-plan.md"
+#       plan_status: approved
+#       branch: "feature/<feature-id>-WI-2.1-<desc>"
+#       base_branch: "main"
+#       pr_number: null
+#       depends_on: ["<feature-id>-WI-1.1"]
+#
+# No live data ships in this template — collections stay empty; the blocks above are
+# schema documentation only. A decomposed feature is materialized by /forge-wave-decompose.
+
+# ------------------------------------------------------------------
+# Bugs
+# ------------------------------------------------------------------
+# Post-ship defects. A top-level collection (NOT nested under features) because:
+#   - a bug is genuinely M:N — a shared-primitive defect breaks several features
+#     at once, so a single-feature home is a false fit;
+#   - "what open bugs exist?" must be a flat query, not a walk over every feature;
+#   - a bug's lifecycle (open → fixed) is independent of its feature's phase.
+#
+# A bug does NOT reopen its feature. The feature stays `done`; the bug carries its
+# own `status`. The shipped record stays intact while the defect stays visible.
+#
+# The feature↔bug link is single-sourced from `affects` — features do NOT store a
+# duplicate bug list; the dashboard derives the per-feature bug list by filtering
+# this collection on `affects`.
+#
+# Lean structured metadata only. The full repro / expected / actual / fix approach
+# lives in `.forge/bugs.md`, one section per bug, joined by `id` (the lessons.md
+# pattern). See `.claude/rules/tracker.md` → "Bug Tracking" for the full lifecycle,
+# the phase-seal rule, and the right-sized bug-fix flow.
+#
+# Bug fields:
+#   id             BUG-NNN — global, zero-padded, monotonic. NOT feature-suffixed.
+#   title          one-line summary (full description in .forge/bugs.md)
+#   status         open | in-progress | fixed | wontfix
+#   severity       low | medium | high
+#   affects        [feature-id ...] — feature(s) whose behaviour is broken (authoritative)
+#   found_in       feature-id — the effort that surfaced it (may differ from affects)
+#   delivery_phase int — the phase the FIX is scheduled for (defaults to the active
+#                  phase at discovery; bump forward to defer — an auditable action).
+#                  A phase cannot be sealed while an open/in-progress bug targets it.
+#   found_date     ISO date filed
+#   spec_ref       the FR/AC/AD the defect violates (optional)
+#   fix_pr         the PR that fixes it, set on `fixed` (optional)
+#   doc            pointer to a dedicated .forge/bugs/BUG-NNN.md when a bug outgrows
+#                  its bugs.md section (optional)
+#   notes          one-line current state (optional)
+
+bugs: []
+
+# Example entry (uncomment and copy when filing a bug). One bug, two affected
+# features (M:N) — generic placeholder ids:
+#
+#   - id: BUG-001
+#     title: "Last child-link unlink must route to Archive, not bare unlink"
+#     status: open              # open | in-progress | fixed | wontfix
+#     severity: high            # low | medium | high
+#     affects: [feature-a, feature-b]
+#     found_in: feature-c
+#     delivery_phase: 1
+#     found_date: "YYYY-MM-DD"
+#     spec_ref: "feature-a FR-5 / FR-10"
+#     fix_pr: null              # e.g. "<repo>#62" when fixed
+#     doc: null
+#     notes: ""
+
+# ------------------------------------------------------------------
+# Release & UAT Lifecycle
+# ------------------------------------------------------------------
+# The post-delivery stabilization-and-acceptance lifecycle. Forge's feature
+# registry ends at `done`; delivery phases end when sealed. But once every
+# promised feature has shipped (V1 feature-complete), a real engagement enters
+# a release lifecycle that the feature/phase model can't represent: pre-UAT
+# regression → handover to UAT → UAT execution → post-UAT stabilization →
+# sign-off. The `release:` track models exactly that — it groups *delivery
+# phases* the way a delivery phase groups *features*.
+#
+# Empty `{}` on a fresh template and until the project reaches the lifecycle.
+# Backward compatible: the dashboard hides the Release/UAT section while this
+# is empty (exactly like the conditional Usage section).
+#
+# This is a DISTINCT top-level concept, NOT a delivery phase and NOT a feature
+# `phase: testing` (per-feature testing already lives in wave verify/e2e WIs).
+# See `.claude/rules/tracker.md` → "Release & UAT Lifecycle" for the lifecycle
+# vocabulary, the three ASK-enforced gates (entry / handover / sign-off), the
+# `uat_issues:` triage routing, and the worked example. Drive it interactively
+# with the `/forge-release` command — a state-aware orchestrator that detects
+# where you are in the lifecycle and proposes the next step (it writes nothing
+# without the developer's confirmation at each gate).
+#
+# Release lifecycle:
+#   build-complete → regression → uat → stabilize → signed-off → live
+#   (uat ⇄ stabilize may alternate across multiple UAT rounds; `live` is the
+#    go-live marker — the signed-off build deployed to production)
+#
+# Release fields:
+#   id             short release id (e.g. "V1", "V1.1"). v1 models ONE active release.
+#   status         build-complete | regression | uat | stabilize | signed-off | live
+#   scope_phases   [int ...] — the delivery.phases[].id values this release bundles
+#   opened         ISO date the release track opened (entered build-complete)
+#   handover_date  ISO date the build was handed to the client (entered uat); null until then
+#   signed_off     ISO date of formal client acceptance; null until signed-off
+#   signoff_by     who recorded the client's acceptance; null until signed-off
+#   live           ISO date the signed-off build went live to production; null until live
+#   live_by        who shipped the deployment; null until live
+#   current_cycle  the active cycle id (e.g. "RC-1", "UC-2"), or null
+#   cycles         [] — the discrete test/validation runs (see shape below)
+#   notes          one-line current state; also records an early-open override (entry gate)
+#
+# Cycle shape (release.cycles[]):
+#   - id: RC-1                  # RC-n (regression, internal) | UC-n (uat, client-executed)
+#     type: regression          # regression | uat
+#     round: 1                  # increments for UAT re-tests (UC-1 round 1, UC-1 round 2…)
+#     status: planned           # planned | running | passed | passed-with-risks | failed
+#     owner: null
+#     target_date: null         # ISO date — planning target for the cycle (set via /forge-release); null = unscheduled
+#     started: null             # ISO date
+#     completed: null           # ISO date
+#     plan: ".forge/release/<id>/RC-1-plan.md"      # detailed cycle plan (evidence file)
+#     report: ".forge/release/<id>/RC-1-report.md"  # cycle report (evidence file); null until written
+#     flows: []                 # critical-flow checklist (shape below)
+#     blocking_issues: []       # [UAT-NNN ...] open issues this cycle is blocked on
+#     accepted_risks: []        # [{id, description, accepted_by, accepted_date, notes}] for passed-with-risks
+#
+# Flow shape (release.cycles[].flows[]) — reuses the parent-research flow shape:
+#   - id: FLOW-001
+#     name: "Counsellor creates lead and converts to student"
+#     source_refs: ["feature-a AC-2", "feature-d AC-4"]   # the ACs/features it exercises
+#     priority: critical        # critical | high | normal
+#     type: e2e                 # e2e | manual | exploratory | accessibility | security
+#     status: not-run           # not-run | running | passed | failed | blocked | deferred
+#     evidence: null            # ".forge/release/<id>/evidence/RC-1/FLOW-001.md" — REQUIRED once passed
+#     issues: []                # [UAT-NNN ...] issues this flow surfaced
+
+release: {}
+
+# Example (uncomment + copy when the release lifecycle opens). One release,
+# one regression cycle passed, one UAT cycle in flight:
+#
+#   release:
+#     id: V1
+#     status: uat                    # build-complete | regression | uat | stabilize | signed-off | live
+#     scope_phases: [1, 2, 3]
+#     opened: "YYYY-MM-DD"
+#     handover_date: "YYYY-MM-DD"
+#     signed_off: null
+#     signoff_by: null
+#     live: null
+#     live_by: null
+#     current_cycle: UC-1
+#     notes: "UAT round 1 in progress"
+#     cycles:
+#       - id: RC-1
+#         type: regression
+#         round: 1
+#         status: passed-with-risks
+#         owner: "QA lead"
+#         started: "YYYY-MM-DD"
+#         completed: "YYYY-MM-DD"
+#         plan: ".forge/release/V1/RC-1-plan.md"
+#         report: ".forge/release/V1/RC-1-report.md"
+#         blocking_issues: []
+#         accepted_risks:
+#           - id: R-REL-001
+#             description: "Bulk-export under 10k rows untested at load"
+#             accepted_by: "Lead"
+#             accepted_date: "YYYY-MM-DD"
+#             notes: "Low-traffic path; revisit if export timeouts reported"
+#         flows:
+#           - id: FLOW-001
+#             name: "Lead → student conversion end to end"
+#             source_refs: ["feature-a AC-2", "feature-d AC-4"]
+#             priority: critical
+#             type: e2e
+#             status: passed
+#             evidence: ".forge/release/V1/evidence/RC-1/FLOW-001.md"
+#             issues: []
+#       - id: UC-1
+#         type: uat
+#         round: 1
+#         status: running
+#         owner: "Client UAT team"
+#         started: "YYYY-MM-DD"
+#         completed: null
+#         plan: ".forge/release/V1/UC-1-plan.md"
+#         report: null
+#         blocking_issues: [UAT-001]
+#         accepted_risks: []
+#         flows: []
+
+# ------------------------------------------------------------------
+# UAT Issues
+# ------------------------------------------------------------------
+# What comes back from UAT — a triaged top-level collection (sibling of bugs:).
+# Each issue is triaged by `kind`, and routing depends on the kind:
+#   - defect         → a genuine bug. On acceptance it routes into the existing
+#                      bugs: collection + right-sized bug-fix flow; the UAT issue
+#                      keeps a bug_ref: BUG-NNN link and mirrors the bug's
+#                      resolution. CHANGE-REQUESTS ARE KEPT OUT OF THE BUG LEDGER.
+#   - change-request → new/changed behaviour the client wants. On acceptance it
+#                      becomes a normal backlog feature (via /forge-deliver) OR is
+#                      deferred to a future release; tracked via resolution +
+#                      feature_ref. NEVER a bug.
+#   - query          → a question, not a code change. Answered and closed.
+#
+# Status machine: triage → accepted | rejected | deferred
+#   then accepted DEFECTS flow → fixed → closed (mirroring bug_ref's lifecycle).
+#
+# The feature↔bug parallel-gate insight (see rules → "Release & UAT Lifecycle"):
+# a UAT defect is found when NO delivery phase is active (all sealed), so its
+# bug's delivery_phase is null and does NOT drive a phase seal. The RELEASE
+# SIGN-OFF GATE is the analogous gate — a blocking defect blocks sign-off the
+# way an in-phase defect blocks a phase seal.
+#
+# Lean structured metadata only. Full prose (repro / steps / client comment /
+# screenshots) lives in `.forge/release/<release_id>/uat-issues.md`, one section
+# per issue joined by `id` — the same prose-home pattern as bugs.md.
+#
+# UAT issue fields:
+#   id           UAT-NNN — global, zero-padded, monotonic. Distinct from RC-n/UC-n
+#                cycle ids (which name cycles, not issues) to avoid collision.
+#   title        one-line summary (full prose in .forge/release/<id>/uat-issues.md)
+#   kind         defect | change-request | query
+#   status       triage | accepted | rejected | deferred | fixed | closed
+#   severity     low | medium | high          (most meaningful for defects)
+#   raised_by    client/stakeholder who raised it
+#   cycle        the UC-n cycle that surfaced it
+#   release_id   the release this issue belongs to (e.g. "V1")
+#   blocking     true | false — does this block sign-off? Defaults false for
+#                change-requests (they route to a future release); a blocking
+#                change-request must be explicitly flagged blocking: true.
+#   bug_ref      BUG-NNN — set ONLY for kind: defect on acceptance (the routed bug)
+#   feature_ref  the backlog feature/ticket a change-request became (e.g. "FEAT-030")
+#   resolution   one-line outcome (e.g. "fixed in BUG-014", "backlog FEAT-030 (V1.1)",
+#                "answered — no change", "rejected — out of scope")
+#   raised_date  ISO date raised
+#   notes        one-line current state (optional)
+
+uat_issues: []
+
+# Example (uncomment + copy when UAT raises issues). Two issues from UC-1 — one
+# defect routed to the bug flow, one change-request deferred to a later release:
+#
+#   - id: UAT-001
+#     title: "Conversion confirmation email never sends"
+#     kind: defect              # defect | change-request | query
+#     status: fixed             # triage | accepted | rejected | deferred | fixed | closed
+#     severity: high
+#     raised_by: "Client UAT team"
+#     cycle: UC-1
+#     release_id: V1
+#     blocking: true
+#     bug_ref: BUG-014          # routed into bugs: on acceptance
+#     feature_ref: null
+#     resolution: "fixed in BUG-014"
+#     raised_date: "YYYY-MM-DD"
+#     notes: "Awaiting UC-1 round 2 verification"
+#   - id: UAT-002
+#     title: "Add bulk CSV import for leads"
+#     kind: change-request      # NOT a bug — never gets a bug_ref
+#     status: deferred
+#     severity: low
+#     raised_by: "Client sponsor"
+#     cycle: UC-1
+#     release_id: V1
+#     blocking: false           # change-requests don't block sign-off by default
+#     bug_ref: null
+#     feature_ref: "FEAT-030"
+#     resolution: "backlog FEAT-030 (V1.1)"
+#     raised_date: "YYYY-MM-DD"
+#     notes: ""

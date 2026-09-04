@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forge Tracker · Usage detail</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@5/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist-mono@5/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
+
+<style>
+/* =========================================================
+   FORGE DESIGN TOKENS — mirrors index.html
+   ========================================================= */
+:root {
+  --primary-50:#EDF2F0; --primary-100:#D4E0DC; --primary-200:#A8C2BB;
+  --primary-300:#7DA59B;--primary-400:#51877A; --primary-500:#2A4D45;
+  --primary-600:#1F3A33;--primary-700:#152721; --primary-800:#0A1410;
+  --secondary-50:#F2F4F4;--secondary-100:#E2E6E6;--secondary-200:#CAD0D0;
+  --secondary-300:#A2ABAB;--secondary-400:#7E8888;--secondary-500:#5A6464;
+  --secondary-600:#3F4646;--secondary-700:#262C2C;--secondary-800:#16191A;
+  --secondary-900:#0A0B0B;
+  --tertiary-50:#F8FBE5;--tertiary-100:#EFF5C2;--tertiary-200:#E2EC8E;
+  --tertiary-300:#D5E370;--tertiary-400:#C5DC55;--tertiary-500:#A8BE3C;
+  --tertiary-600:#88992E;--tertiary-700:#6A7521;
+
+  --surface-bg:#FFFFFF;--surface-card:#FFFFFF;--surface-muted:var(--secondary-50);
+  --surface-sunken:var(--secondary-50);
+  --text-primary:var(--secondary-800);--text-secondary:var(--secondary-500);
+  --text-tertiary:var(--secondary-400);
+  --accent-primary:var(--primary-500);--accent-tertiary:var(--tertiary-400);
+  --border:var(--secondary-100);--border-strong:var(--secondary-300);
+
+  --font-sans:'Geist Variable','Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --font-mono:'Geist Mono Variable','Geist Mono',ui-monospace,'SF Mono',Menlo,monospace;
+  --w-r:400;--w-m:500;--w-s:600;
+  --tracking-tag:0.14em;
+  --r-sm:4px;--r-md:8px;--r-lg:12px;--r-pill:999px;
+  --hair:0.5px;
+}
+:root[data-theme="dark"] {
+  --surface-bg:var(--secondary-900);
+  --surface-card:var(--secondary-800);
+  --surface-muted:var(--secondary-700);
+  --surface-sunken:#0F1213;
+  --text-primary:var(--secondary-50);
+  --text-secondary:var(--secondary-300);
+  --text-tertiary:var(--secondary-400);
+  --accent-primary:var(--tertiary-400);
+  --border:var(--secondary-700);
+  --border-strong:var(--secondary-500);
+}
+
+*,*::before,*::after { box-sizing: border-box; }
+html, body { margin:0; padding:0; }
+body {
+  font-family: var(--font-sans);
+  background: var(--surface-bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; color: inherit; }
+.tabular { font-variant-numeric: tabular-nums; }
+.tag {
+  font-family: var(--font-mono); font-weight: var(--w-m);
+  font-size: 11px; letter-spacing: var(--tracking-tag);
+  text-transform: uppercase; color: var(--text-secondary);
+}
+
+/* Header */
+.hd {
+  position: sticky; top: 0; z-index: 10;
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center; height: 64px; padding: 0 32px;
+  background: var(--surface-card);
+  border-bottom: var(--hair) solid var(--border);
+}
+.hd-l { display: flex; align-items: center; gap: 14px; }
+.hd-l a { color: var(--text-secondary); text-decoration: none; font-family: var(--font-mono);
+          font-size: 12px; letter-spacing: var(--tracking-tag); text-transform: uppercase;
+          padding: 6px 12px; border-radius: var(--r-md); border: var(--hair) solid var(--border); }
+.hd-l a:hover { color: var(--text-primary); border-color: var(--border-strong); background: var(--surface-muted); }
+.hd-id { display: flex; flex-direction: column; line-height: 1.1; }
+.hd-eyebrow {
+  font-family: var(--font-mono); font-size: 10px; font-weight: var(--w-m);
+  letter-spacing: var(--tracking-tag); text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.hd-title {
+  font-family: var(--font-sans); font-weight: var(--w-s); font-size: 15px;
+  color: var(--text-primary); margin-top: 2px; letter-spacing: -0.005em;
+}
+.hd-r { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.icon-btn {
+  width: 36px; height: 36px; border-radius: var(--r-md);
+  background: transparent; border: var(--hair) solid var(--border);
+  display: grid; place-items: center; cursor: pointer; color: var(--text-primary);
+}
+.icon-btn:hover { background: var(--surface-muted); border-color: var(--border-strong); }
+.icon-btn .ph { font-size: 18px; }
+
+/* Page */
+.page { max-width: 1280px; margin: 0 auto; padding: 28px 32px 64px; }
+
+.hero { padding: 8px 0 24px; }
+.hero h1 {
+  font-size: 28px; line-height: 1.15; letter-spacing: -0.02em;
+  font-weight: var(--w-s); margin: 0 0 6px;
+}
+.hero-meta {
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--text-secondary); letter-spacing: -0.005em;
+}
+.hero-meta b { color: var(--text-primary); font-weight: var(--w-m); }
+
+.sec {
+  display: grid; grid-template-columns: auto 1fr auto;
+  align-items: center; gap: 16px; margin: 32px 0 14px;
+}
+.sec .title { font-weight: var(--w-s); font-size: 16px; }
+.sec .rule { height: 0; border-top: var(--hair) solid var(--border); }
+.sec .end { font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: var(--tracking-tag); text-transform: uppercase; color: var(--text-tertiary); }
+
+/* Glance row */
+.glance {
+  display: grid; grid-template-columns: repeat(6, 1fr);
+  gap: 0;
+  background: var(--surface-card);
+  border: var(--hair) solid var(--border); border-radius: var(--r-lg);
+  overflow: hidden;
+}
+@media (max-width: 960px) { .glance { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px) { .glance { grid-template-columns: repeat(2, 1fr); } }
+.stat {
+  padding: 16px 18px;
+  border-right: var(--hair) solid var(--border);
+  display: flex; flex-direction: column; gap: 6px;
+  min-width: 0;
+}
+.stat:last-child { border-right: none; }
+.stat-label {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tracking-tag);
+  text-transform: uppercase; color: var(--text-secondary);
+  display: flex; align-items: center; gap: 6px;
+}
+.stat-label .ph { font-size: 13px; color: var(--text-tertiary); }
+.stat-value {
+  font-family: var(--font-mono); font-size: 26px; font-weight: var(--w-m);
+  line-height: 1.1; color: var(--text-primary);
+  font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+}
+.stat-foot { font-size: 12px; color: var(--text-tertiary); }
+
+/* Cost card */
+.cost {
+  background: var(--surface-card);
+  border: var(--hair) solid var(--border); border-radius: var(--r-lg);
+  padding: 18px 22px;
+}
+.cost-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 12px;
+}
+.cost-head h3 {
+  margin: 0; font-size: 14px; font-weight: var(--w-s);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.cost-grid {
+  display: grid; grid-template-columns: 1.3fr 1fr 1.4fr; gap: 28px;
+  align-items: start;
+}
+@media (max-width: 900px) { .cost-grid { grid-template-columns: 1fr; gap: 20px; } }
+.cost-total {
+  font-family: var(--font-mono); font-size: 34px; font-weight: var(--w-m);
+  letter-spacing: -0.01em; line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.cost-note { font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-top: 10px; }
+.cost-note strong { color: var(--text-primary); }
+.cost-warn {
+  font-size: 11px; color: var(--text-tertiary); margin-top: 10px;
+  font-family: var(--font-mono);
+}
+
+/* Tables */
+.t {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+.t th, .t td {
+  text-align: left; padding: 8px 10px;
+  border-bottom: var(--hair) solid var(--border);
+}
+.t th {
+  font-family: var(--font-mono); font-size: 10px; font-weight: var(--w-m);
+  letter-spacing: var(--tracking-tag); text-transform: uppercase; color: var(--text-secondary);
+  background: var(--surface-sunken);
+}
+.t td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.row2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  margin-top: 18px;
+}
+@media (max-width: 900px) { .row2 { grid-template-columns: 1fr; } }
+
+.panel {
+  background: var(--surface-card);
+  border: var(--hair) solid var(--border); border-radius: var(--r-lg);
+  padding: 16px 18px;
+}
+.panel-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 8px;
+}
+.panel-head h3 {
+  margin: 0; font-size: 13px; font-weight: var(--w-s);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+
+.empty { color: var(--text-tertiary); font-size: 13px; padding: 12px 0; font-family: var(--font-mono); }
+
+.missing { padding: 64px 32px; text-align: center; color: var(--text-secondary); }
+.missing h2 { font-size: 18px; margin: 0 0 12px; color: var(--text-primary); font-weight: var(--w-s); }
+.missing p { max-width: 520px; margin: 8px auto; }
+</style>
+</head>
+<body>
+
+<header class="hd">
+  <div class="hd-l">
+    <a href="index.html">← Back to tracker</a>
+    <div class="hd-id">
+      <span class="hd-eyebrow">Forge · Usage detail</span>
+      <span class="hd-title" id="hd-project">—</span>
+    </div>
+  </div>
+  <div></div>
+  <div class="hd-r">
+    <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme">
+      <i class="ph ph-moon" id="theme-icon"></i>
+    </button>
+  </div>
+</header>
+
+<main class="page" id="page">
+  <section class="hero">
+    <h1>Token usage detail</h1>
+    <div class="hero-meta" id="hero-meta">—</div>
+  </section>
+
+  <section class="glance" id="glance" aria-label="Totals"></section>
+
+  <div id="cost-card" style="margin-top: 16px;"></div>
+
+  <div class="row2">
+    <div class="panel">
+      <div class="panel-head"><h3><i class="ph ph-stack"></i> By phase</h3><span class="tag" id="phase-count">—</span></div>
+      <div id="by-phase"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3><i class="ph ph-calendar"></i> By day</h3><span class="tag" id="day-count">—</span></div>
+      <div id="by-day"></div>
+    </div>
+  </div>
+
+  <div class="row2">
+    <div class="panel">
+      <div class="panel-head"><h3><i class="ph ph-user"></i> By developer</h3><span class="tag" id="user-count">—</span></div>
+      <div id="by-user"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3><i class="ph ph-cpu"></i> By model</h3><span class="tag" id="model-count">—</span></div>
+      <div id="by-model"></div>
+    </div>
+  </div>
+</main>
+
+<script src="usage.js"></script>
+<script src="tracker.js"></script>
+<script>
+const THEME_KEY = "forge-tracker-theme";
+function applyTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  const icon = document.getElementById("theme-icon");
+  if (icon) icon.className = "ph " + (t === "dark" ? "ph-sun" : "ph-moon");
+}
+applyTheme(localStorage.getItem(THEME_KEY) || "light");
+document.getElementById("theme-toggle").addEventListener("click", () => {
+  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  localStorage.setItem(THEME_KEY, next);
+  applyTheme(next);
+});
+
+const TRACKER = window.TRACKER || {};
+const USAGE   = window.USAGE   || null;
+
+document.title = "Forge Usage · " + (TRACKER.project || "Project");
+document.getElementById("hd-project").textContent = TRACKER.project || "—";
+
+const $ = (s) => document.querySelector(s);
+function pad2(n) { return String(n).padStart(2, "0"); }
+function fmtDate(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.getFullYear() + "·" + pad2(d.getMonth() + 1) + "·" + pad2(d.getDate());
+}
+function fmtDateTime(iso) {
+  if (!iso) return null;
+  const d = new Date(iso); if (isNaN(d)) return iso;
+  return fmtDate(iso) + " · " + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+}
+function fmtNum(n) {
+  if (n == null) return "—";
+  if (n >= 1e9) return (n / 1e9).toFixed(1) + "B";
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + "M";
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + "K";
+  return String(n);
+}
+function fmtCost(usd) {
+  if (usd == null || isNaN(usd)) return "—";
+  if (usd >= 10000) return "$" + Math.round(usd).toLocaleString();
+  if (usd >= 1)     return "$" + usd.toFixed(2);
+  if (usd >= 0.01)  return "$" + usd.toFixed(3);
+  if (usd === 0)    return "$0.00";
+  return "<$0.01";
+}
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+}
+
+/* Same rate table as index.html — kept here for self-contained operation
+   so usage.html can be opened directly. Update both files when rates change. */
+const RATES = {
+  "claude-opus-4-7":   { input:  5.00, output: 25.00, cache_read: 0.50, cache_creation: 10.00 },
+  "claude-opus-4-6":   { input:  5.00, output: 25.00, cache_read: 0.50, cache_creation: 10.00 },
+  "claude-opus-4-5":   { input:  5.00, output: 25.00, cache_read: 0.50, cache_creation: 10.00 },
+  "claude-opus-4-1":   { input: 15.00, output: 75.00, cache_read: 1.50, cache_creation: 30.00 },
+  "claude-sonnet-4-6": { input:  3.00, output: 15.00, cache_read: 0.30, cache_creation:  6.00 },
+  "claude-sonnet-4-5": { input:  3.00, output: 15.00, cache_read: 0.30, cache_creation:  6.00 },
+  "claude-haiku-4-5":  { input:  1.00, output:  5.00, cache_read: 0.10, cache_creation:  2.00 },
+  "default":           { input:  5.00, output: 25.00, cache_read: 0.50, cache_creation: 10.00 }
+};
+const RATES_VERIFIED_DATE = "2026-05-14";
+
+function costForRow(row) {
+  const r = RATES[row.model] || RATES.default;
+  return ((row.input_tokens          || 0) / 1e6) * r.input
+       + ((row.output_tokens         || 0) / 1e6) * r.output
+       + ((row.cache_read_tokens     || 0) / 1e6) * r.cache_read
+       + ((row.cache_creation_tokens || 0) / 1e6) * r.cache_creation;
+}
+
+/* =========================================================
+   MISSING / EMPTY
+   ========================================================= */
+if (!USAGE || USAGE.empty || !USAGE.totals) {
+  document.getElementById("page").innerHTML = `
+    <div class="missing">
+      <h2>No usage data yet</h2>
+      <p>This page renders the per-phase / per-day / per-developer / per-model breakdown captured by the Forge usage hooks.</p>
+      <p>Run a Claude Code session in this harness; the file <code>usage.js</code> is regenerated on the next Stop event, and this page populates after a refresh.</p>
+      <p style="font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); margin-top: 18px;">
+        Source: ~/.claude/forge-usage.jsonl · derived by .claude/hooks/regen-usage-dashboard.sh
+      </p>
+    </div>`;
+} else {
+  const t = USAGE.totals || {};
+  const inputLike = (t.input_tokens || 0) + (t.cache_read_tokens || 0) + (t.cache_creation_tokens || 0);
+  const cacheHit = inputLike > 0 ? Math.round(((t.cache_read_tokens || 0) / inputLike) * 100) : 0;
+
+  $("#hero-meta").innerHTML =
+    `<b>${fmtNum(t.turns)}</b> turns · ` +
+    `<b>${fmtNum((t.input_tokens || 0) + (t.output_tokens || 0))}</b> non-cache tokens · ` +
+    `updated ${fmtDateTime(USAGE.last_updated) || "—"}`;
+
+  const stats = [
+    { label: "Turns",        icon: "ph-arrows-clockwise", value: fmtNum(t.turns),                  foot: "captured" },
+    { label: "Input",        icon: "ph-arrow-down",       value: fmtNum(t.input_tokens),           foot: "tokens (uncached)" },
+    { label: "Output",       icon: "ph-arrow-up",         value: fmtNum(t.output_tokens),          foot: "tokens generated" },
+    { label: "Cache read",   icon: "ph-database",         value: fmtNum(t.cache_read_tokens),      foot: "tokens reused" },
+    { label: "Cache create", icon: "ph-plus-circle",      value: fmtNum(t.cache_creation_tokens),  foot: "tokens cached" },
+    { label: "Cache hit",    icon: "ph-percent",          value: cacheHit + "%",                   foot: "of input-side" }
+  ];
+  $("#glance").innerHTML = stats.map(st => `
+    <div class="stat">
+      <div class="stat-label"><i class="ph ${st.icon}" aria-hidden="true"></i><span>${st.label}</span></div>
+      <div class="stat-value tabular">${st.value}</div>
+      <div class="stat-foot">${st.foot}</div>
+    </div>
+  `).join("");
+
+  /* Cost card */
+  const byModel = USAGE.by_model || [];
+  const modelCosts = byModel.map(r => ({
+    model: r.model,
+    cost: costForRow(r),
+    cost_input:          ((r.input_tokens          || 0) / 1e6) * (RATES[r.model] || RATES.default).input,
+    cost_output:         ((r.output_tokens         || 0) / 1e6) * (RATES[r.model] || RATES.default).output,
+    cost_cache_read:     ((r.cache_read_tokens     || 0) / 1e6) * (RATES[r.model] || RATES.default).cache_read,
+    cost_cache_creation: ((r.cache_creation_tokens || 0) / 1e6) * (RATES[r.model] || RATES.default).cache_creation
+  })).sort((a, b) => b.cost - a.cost);
+
+  const total = modelCosts.reduce((s, m) => s + m.cost, 0);
+  const inputCost         = modelCosts.reduce((s, m) => s + m.cost_input, 0);
+  const outputCost        = modelCosts.reduce((s, m) => s + m.cost_output, 0);
+  const cacheReadCost     = modelCosts.reduce((s, m) => s + m.cost_cache_read, 0);
+  const cacheCreationCost = modelCosts.reduce((s, m) => s + m.cost_cache_creation, 0);
+  const unknownModels = byModel.filter(r => !RATES[r.model]).map(r => r.model);
+
+  $("#cost-card").innerHTML = `
+    <div class="cost">
+      <div class="cost-head">
+        <h3><i class="ph ph-currency-dollar"></i> API-rate cost estimate</h3>
+        <span class="tag" title="Rates last verified against claude.com/pricing">verified ${RATES_VERIFIED_DATE}</span>
+      </div>
+      <div class="cost-grid">
+        <div>
+          <div class="tag" style="margin-bottom: 6px;">Estimated total</div>
+          <div class="cost-total">${fmtCost(total)}</div>
+          <div class="cost-note">
+            <strong>Not your subscription bill.</strong> Computed at Anthropic's <em>published per-MTok API rates</em>
+            (see <code style="font-family: var(--font-mono); font-size: 11px;">claude.com/pricing</code>).
+            Max &amp; Team plans amortize differently — use this for relative comparison across phases /
+            projects / models, not for billing prediction.
+          </div>
+          ${unknownModels.length > 0 ? `<div class="cost-warn">⚠ Unknown model rate (using Opus 4.7 fallback): ${unknownModels.map(escapeHtml).join(", ")}</div>` : ""}
+        </div>
+        <div>
+          <div class="tag" style="margin-bottom: 6px;">By category</div>
+          <table class="t">
+            <tbody>
+              <tr><td>Input</td><td class="num">${fmtCost(inputCost)}</td></tr>
+              <tr><td>Output</td><td class="num">${fmtCost(outputCost)}</td></tr>
+              <tr><td>Cache read</td><td class="num">${fmtCost(cacheReadCost)}</td></tr>
+              <tr><td>Cache create<sup>*</sup></td><td class="num">${fmtCost(cacheCreationCost)}</td></tr>
+            </tbody>
+          </table>
+          <div class="cost-warn"><sup>*</sup> Assumes 1-hour TTL cache writes (2× input rate).</div>
+        </div>
+        <div>
+          <div class="tag" style="margin-bottom: 6px;">By model</div>
+          <table class="t">
+            <tbody>
+              ${modelCosts.map(m => `
+                <tr>
+                  <td style="font-family: var(--font-mono); font-size: 12px;">${escapeHtml(m.model)}</td>
+                  <td class="num">${fmtCost(m.cost)}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+          <div class="cost-warn">Per-model cost is exact for known rates. Sort: highest spend first.</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  /* Breakdown tables */
+  function renderTable(rows, labelKey, headerLabel, labelFmt, perRowCost) {
+    if (!rows || rows.length === 0) return '<div class="empty">No data</div>';
+    const costCol = typeof perRowCost === "function";
+    return `
+      <table class="t">
+        <thead>
+          <tr>
+            <th>${headerLabel}</th>
+            <th class="num">Turns</th>
+            <th class="num">Input</th>
+            <th class="num">Output</th>
+            <th class="num">Cache R</th>
+            ${costCol ? '<th class="num">Cost*</th>' : ""}
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr>
+              <td>${escapeHtml(labelFmt ? labelFmt(r[labelKey]) : (r[labelKey] || "unknown"))}</td>
+              <td class="num">${fmtNum(r.turns)}</td>
+              <td class="num">${fmtNum(r.input_tokens)}</td>
+              <td class="num">${fmtNum(r.output_tokens)}</td>
+              <td class="num">${fmtNum(r.cache_read_tokens)}</td>
+              ${costCol ? `<td class="num">${fmtCost(perRowCost(r))}</td>` : ""}
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  $("#by-phase").innerHTML = renderTable(USAGE.by_phase, "phase", "Phase");
+  $("#by-day").innerHTML   = renderTable(USAGE.by_day   || [], "day", "Day", d => fmtDate(d) || d);
+  $("#by-user").innerHTML  = renderTable(USAGE.by_user, "user_email", "Developer");
+  $("#by-model").innerHTML = renderTable(USAGE.by_model, "model", "Model", null, costForRow);
+
+  $("#phase-count").textContent = `${(USAGE.by_phase || []).length} phase${(USAGE.by_phase || []).length === 1 ? "" : "s"}`;
+  $("#day-count").textContent   = `${(USAGE.by_day   || []).length} day${(USAGE.by_day   || []).length === 1 ? "" : "s"}`;
+  $("#user-count").textContent  = `${(USAGE.by_user  || []).length} dev${(USAGE.by_user  || []).length === 1 ? "" : "s"}`;
+  $("#model-count").textContent = `${(USAGE.by_model || []).length} model${(USAGE.by_model || []).length === 1 ? "" : "s"}`;
+}
+</script>
+</body>
+</html>

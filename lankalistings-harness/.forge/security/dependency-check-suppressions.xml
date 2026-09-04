@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Dependency-vulnerability suppressions — generic Forge harness stub.
+
+  WHAT THIS IS
+  A starting point for the OWASP Dependency-Check suppression file that triages
+  false positives from the dependency-vulnerability build gate (framework.md §4.10).
+
+  WHERE IT GOES
+  Copy this file into EACH scanned app repo (e.g. the backend and the frontend),
+  next to that repo's build config, and wire the scanner's `suppressionFile` at it.
+  This copy under `.forge/security/` is the reference template, not the live file —
+  the live truth lives in each app repo.
+
+  GOVERNANCE (every entry, no exceptions)
+  - Suppress by CVE *and* dependency coordinate (packageUrl), never a blanket CVE.
+  - Every entry carries a justification in <notes> — why this CVE is not exploitable
+    here, or who accepted the risk and when.
+  - Every entry carries an expiry via the `until` attribute, so suppressions are
+    revisited rather than living forever. Re-justify or drop on expiry.
+
+  Default state: no active suppressions. Uncomment and adapt the example below
+  when triaging a real finding.
+-->
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+
+  <!-- EXAMPLE — copy, uncomment, and fill in for a real false positive.
+  <suppress until="YYYY-MM-DDZ">
+    <notes><![CDATA[
+      Justification: <why this CVE does not apply / is not reachable / accepted>.
+      Accepted by: <name>, <date>. Revisit on the `until` date above.
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/com\.example/example-lib@.*$</packageUrl>
+    <cve>CVE-YYYY-NNNNN</cve>
+  </suppress>
+  -->
+
+</suppressions>

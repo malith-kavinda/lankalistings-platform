@@ -1,0 +1,228 @@
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Manrope:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;overflow-x:hidden;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}}::-webkit-scrollbar{display:none;}.drawer-transition{transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"inverse-surface":"#2d3133","primary":"#000000","secondary":"#006c49","secondary-fixed":"#6ffbbe","on-tertiary":"#ffffff","tertiary":"#000000","on-error":"#ffffff","on-surface-variant":"#45464d","surface-container-highest":"#e0e3e5","on-tertiary-fixed":"#261a00","surface-bright":"#f7f9fb","tertiary-fixed":"#ffdf9f","secondary-fixed-dim":"#4edea3","primary-fixed-dim":"#bec6e0","surface-container":"#eceef0","on-primary-fixed":"#131b2e","surface-container-lowest":"#ffffff","surface-tint":"#565e74","on-surface":"#191c1e","error":"#ba1a1a","tertiary-container":"#261a00","error-container":"#ffdad6","on-primary-fixed-variant":"#3f465c","on-primary":"#ffffff","surface-dim":"#d8dadc","primary-container":"#131b2e","inverse-primary":"#bec6e0","on-secondary-fixed-variant":"#005236","surface-container-low":"#f2f4f6","on-tertiary-fixed-variant":"#5c4300","on-error-container":"#93000a","background":"#f7f9fb","surface-container-high":"#e6e8ea","outline":"#76777d","on-background":"#191c1e","on-tertiary-container":"#a87d00","on-primary-container":"#7c839b","tertiary-fixed-dim":"#f9bd22","outline-variant":"#c6c6cd","on-secondary-container":"#00714d","on-secondary-fixed":"#002113","primary-fixed":"#dae2fd","on-secondary":"#ffffff","surface":"#f7f9fb","surface-variant":"#e0e3e5","inverse-on-surface":"#eff1f3","secondary-container":"#6cf8bb"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter":"20px","margin-mobile":"16px","base":"4px","md":"24px","xs":"8px","lg":"40px","sm":"16px","xl":"64px","margin-desktop":"32px"},"fontFamily":{"metadata":["Inter"],"headline-lg":["Manrope"],"body-lg":["Manrope"],"headline-lg-mobile":["Manrope"],"price-xl":["Manrope"],"display-lg":["Manrope"],"body-sm":["Manrope"],"headline-md":["Manrope"],"label-caps":["Inter"]},"fontSize":{"metadata":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-lg":["32px",{"lineHeight":"40px","fontWeight":"700"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","fontWeight":"700"}],"price-xl":["24px",{"lineHeight":"32px","fontWeight":"800"}],"display-lg":["48px",{"lineHeight":"56px","letterSpacing":"-0.02em","fontWeight":"800"}],"body-sm":["14px",{"lineHeight":"20px","fontWeight":"400"}],"headline-md":["20px",{"lineHeight":"28px","fontWeight":"600"}],"label-caps":["12px",{"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"600"}]}}}}</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-background font-body-lg text-on-surface"><div class="fixed inset-0 z-[100] invisible" id="side-drawer"><div class="absolute inset-0 bg-primary/40 opacity-0 transition-opacity duration-300" id="drawer-overlay"></div><div class="absolute left-0 top-0 bottom-0 w-[280px] bg-surface-container-lowest shadow-xl drawer-transition -translate-x-full flex flex-col pt-safe" id="drawer-content"><div class="p-sm border-b border-outline-variant flex items-center justify-between"><img alt="Logo" class="h-8 w-auto" src="https://lh3.googleusercontent.com/aida/AEtjO1XMvA35tJ3JcmWW3Qh3xuToENDZURqJ1hmeBHnUShjH3TfjHFrsty1rDgk6ZZXiRzRrl5h2hyOf-U1lMxLdyRjK4o_nENdqc7M6Gw4J1vIqE1dtKyT6spOTht3m3YOjV1R9ERGFYFXwdnZf925Wzhb4t6Dlm77n0lAzfv6ZA1VpUjPQCN4_blxeNViKO-T4kc-8czpVEr9jcpd-P0TGwyqUNBdDhouBDBJYzF50DX0P2to8OAv5mNLTqKIb"/><button class="p-xs" onclick="document.getElementById('side-drawer').classList.add('invisible');document.getElementById('drawer-content').classList.add('-translate-x-full');document.getElementById('drawer-overlay').classList.replace('opacity-100','opacity-0')"><span class="material-symbols-outlined">close</span></button></div><nav class="flex-1 py-sm px-sm space-y-base"><a class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-container" href="#"><span class="material-symbols-outlined">grid_view</span><span class="font-headline-md text-body-lg">Browse Categories</span></a><a class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-container" href="#"><span class="material-symbols-outlined">help_outline</span><span class="font-headline-md text-body-lg">How it Works</span></a><a class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-container" href="#"><span class="material-symbols-outlined">gpp_good</span><span class="font-headline-md text-body-lg">Safety Tips</span></a></nav></div></div><header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-16 px-margin-mobile flex items-center justify-between gap-sm"><div class="flex items-center gap-xs"><button class="w-10 h-10 flex items-center justify-center" onclick="document.getElementById('side-drawer').classList.remove('invisible');document.getElementById('drawer-content').classList.remove('-translate-x-full');document.getElementById('drawer-overlay').classList.replace('opacity-0','opacity-100')"><span class="material-symbols-outlined">menu</span></button><img alt="LankaListings logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XMvA35tJ3JcmWW3Qh3xuToENDZURqJ1hmeBHnUShjH3TfjHFrsty1rDgk6ZZXiRzRrl5h2hyOf-U1lMxLdyRjK4o_nENdqc7M6Gw4J1vIqE1dtKyT6spOTht3m3YOjV1R9ERGFYFXwdnZf925Wzhb4t6Dlm77n0lAzfv6ZA1VpUjPQCN4_blxeNViKO-T4kc-8czpVEr9jcpd-P0TGwyqUNBdDhouBDBJYzF50DX0P2to8OAv5mNLTqKIb"/></div><div class="flex items-center gap-xs"><button class="w-10 h-10 flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined">search</span></button><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1V33vFFIOps13-q95aDbuU-dsrdeMr4lO6CusKGzCttFlklUGI3mDV5ONbu4J_DMJgGUpBB6QWBz7TreGVGtyR3CtVNBHA6koSrGwZPgHB8lHSJjGy-sbUhQN7ezjqPYPik0i6BPkk_lBYY-CB9xGTWnEkP3WRGEisDSX8jtU0oLmNaBhcHf8WZ1jWMIMeNm-AugibLCyfSInMcDA0kVKRbY5q8zTcNCJ5NNcQdSRpJrsKLiOCzkf47ebI"/></div></div></header><main class="relative w-full pt-16 pb-32 bg-background min-h-screen"><div class="flex flex-col w-full pb-20">
+<!-- Header Greeting -->
+<div class="px-margin-mobile py-lg flex items-center justify-between">
+<div class="flex flex-col gap-xs">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Hello, Chaminda!</h1>
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Verified Seller</span>
+</div>
+</div>
+<div class="relative">
+<img class="w-16 h-16 rounded-full object-cover shadow-sm" data-alt="Close-up portrait of a friendly Sri Lankan man in his 30s with a warm smile, wearing a casual polo shirt, soft natural lighting, set against a bright, airy office background. Corporate modern aesthetic, high resolution." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCobn4ghu31ZAZ6SmMniL99R1xGdRi6OnvrrOy2VeIgpI1WQbyH2OWt7uv8_P8G5_kiIDiL4xp3vtJPye9m5kHzPDkzyn-gPN7i_Weg5Jg2TZwLpDWM5AR52QzSCW6nOIVnbNno7Y11wsgSw9TNt6jpchakd84rK0lU9bcUAo9_mgossnVBiwxCAPSl9EUJg8Rm7S6v6FHhh4INL_o6mBD4fxO5oG0EBTlv-XUnwa5yfs0WxwiZax1QzQ"/>
+<div class="absolute bottom-0 right-0 w-4 h-4 bg-secondary rounded-full flex items-center justify-center border-2 border-surface-container-lowest">
+<span class="w-2 h-2 rounded-full bg-surface-container-lowest"></span>
+</div>
+</div>
+</div>
+<!-- Quick Metric Grid -->
+<div class="px-margin-mobile grid grid-cols-2 gap-sm mb-lg">
+<div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs shadow-sm active:scale-95 transition-transform duration-200">
+<div class="flex items-center gap-xs text-secondary">
+<span class="material-symbols-outlined">campaign</span>
+<span class="font-label-caps text-label-caps">Active Ads</span>
+</div>
+<span class="font-display-lg text-display-lg text-on-surface">12</span>
+</div>
+<div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs shadow-sm active:scale-95 transition-transform duration-200">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined">pending_actions</span>
+<span class="font-label-caps text-label-caps">Pending</span>
+</div>
+<span class="font-display-lg text-display-lg text-on-surface">2</span>
+</div>
+<div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs shadow-sm active:scale-95 transition-transform duration-200">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined">bookmark</span>
+<span class="font-label-caps text-label-caps">Saved</span>
+</div>
+<span class="font-display-lg text-display-lg text-on-surface">24</span>
+</div>
+<div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs shadow-sm active:scale-95 transition-transform duration-200 relative">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined">mail</span>
+<span class="font-label-caps text-label-caps">Messages</span>
+</div>
+<span class="font-display-lg text-display-lg text-on-surface">5</span>
+<div class="absolute top-md right-md w-3 h-3 bg-error rounded-full animate-pulse"></div>
+</div>
+</div>
+<!-- Post New Ad Button -->
+<div class="px-margin-mobile mb-lg">
+<button class="w-full bg-secondary text-on-secondary font-headline-md text-body-lg py-sm rounded-xl shadow-md flex items-center justify-center gap-xs active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined">add_circle</span>
+            Post New Ad
+        </button>
+</div>
+<!-- My Ads Section -->
+<div class="flex flex-col gap-md">
+<div class="px-margin-mobile flex items-center justify-between">
+<h2 class="font-headline-md text-headline-md text-on-surface">My Ads</h2>
+</div>
+<!-- Filters (Horizontal Scroll) -->
+<div class="px-margin-mobile flex overflow-x-auto gap-xs pb-xs no-scrollbar">
+<button class="whitespace-nowrap px-sm py-xs rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps shadow-sm">All Ads (14)</button>
+<button class="whitespace-nowrap px-sm py-xs rounded-full bg-surface-container text-on-surface-variant font-label-caps text-label-caps active:bg-primary-container active:text-on-primary-container transition-colors">Active (12)</button>
+<button class="whitespace-nowrap px-sm py-xs rounded-full bg-surface-container text-on-surface-variant font-label-caps text-label-caps active:bg-primary-container active:text-on-primary-container transition-colors">Pending (2)</button>
+<button class="whitespace-nowrap px-sm py-xs rounded-full bg-surface-container text-on-surface-variant font-label-caps text-label-caps active:bg-primary-container active:text-on-primary-container transition-colors">Drafts (1)</button>
+<button class="whitespace-nowrap px-sm py-xs rounded-full bg-surface-container text-on-surface-variant font-label-caps text-label-caps active:bg-primary-container active:text-on-primary-container transition-colors">Expired (0)</button>
+</div>
+<!-- Ad Cards List -->
+<div class="flex flex-col gap-sm px-margin-mobile">
+<!-- Card 1 (Active) -->
+<div class="bg-surface-container-lowest rounded-xl p-sm flex flex-col gap-sm shadow-sm relative">
+<div class="flex gap-sm">
+<img class="w-24 h-24 rounded-lg object-cover flex-shrink-0" data-alt="A clean, well-lit photograph of a used Toyota Aqua hybrid car, white color, parked on a paved driveway in Colombo. Modern, realistic, clear details." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiQtFNqXo9wtmLGo7Tvc_r20XPqLWOBMDRdS9TpjOPiuFxN1GF5Mau7_BDofHGXp3hmhCKGy2VExSBD9ExKqSuCXXUPKgKES7GiStsylWCj2YiNkrfFimGQ-EyTbO88u3YHgFW5A75BF2ByUGFyT2gTKucWTiSqKpZfHXAkjLtJ5_Ve96I2nbQ3UsSgZ94LQlumy_RTCWd-Na2I_2xN0DnAKk4JjuN8tZYSPaPZHgKFEdRf9YPbTO83g"/>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex justify-between items-start mb-base">
+<span class="inline-flex items-center gap-1 bg-secondary-container text-on-secondary-container px-2 py-1 rounded-full font-label-caps text-[10px]">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Active
+                            </span>
+<button class="p-1 text-on-surface-variant active:text-primary transition-colors" onclick="toggleBottomSheet('actions-sheet-1')">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<h3 class="font-headline-md text-body-lg text-on-surface truncate mb-1">Toyota Aqua G Spec 2014</h3>
+<span class="font-price-xl text-price-xl text-primary mb-1">Rs 6,250,000</span>
+<div class="flex items-center gap-1 text-on-surface-variant mt-auto">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span class="font-metadata text-metadata">Colombo 06</span>
+</div>
+</div>
+</div>
+<div class="h-[1px] w-full bg-surface-container"></div>
+<div class="flex items-center justify-between text-on-surface-variant">
+<div class="flex gap-md">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span class="font-metadata text-metadata">1.2k Views</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">chat</span>
+<span class="font-metadata text-metadata">8 Inquiries</span>
+</div>
+</div>
+<span class="font-metadata text-metadata text-outline">Expires in 12 days</span>
+</div>
+</div>
+<!-- Card 2 (Pending) -->
+<div class="bg-surface-container-lowest rounded-xl p-sm flex flex-col gap-sm shadow-sm relative opacity-80">
+<div class="flex gap-sm">
+<img class="w-24 h-24 rounded-lg object-cover flex-shrink-0 grayscale-[20%]" data-alt="A modern 2-bedroom apartment living room in Colombo, featuring minimal furniture, bright natural light coming from a balcony, contemporary interior design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvQgq0t4Dm-JA0qEiogu3ytnbY1KxwZr7TRwsmqYTlZDUbDP0dP-eZ2aG6X5iisWVrDSSfMF7Z3cDChqzbcoZCFiw7Zp7H9e8J8YTImOwwC8g793UyS3kfWE_5FbFoDpaTOfor3f_AKYHQ9SXRw1agqK-Dt7R_G2LjRXIaZYmhPchwsraKt4tBG3PhRV01cxYQR4YOIlNwlITDfaXdgn9bgkqjfYnConEIPbc_oDD7-RIQbFNw6L-fbg"/>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex justify-between items-start mb-base">
+<span class="inline-flex items-center gap-1 bg-tertiary-container text-on-tertiary-container px-2 py-1 rounded-full font-label-caps text-[10px]">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim"></span> Pending Review
+                            </span>
+<button class="p-1 text-on-surface-variant active:text-primary transition-colors" onclick="toggleBottomSheet('actions-sheet-2')">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<h3 class="font-headline-md text-body-lg text-on-surface truncate mb-1">Luxury 2BR Apt - Havelock</h3>
+<span class="font-price-xl text-price-xl text-primary mb-1">Rs 185,000 <span class="text-body-sm font-body-sm text-on-surface-variant">/mo</span></span>
+<div class="flex items-center gap-1 text-on-surface-variant mt-auto">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span class="font-metadata text-metadata">Havelock Town</span>
+</div>
+</div>
+</div>
+<div class="h-[1px] w-full bg-surface-container"></div>
+<div class="flex items-center justify-between text-on-surface-variant">
+<div class="flex gap-md">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span class="font-metadata text-metadata">0 Views</span>
+</div>
+</div>
+<span class="font-metadata text-metadata text-outline">Submitted 2h ago</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Sheet Overlay & Content (Hidden by default) -->
+<div class="fixed inset-0 bg-primary/40 backdrop-blur-sm z-[60] hidden opacity-0 transition-opacity duration-300" id="actions-sheet-overlay" onclick="closeAllBottomSheets()"></div>
+<div class="fixed bottom-0 left-0 w-full bg-surface-container-lowest rounded-t-3xl shadow-xl z-[70] transform translate-y-full transition-transform duration-300 flex flex-col pb-safe" id="actions-sheet-1">
+<div class="w-full flex justify-center py-xs cursor-pointer" onclick="closeAllBottomSheets()">
+<div class="w-12 h-1.5 bg-surface-container-highest rounded-full"></div>
+</div>
+<div class="px-margin-mobile py-sm flex flex-col gap-sm">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Ad Actions</h3>
+<button class="flex items-center gap-md p-sm bg-surface-container-low rounded-xl text-on-surface active:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-secondary">edit</span>
+<span class="font-body-lg text-body-lg">Edit Listing</span>
+</button>
+<button class="flex items-center gap-md p-sm bg-surface-container-low rounded-xl text-on-surface active:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-tertiary-fixed-dim">trending_up</span>
+<span class="font-body-lg text-body-lg flex-1 text-left">Promote Ad</span>
+<span class="bg-primary-container text-on-primary-container font-label-caps text-[10px] px-2 py-0.5 rounded">HOT</span>
+</button>
+<button class="flex items-center gap-md p-sm bg-surface-container-low rounded-xl text-on-surface active:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">sell</span>
+<span class="font-body-lg text-body-lg">Mark as Sold</span>
+</button>
+<div class="h-[1px] w-full bg-surface-container my-1"></div>
+<button class="flex items-center gap-md p-sm bg-error-container text-on-error-container rounded-xl active:opacity-80 transition-opacity">
+<span class="material-symbols-outlined">delete</span>
+<span class="font-body-lg text-body-lg font-headline-md">Delete Ad</span>
+</button>
+</div>
+</div>
+<div class="fixed bottom-0 left-0 w-full bg-surface-container-lowest rounded-t-3xl shadow-xl z-[70] transform translate-y-full transition-transform duration-300 flex flex-col pb-safe" id="actions-sheet-2">
+<div class="w-full flex justify-center py-xs cursor-pointer" onclick="closeAllBottomSheets()">
+<div class="w-12 h-1.5 bg-surface-container-highest rounded-full"></div>
+</div>
+<div class="px-margin-mobile py-sm flex flex-col gap-sm">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Ad Actions (Pending)</h3>
+<button class="flex items-center gap-md p-sm bg-surface-container-low rounded-xl text-on-surface active:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-secondary">edit</span>
+<span class="font-body-lg text-body-lg">Edit Listing</span>
+</button>
+<div class="h-[1px] w-full bg-surface-container my-1"></div>
+<button class="flex items-center gap-md p-sm bg-error-container text-on-error-container rounded-xl active:opacity-80 transition-opacity">
+<span class="material-symbols-outlined">delete</span>
+<span class="font-body-lg text-body-lg font-headline-md">Cancel &amp; Delete</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+    function toggleBottomSheet(sheetId) {
+        const overlay = document.getElementById('actions-sheet-overlay');
+        const sheet = document.getElementById(sheetId);
+        
+        if (sheet.classList.contains('translate-y-full')) {
+            // Open
+            overlay.classList.remove('hidden');
+            // Small delay to allow display:block to apply before animating opacity
+            setTimeout(() => {
+                overlay.classList.remove('opacity-0');
+                sheet.classList.remove('translate-y-full');
+            }, 10);
+        } else {
+             // Handled by closeAllBottomSheets for consistency
+             closeAllBottomSheets();
+        }
+    }
+
+    function closeAllBottomSheets() {
+        const overlay = document.getElementById('actions-sheet-overlay');
+        const sheets = document.querySelectorAll('[id^="actions-sheet-"]');
+        
+        overlay.classList.add('opacity-0');
+        sheets.forEach(sheet => {
+            if (sheet.id !== 'actions-sheet-overlay') {
+                sheet.classList.add('translate-y-full');
+            }
+        });
+        
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+        }, 300); // Wait for transition to finish
+    }
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-1px_8px_rgba(0,0,0,0.04)]" data-active-classes="text-secondary"><div class="flex justify-between items-center h-16 px-base relative"><a aria-current="page" class="flex-1 flex flex-col items-center justify-center gap-1 text-secondary" data-path="home" href="#"><span class="material-symbols-outlined">home</span><span class="font-label-caps text-label-caps">Home</span></a><a class="flex-1 flex flex-col items-center justify-center gap-1 text-on-surface-variant" data-path="browse" href="#"><span class="material-symbols-outlined">explore</span><span class="font-label-caps text-label-caps">Browse</span></a><div class="flex-1 flex justify-center -translate-y-6"><a class="w-14 h-14 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-lg" data-path="post-ad" href="#"><span class="material-symbols-outlined">add</span></a></div><a class="flex-1 flex flex-col items-center justify-center gap-1 text-on-surface-variant" data-path="saved" href="#"><span class="material-symbols-outlined">bookmark</span><span class="font-label-caps text-label-caps">Saved</span></a><a class="flex-1 flex flex-col items-center justify-center gap-1 text-on-surface-variant" data-path="account" href="#"><span class="material-symbols-outlined">person</span><span class="font-label-caps text-label-caps">Account</span></a></div></nav></body></html>

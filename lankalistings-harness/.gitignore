@@ -1,0 +1,17 @@
+# Token-usage tracking — per-developer-per-machine local state
+# (see docs/specs/2026-05-14-token-usage-tracking.md FR-10)
+#
+# Both files contain user_email values and per-developer turn-level data.
+# They are derived from the global file at ~/.claude/forge-usage.jsonl
+# (which lives outside any repo by location) — committing them would
+# (a) leak email addresses, (b) cause merge conflicts across developers
+# since each dev's machine produces a different filtered slice.
+#
+# For team-wide usage rollup, the spec's Phase 2 scheduler-to-DB story is
+# the appropriate channel; the local files stay local.
+.forge/usage.jsonl
+.forge/dashboard/usage.js
+
+# Delivery metrics v1 ledgers are committable role/project facts.
+# Future token-joined variants remain local/private.
+.forge/metrics/*.local.jsonl

@@ -1,0 +1,27 @@
+# App code lives in its own repositories:
+#   lankalistings-web            -> frontend-web/
+#   lankalistings-portal         -> management-portal/
+#   lankalistings-mobile         -> mobile/
+#   lankalistings-media-service  -> media-service/
+frontend-web/
+management-portal/
+mobile/
+media-service/
+
+# Local tooling and installers (7-Zip, Tesseract installer, scratch images)
+.tools/
+
+node_modules/
+package-lock.json
+*.bundle
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+
+# Root workspace glue - the apps now live in their own repositories
+package.json
+
+# Crash artifacts
+*.stackdump

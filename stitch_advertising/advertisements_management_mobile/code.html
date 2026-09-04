@@ -1,0 +1,289 @@
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={theme:{extend:{"colors":{"primary-fixed-dim":"#bec6e0","primary-container":"#131b2e","secondary-fixed":"#6ffbbe","tertiary":"#000000","error-container":"#ffdad6","on-secondary-container":"#00714d","secondary-container":"#6cf8bb","on-secondary":"#ffffff","outline-variant":"#c6c6cd","tertiary-fixed":"#ffdf9f","on-error":"#ffffff","on-primary-container":"#7c839b","on-primary-fixed-variant":"#3f465c","on-tertiary-container":"#a87d00","primary-fixed":"#dae2fd","surface-container-highest":"#e0e3e5","surface-container-high":"#e6e8ea","error":"#ba1a1a","surface-container":"#eceef0","surface-dim":"#d8dadc","surface-tint":"#565e74","on-error-container":"#93000a","surface-variant":"#e0e3e5","on-background":"#191c1e","surface-container-lowest":"#ffffff","on-secondary-fixed":"#002113","inverse-primary":"#bec6e0","inverse-on-surface":"#eff1f3","surface":"#f7f9fb","primary":"#000000","background":"#f7f9fb","on-surface-variant":"#45464d","inverse-surface":"#2d3133","on-surface":"#191c1e","surface-bright":"#f7f9fb","secondary":"#006c49","on-secondary-fixed-variant":"#005236","outline":"#76777d","secondary-fixed-dim":"#4edea3","tertiary-fixed-dim":"#f9bd22","on-tertiary-fixed-variant":"#5c4300","on-tertiary":"#ffffff","on-tertiary-fixed":"#261a00","surface-container-low":"#f2f4f6","on-primary":"#ffffff","on-primary-fixed":"#131b2e","tertiary-container":"#261a00"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"lg":"40px","margin-mobile":"16px","margin-desktop":"32px","gutter":"20px","md":"24px","xs":"8px","base":"4px","sm":"16px","xl":"64px"},"fontFamily":{"body-lg":["Manrope"],"headline-lg-mobile":["Manrope"],"display-lg":["Manrope"],"body-sm":["Manrope"],"metadata":["Inter"],"headline-lg":["Manrope"],"headline-md":["Manrope"],"price-xl":["Manrope"],"label-caps":["Inter"]},"fontSize":{"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","fontWeight":"700"}],"display-lg":["48px",{"lineHeight":"56px","letterSpacing":"-0.02em","fontWeight":"800"}],"body-sm":["14px",{"lineHeight":"20px","fontWeight":"400"}],"metadata":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-lg":["32px",{"lineHeight":"40px","fontWeight":"700"}],"headline-md":["20px",{"lineHeight":"28px","fontWeight":"600"}],"price-xl":["24px",{"lineHeight":"32px","fontWeight":"800"}],"label-caps":["12px",{"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"600"}]}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Manrope:wght@100..900&display=swap" rel="stylesheet"/><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-lg text-on-surface"><header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 w-full px-margin-desktop flex items-center justify-between"><div class="flex items-center gap-sm"><img alt="LankaListings logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XMvA35tJ3JcmWW3Qh3xuToENDZURqJ1hmeBHnUShjH3TfjHFrsty1rDgk6ZZXiRzRrl5h2hyOf-U1lMxLdyRjK4o_nENdqc7M6Gw4J1vIqE1dtKyT6spOTht3m3YOjV1R9ERGFYFXwdnZf925Wzhb4t6Dlm77n0lAzfv6ZA1VpUjPQCN4_blxeNViKO-T4kc-8czpVEr9jcpd-P0TGwyqUNBdDhouBDBJYzF50DX0P2to8OAv5mNLTqKIb"/><span class="font-headline-md text-headline-md text-on-surface hidden lg:block">LankaListings</span></div><nav class="flex items-center gap-md" data-active-classes="text-secondary font-bold"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="marketplace" href="#">Marketplace</a><a aria-current="page" class="transition-colors text-secondary font-bold" data-path="post-ad" href="#">Post Ad</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="support" href="#">Support</a><div class="h-6 w-px bg-outline-variant mx-xs"></div><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="drafts" href="#">Save as Draft</a><a class="font-body-sm text-body-sm text-error hover:opacity-80 transition-opacity" data-path="exit" href="#">Cancel</a></nav><div class="flex items-center gap-sm"><button class="p-xs rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant"><span class="material-symbols-outlined">search</span></button><img alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant cursor-pointer" src="https://lh3.googleusercontent.com/aida/AEtjO1V33vFFIOps13-q95aDbuU-dsrdeMr4lO6CusKGzCttFlklUGI3mDV5ONbu4J_DMJgGUpBB6QWBz7TreGVGtyR3CtVNBHA6koSrGwZPgHB8lHSJjGy-sbUhQN7ezjqPYPik0i6BPkk_lBYY-CB9xGTWnEkP3WRGEisDSX8jtU0oLmNaBhcHf8WZ1jWMIMeNm-AugibLCyfSInMcDA0kVKRbY5q8zTcNCJ5NNcQdSRpJrsKLiOCzkf47ebI"/></div></div></header><main class="w-full pt-20 bg-surface"><div class="flex flex-col w-full h-full relative" id="ad-management-app">
+<!-- Action Bar / Header -->
+<div class="px-container-padding py-stack-loose flex items-center justify-between bg-surface z-10 sticky top-0">
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface">Advertisements</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Manage platform listings</p>
+</div>
+<button aria-label="Create Ad" class="bg-primary-container text-on-primary-container p-3 rounded-full flex items-center justify-center shadow-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<!-- Search & Filter Controls -->
+<div class="px-container-padding pb-stack-loose flex gap-stack-compact bg-surface z-10 sticky top-[76px]">
+<div class="relative flex-1 group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none group-focus-within:text-primary transition-colors">search</span>
+<input aria-label="Search advertisements" class="w-full bg-surface-container-highest text-on-surface font-body-sm rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary transition-all placeholder:text-on-surface-variant" placeholder="Search ID or Title..." type="text"/>
+</div>
+<button aria-label="Open filters" class="bg-surface-container-highest text-on-surface-variant px-4 py-3 rounded-lg flex items-center justify-center font-body-sm font-medium gap-2 active:bg-surface-dim transition-colors" id="filter-toggle">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+<span class="hidden sm:inline">Filter</span>
+</button>
+</div>
+<!-- Bulk Action Toolbar (Hidden by default) -->
+<div class="fixed bottom-0 left-0 right-0 bg-primary-container text-on-primary-container px-container-padding py-stack-loose flex items-center justify-between translate-y-full transition-transform duration-300 z-40 rounded-t-xl shadow-[0_-4px_12px_rgba(0,0,0,0.1)]" id="bulk-action-bar">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+<span class="font-title-sm text-title-sm"><span id="selected-count">0</span> Selected</span>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-2 bg-on-primary-container text-primary-container rounded-lg font-body-sm font-medium hover:bg-opacity-90 transition-opacity">Approve</button>
+<button class="px-4 py-2 bg-error-container text-on-error-container rounded-lg font-body-sm font-medium hover:bg-opacity-90 transition-opacity">Reject</button>
+</div>
+</div>
+<!-- Ad List (Dense Cards) -->
+<div class="flex-1 px-container-padding pb-[80px] flex flex-col gap-stack-compact">
+<!-- Card 1 (Pending) -->
+<div class="ad-card bg-surface-container-lowest p-3 rounded-xl shadow-sm flex gap-3 relative transition-colors cursor-pointer group" data-id="AD-8842">
+<div class="absolute inset-0 bg-primary/5 rounded-xl opacity-0 group-[.selected]:opacity-100 transition-opacity pointer-events-none"></div>
+<!-- Checkbox Overlay for Selection -->
+<div class="absolute top-2 left-2 z-10 w-6 h-6 bg-surface rounded-full shadow-sm flex items-center justify-center opacity-0 group-[.selected]:opacity-100 group-hover:opacity-100 transition-opacity">
+<input class="card-checkbox w-4 h-4 accent-primary cursor-pointer" type="checkbox"/>
+</div>
+<div class="w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-surface-dim relative">
+<img alt="Product Image" class="w-full h-full object-cover" data-alt="A modern, minimalist smartphone floating on a clean, light blue background. Studio lighting, soft shadows, high resolution product photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhgGIhz39D9xZZXxK5I-auY-qXzuA0MulPQYEw596vAk1lvq5805cAoqO64btPybcxeJFk54Uz4lRG7_E6kiLPT2jP6qQ-k1hOYJ4TLPb6MRK16XVB0X9wJwsFi0XlJd_-cZIvlytW-YzDr6_swqeZizg_jRtI90bB7OoJyfV_MDfQLjjxFYXj19ajDkgfpO5MPjEOk3HeQjk2drTpj_rvI_fg-eX5rteN_RRMZWv_3WSrsfto3WzPtg"/>
+<div class="absolute bottom-1 right-1 bg-surface/90 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] font-data-mono text-on-surface">1/4</div>
+</div>
+<div class="flex-1 min-w-0 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-1">
+<span class="font-data-mono text-data-mono text-on-surface-variant text-[11px]">#AD-8842</span>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-error-container/20 text-on-error-container font-label-caps text-[10px]">
+<span class="w-1.5 h-1.5 rounded-full bg-on-error-container"></span> Pending
+                        </span>
+</div>
+<h3 class="font-title-sm text-[14px] leading-tight text-on-surface truncate">Brand New iPhone 15 Pro Max 256GB</h3>
+<p class="font-body-sm text-[12px] text-on-surface-variant mt-0.5 truncate">Colombo 03 • Electronics</p>
+</div>
+<div class="flex justify-between items-end mt-2">
+<div>
+<div class="font-body-md font-bold text-on-surface">Rs. 385,000</div>
+<div class="font-body-sm text-[11px] text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[12px]">person</span> Kamal P.
+                        </div>
+</div>
+<div class="flex gap-1">
+<button aria-label="Reject" class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center hover:bg-surface-dim transition-colors">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+<button aria-label="Approve" class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center hover:bg-surface-dim transition-colors">
+<span class="material-symbols-outlined text-[18px]">check</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2 (Active) -->
+<div class="ad-card bg-surface-container-lowest p-3 rounded-xl shadow-sm flex gap-3 relative transition-colors cursor-pointer group" data-id="AD-8841">
+<div class="absolute inset-0 bg-primary/5 rounded-xl opacity-0 group-[.selected]:opacity-100 transition-opacity pointer-events-none"></div>
+<div class="absolute top-2 left-2 z-10 w-6 h-6 bg-surface rounded-full shadow-sm flex items-center justify-center opacity-0 group-[.selected]:opacity-100 group-hover:opacity-100 transition-opacity">
+<input class="card-checkbox w-4 h-4 accent-primary cursor-pointer" type="checkbox"/>
+</div>
+<div class="w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-surface-dim relative">
+<img alt="Product Image" class="w-full h-full object-cover" data-alt="A sleek, modern sedan parked on a clean, empty street during golden hour. Cinematic lighting, photorealistic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3h_ITFOyapS870cSIlw65r08NCNlHxJQBObnH8TZ4JzGZnxyzQ_i_0e4lY5KVHIfLsXABivqbbJ303DUbBqobdk9BrM71yACb3Oc-MIxz8H0IRmZiDPvx5o-G9v3btHdU81x8Zqz8S168kTIrlT6tWWOxRCZqGZUw5gNGNRKkYuTxncwae8fdjyA5xNCdRnUlXPNMGKXQ3sKp7JnGWsLcqpuC4wJ25ZrX55IZJ5GTls_xAh_mE0KAzw"/>
+<div class="absolute bottom-1 right-1 bg-surface/90 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] font-data-mono text-on-surface">1/8</div>
+</div>
+<div class="flex-1 min-w-0 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-1">
+<span class="font-data-mono text-data-mono text-on-surface-variant text-[11px]">#AD-8841</span>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-caps text-[10px]">
+<span class="w-1.5 h-1.5 rounded-full bg-on-secondary-container"></span> Active
+                        </span>
+</div>
+<h3 class="font-title-sm text-[14px] leading-tight text-on-surface truncate">Toyota Aqua G Grade 2014</h3>
+<p class="font-body-sm text-[12px] text-on-surface-variant mt-0.5 truncate">Kandy • Vehicles</p>
+</div>
+<div class="flex justify-between items-end mt-2">
+<div>
+<div class="font-body-md font-bold text-on-surface">Rs. 7,450,000</div>
+<div class="font-body-sm text-[11px] text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[12px]">schedule</span> 2h ago
+                        </div>
+</div>
+<div>
+<button aria-label="More options" class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center hover:bg-surface-dim transition-colors">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3 (Rejected) -->
+<div class="ad-card bg-surface-container-lowest p-3 rounded-xl shadow-sm flex gap-3 relative transition-colors cursor-pointer group" data-id="AD-8840">
+<div class="absolute inset-0 bg-primary/5 rounded-xl opacity-0 group-[.selected]:opacity-100 transition-opacity pointer-events-none"></div>
+<div class="absolute top-2 left-2 z-10 w-6 h-6 bg-surface rounded-full shadow-sm flex items-center justify-center opacity-0 group-[.selected]:opacity-100 group-hover:opacity-100 transition-opacity">
+<input class="card-checkbox w-4 h-4 accent-primary cursor-pointer" type="checkbox"/>
+</div>
+<div class="w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-surface-dim relative">
+<div class="w-full h-full flex items-center justify-center bg-surface-container-high text-on-surface-variant">
+<span class="material-symbols-outlined text-[24px]">image_not_supported</span>
+</div>
+</div>
+<div class="flex-1 min-w-0 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-1">
+<span class="font-data-mono text-data-mono text-on-surface-variant text-[11px]">#AD-8840</span>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-error-container text-on-error-container font-label-caps text-[10px]">
+<span class="w-1.5 h-1.5 rounded-full bg-on-error-container"></span> Rejected
+                        </span>
+</div>
+<h3 class="font-title-sm text-[14px] leading-tight text-on-surface truncate text-on-surface-variant line-through">Luxury Apartment for Rent in Col...</h3>
+<p class="font-body-sm text-[12px] text-error mt-0.5 truncate flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">info</span> Policy Violation
+                    </p>
+</div>
+<div class="flex justify-between items-end mt-2">
+<div>
+<div class="font-body-md font-bold text-on-surface-variant">Rs. 150,000 /mo</div>
+</div>
+<div>
+<button aria-label="Review" class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center hover:bg-surface-dim transition-colors">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Filter Drawer (Hidden by default) -->
+<div class="fixed inset-0 bg-tertiary/20 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300" id="filter-drawer-backdrop"></div>
+<div class="fixed inset-y-0 right-0 w-4/5 max-w-sm bg-surface-container-lowest z-50 translate-x-full transition-transform duration-300 shadow-xl flex flex-col" id="filter-drawer">
+<div class="p-container-padding flex items-center justify-between border-b border-surface-variant">
+<h2 class="font-headline-md text-title-sm text-on-surface">Filters</h2>
+<button class="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-dim flex items-center justify-center text-on-surface-variant transition-colors" id="close-filter">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-container-padding flex flex-col gap-stack-loose">
+<!-- Status Filter -->
+<div>
+<label class="font-label-caps text-label-caps text-on-surface-variant block mb-3">Status</label>
+<div class="flex flex-wrap gap-2">
+<button class="px-3 py-1.5 rounded-lg font-body-sm bg-primary-container text-on-primary-container">All</button>
+<button class="px-3 py-1.5 rounded-lg font-body-sm bg-surface-container text-on-surface hover:bg-surface-dim transition-colors">Pending</button>
+<button class="px-3 py-1.5 rounded-lg font-body-sm bg-surface-container text-on-surface hover:bg-surface-dim transition-colors">Active</button>
+<button class="px-3 py-1.5 rounded-lg font-body-sm bg-surface-container text-on-surface hover:bg-surface-dim transition-colors">Rejected</button>
+</div>
+</div>
+<!-- Category Filter -->
+<div>
+<label class="font-label-caps text-label-caps text-on-surface-variant block mb-3">Category</label>
+<select class="w-full bg-surface-container p-3 rounded-lg font-body-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary appearance-none">
+<option>All Categories</option>
+<option>Electronics</option>
+<option>Vehicles</option>
+<option>Property</option>
+<option>Services</option>
+</select>
+</div>
+<!-- Sort By -->
+<div>
+<label class="font-label-caps text-label-caps text-on-surface-variant block mb-3">Sort By</label>
+<div class="flex flex-col gap-2">
+<label class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-container cursor-pointer transition-colors">
+<input checked="" class="w-4 h-4 accent-primary" name="sort" type="radio"/>
+<span class="font-body-sm text-on-surface">Newest First</span>
+</label>
+<label class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-container cursor-pointer transition-colors">
+<input class="w-4 h-4 accent-primary" name="sort" type="radio"/>
+<span class="font-body-sm text-on-surface">Oldest First</span>
+</label>
+<label class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-container cursor-pointer transition-colors">
+<input class="w-4 h-4 accent-primary" name="sort" type="radio"/>
+<span class="font-body-sm text-on-surface">Highest Price</span>
+</label>
+</div>
+</div>
+</div>
+<div class="p-container-padding border-t border-surface-variant flex gap-3">
+<button class="flex-1 py-3 bg-surface-container text-on-surface font-body-sm font-medium rounded-lg hover:bg-surface-dim transition-colors">Reset</button>
+<button class="flex-[2] py-3 bg-primary text-on-primary font-body-sm font-medium rounded-lg hover:bg-primary/90 transition-colors shadow-sm">Apply Filters</button>
+</div>
+</div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const drawer = document.getElementById('filter-drawer');
+        const backdrop = document.getElementById('filter-drawer-backdrop');
+        const filterToggle = document.getElementById('filter-toggle');
+        const closeFilter = document.getElementById('close-filter');
+        
+        const cards = document.querySelectorAll('.ad-card');
+        const checkboxes = document.querySelectorAll('.card-checkbox');
+        const bulkActionBar = document.getElementById('bulk-action-bar');
+        const selectedCountEl = document.getElementById('selected-count');
+
+        let selectedCount = 0;
+
+        // Drawer logic
+        function openDrawer() {
+            backdrop.classList.remove('hidden');
+            // Small delay to allow display block to apply before animating opacity
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                drawer.classList.remove('translate-x-full');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDrawerAction() {
+            backdrop.classList.add('opacity-0');
+            drawer.classList.add('translate-x-full');
+            setTimeout(() => {
+                backdrop.classList.add('hidden');
+            }, 300);
+            document.body.style.overflow = '';
+        }
+
+        filterToggle.addEventListener('click', openDrawer);
+        closeFilter.addEventListener('click', closeDrawerAction);
+        backdrop.addEventListener('click', closeDrawerAction);
+
+        // Selection logic
+        function updateBulkActionBar() {
+            selectedCountEl.textContent = selectedCount;
+            if (selectedCount > 0) {
+                bulkActionBar.classList.remove('translate-y-full');
+            } else {
+                bulkActionBar.classList.add('translate-y-full');
+            }
+        }
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const card = e.target.closest('.ad-card');
+                if (e.target.checked) {
+                    card.classList.add('selected');
+                    selectedCount++;
+                } else {
+                    card.classList.remove('selected');
+                    selectedCount--;
+                }
+                updateBulkActionBar();
+            });
+        });
+
+        // Optional: Make whole card clickable for selection on mobile if clicking outside buttons
+        cards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                // Ignore clicks on buttons or the checkbox itself to prevent double toggling
+                if (e.target.tagName.toLowerCase() === 'button' || e.target.closest('button') || e.target.tagName.toLowerCase() === 'input') {
+                    return;
+                }
+                
+                const checkbox = card.querySelector('.card-checkbox');
+                checkbox.checked = !checkbox.checked;
+                // Dispatch change event to trigger the listener above
+                checkbox.dispatchEvent(new Event('change'));
+            });
+        });
+    });
+</script></main><footer class="w-full bg-surface-container-low py-xl"><div class="max-w-[1280px] mx-auto px-margin-desktop flex flex-col md:flex-row justify-between items-start gap-lg"><div class="flex flex-col gap-sm"><div class="flex items-center gap-xs"><img alt="LankaListings logo" class="h-6 w-auto grayscale opacity-70" src="https://lh3.googleusercontent.com/aida/AEtjO1XMvA35tJ3JcmWW3Qh3xuToENDZURqJ1hmeBHnUShjH3TfjHFrsty1rDgk6ZZXiRzRrl5h2hyOf-U1lMxLdyRjK4o_nENdqc7M6Gw4J1vIqE1dtKyT6spOTht3m3YOjV1R9ERGFYFXwdnZf925Wzhb4t6Dlm77n0lAzfv6ZA1VpUjPQCN4_blxeNViKO-T4kc-8czpVEr9jcpd-P0TGwyqUNBdDhouBDBJYzF50DX0P2to8OAv5mNLTqKIb"/> <span class="font-headline-md text-headline-md text-on-surface-variant">LankaListings</span></div><p class="font-body-sm text-body-sm text-on-surface-variant max-w-xs">The most trusted marketplace in Sri Lanka for property, vehicles, and electronics.</p></div><div class="grid grid-cols-2 lg:grid-cols-3 gap-xl"><div class="flex flex-col gap-xs"><span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Company</span><a class="font-body-sm text-body-sm text-on-surface hover:text-secondary" href="#">About Us</a><a class="font-body-sm text-body-sm text-on-surface hover:text-secondary" href="#">Contact</a></div><div class="flex flex-col gap-xs"><span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Legal</span><a class="font-body-sm text-body-sm text-on-surface hover:text-secondary" href="#">Privacy Policy</a><a class="font-body-sm text-body-sm text-on-surface hover:text-secondary" href="#">Terms of Service</a></div></div></div><div class="max-w-[1280px] mx-auto px-margin-desktop mt-lg pt-md border-t border-outline-variant flex justify-between items-center"><p class="font-metadata text-metadata text-on-surface-variant">© 2024 LankaListings. All rights reserved.</p><div class="flex gap-sm text-on-surface-variant"><span class="material-symbols-outlined cursor-pointer hover:text-on-surface">language</span><span class="font-metadata text-metadata">English (LK)</span></div></div></footer></body></html>

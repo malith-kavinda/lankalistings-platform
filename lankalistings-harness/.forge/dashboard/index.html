@@ -1,0 +1,2546 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forge Tracker</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@5/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist-mono@5/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
+
+<style>
+/* =========================================================
+   FORGE DESIGN TOKENS — colors, type, layout, components
+   ========================================================= */
+:root {
+  --primary-50:#EDF2F0; --primary-100:#D4E0DC; --primary-200:#A8C2BB;
+  --primary-300:#7DA59B;--primary-400:#51877A; --primary-500:#2A4D45;
+  --primary-600:#1F3A33;--primary-700:#152721; --primary-800:#0A1410;
+  --secondary-50:#F2F4F4;--secondary-100:#E2E6E6;--secondary-200:#CAD0D0;
+  --secondary-300:#A2ABAB;--secondary-400:#7E8888;--secondary-500:#5A6464;
+  --secondary-600:#3F4646;--secondary-700:#262C2C;--secondary-800:#16191A;
+  --secondary-900:#0A0B0B;
+  --tertiary-50:#F8FBE5;--tertiary-100:#EFF5C2;--tertiary-200:#E2EC8E;
+  --tertiary-300:#D5E370;--tertiary-400:#C5DC55;--tertiary-500:#A8BE3C;
+  --tertiary-600:#88992E;--tertiary-700:#6A7521;
+
+  --surface-bg:#FFFFFF;--surface-card:#FFFFFF;--surface-muted:var(--secondary-50);
+  --surface-sunken:var(--secondary-50);
+  --text-primary:var(--secondary-800);--text-secondary:var(--secondary-500);
+  --text-tertiary:var(--secondary-400);
+  --accent-primary:var(--primary-500);--accent-tertiary:var(--tertiary-400);
+  --accent-warm:var(--tertiary-700);--accent-warm-soft:var(--tertiary-50);
+  --accent-soft:var(--primary-50);
+  --border:var(--secondary-100);--border-strong:var(--secondary-300);
+  --on-primary:#FFFFFF;
+
+  --font-sans:'Geist Variable','Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --font-mono:'Geist Mono Variable','Geist Mono',ui-monospace,'SF Mono',Menlo,monospace;
+  --w-r:400;--w-m:500;--w-s:600;
+  --tracking-tag:0.14em;
+
+  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;
+  --space-6:24px;--space-8:32px;--space-12:48px;
+
+  --r-sm:4px;--r-md:8px;--r-lg:12px;--r-pill:999px;
+  --hair:0.5px;
+}
+:root[data-theme="dark"] {
+  --surface-bg:var(--secondary-900);
+  --surface-card:var(--secondary-800);
+  --surface-muted:var(--secondary-700);
+  --surface-sunken:#0F1213;
+  --text-primary:var(--secondary-50);
+  --text-secondary:var(--secondary-300);
+  --text-tertiary:var(--secondary-400);
+  --accent-primary:var(--tertiary-400);
+  --accent-warm:var(--tertiary-400);
+  --accent-warm-soft:rgba(197,220,85,0.10);
+  --accent-soft:rgba(197,220,85,0.10);
+  --border:var(--secondary-700);
+  --border-strong:var(--secondary-500);
+  --on-primary:var(--primary-700);
+}
+
+/* ---------- reset + base ---------- */
+*,*::before,*::after { box-sizing: border-box; }
+html, body { margin:0; padding:0; }
+body {
+  font-family: var(--font-sans);
+  background: var(--surface-bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; color: inherit; }
+.tabular { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); }
+.tag {
+  font-family: var(--font-mono); font-weight: var(--w-m);
+  font-size: 11px; letter-spacing: var(--tracking-tag);
+  text-transform: uppercase; color: var(--text-secondary);
+}
+.dim { color: var(--text-tertiary); }
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+.hd {
+  position: sticky; top: 0; z-index: 10;
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 64px; padding: 0 32px;
+  background: var(--surface-card);
+  border-bottom: var(--hair) solid var(--border);
+}
+.hd-l { display: flex; align-items: center; gap: 14px; }
+.hd-mark {
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+}
+.hd-mark svg { width: 28px; height: 28px; }
+:root[data-theme="dark"] .hd-mark svg path { fill: var(--tertiary-400); }
+.hd-id { display: flex; flex-direction: column; line-height: 1.1; }
+.hd-eyebrow {
+  font-family: var(--font-mono); font-size: 10px; font-weight: var(--w-m);
+  letter-spacing: var(--tracking-tag); text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.hd-title {
+  font-family: var(--font-sans); font-weight: var(--w-s); font-size: 15px;
+  color: var(--text-primary); margin-top: 2px;
+  letter-spacing: -0.005em;
+}
+.hd-c { display: flex; align-items: center; gap: 18px; }
+.hd-c .pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--tracking-tag);
+  text-transform: uppercase; color: var(--text-secondary);
+  padding: 5px 10px; border-radius: var(--r-pill);
+  background: var(--surface-muted);
+}
+.hd-c .pill .ph { font-size: 13px; color: var(--text-tertiary); }
+.hd-c .pill b { font-weight: var(--w-m); color: var(--text-primary); }
+.hd-c .live::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--tertiary-500);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tertiary-400) 30%, transparent);
+}
+.hd-r { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.icon-btn {
+  width: 36px; height: 36px; border-radius: var(--r-md);
+  background: transparent; border: var(--hair) solid var(--border);
+  display: grid; place-items: center; cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+  color: var(--text-primary);
+}
+.icon-btn:hover { background: var(--surface-muted); border-color: var(--border-strong); }
+.icon-btn .ph { font-size: 18px; }
+
+/* =========================================================
+   PAGE LAYOUT
+   ========================================================= */
+.page { max-width: 1280px; margin: 0 auto; padding: 28px 32px 64px; }
+
+/* Section — title-only, no leading number.
+   Hairline rests under the whole row (no inline <hr>, no center artifact). */
+.sec {
+  display: grid; grid-template-columns: 1fr auto;
+  align-items: baseline; gap: 16px;
+  margin: 36px 0 16px;
+  padding-bottom: 10px;
+  border-bottom: var(--hair) solid var(--border);
+}
+.sec .title {
+  font-family: var(--font-sans); font-weight: var(--w-s); font-size: 19px;
+  color: var(--text-primary); letter-spacing: -0.005em;
+}
+.sec .end {
+  font-family: var(--font-mono); font-size: 10px; font-weight: var(--w-m);
+  letter-spacing: var(--tracking-tag); text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+/* =========================================================
+   HERO — project name + status line + meta
+   ========================================================= */
+.hero { padding: 8px 0 16px; }
+.hero h1 {
+  font-size: 30px; line-height: 1.15; letter-spacing: -0.02em;
+  font-weight: var(--w-s); margin: 0 0 8px; color: var(--text-primary);
+}
+.hero-status {
+  font-family: var(--font-mono); font-size: 14px;
+  color: var(--text-primary); letter-spacing: -0.005em;
+  font-variant-numeric: tabular-nums;
+}
+.hero-status b { color: var(--text-primary); font-weight: var(--w-m); }
+.hero-meta {
+  margin-top: 4px;
+  font-size: 12px; color: var(--text-tertiary);
+  font-family: var(--font-mono);
+}
+.hero-meta b { color: var(--text-secondary); font-weight: var(--w-m); }
+
+/* =========================================================
+   AT-A-GLANCE KPI STRIP + OVERALL PROGRESS
+   ========================================================= */
+.kpis {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+}
+@media (max-width: 720px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+.kpi {
+  border: var(--hair) solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  background: var(--surface-card);
+}
+.kpi-lbl {
+  font-family: var(--font-mono); font-size: 10px; font-weight: var(--w-m);
+  letter-spacing: var(--tracking-tag); text-transform: uppercase;
+  color: var(--text-tertiary); margin-bottom: 6px;
+}
+.kpi-val {
+  font-family: var(--font-mono); font-size: 26px; font-weight: var(--w-m);
+  color: var(--text-primary); font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+.kpi-sub {
+  font-size: 11px; color: var(--text-tertiary); margin-top: 4px;
+  line-height: 1.4;
+}
+.kpi.shipped .kpi-val { color: var(--tertiary-700); }
+:root[data-theme="dark"] .kpi.shipped .kpi-val { color: var(--tertiary-400); }
+.kpi.in-flight .kpi-val::after {
+  content: "";
+  display: inline-block;
+  width: 7px; height: 7px;
+  margin-left: 8px; margin-bottom: 4px;
+  border-radius: 50%;
+  background: var(--tertiary-400);
+  vertical-align: middle;
+}
+
+.overall {
+  margin-top: 16px;
+  padding: 14px 0 4px;
+  border-top: var(--hair) solid var(--border);
+}
+.overall-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.10em; color: var(--text-secondary);
+  margin-bottom: 8px; text-transform: uppercase;
+}
+.overall-pct { color: var(--text-primary); font-size: 13px; font-variant-numeric: tabular-nums; }
+.overall-bar {
+  height: 6px; background: var(--secondary-100); border-radius: var(--r-pill);
+  overflow: hidden;
+}
+:root[data-theme="dark"] .overall-bar { background: var(--secondary-700); }
+.overall-fill { height: 100%; background: var(--tertiary-400); border-radius: var(--r-pill); }
+.overall-breakdown {
+  margin-top: 8px;
+  display: flex; gap: 10px; flex-wrap: wrap;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--text-secondary); font-variant-numeric: tabular-nums;
+}
+.overall-breakdown b { color: var(--text-primary); font-weight: var(--w-m); }
+
+/* =========================================================
+   SETUP — dot row + labels + foundation disclosure
+   ========================================================= */
+.setup-dots {
+  display: flex; align-items: center; gap: 16px;
+  padding: 4px 0 8px;
+}
+.setup-dot {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary);
+  white-space: nowrap;
+}
+.dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: transparent;
+  border: var(--hair) solid var(--secondary-300);
+  flex-shrink: 0;
+}
+.dot.half {
+  background: linear-gradient(to right, var(--tertiary-400) 50%, transparent 50%);
+  border-color: var(--tertiary-600);
+}
+.dot.full {
+  background: var(--tertiary-400);
+  border-color: var(--tertiary-600);
+}
+.setup-dot b { color: var(--text-primary); font-weight: var(--w-m); }
+.setup-line { flex: 1; height: 1px; background: var(--border); min-width: 8px; }
+
+.setup-labels {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 12px; font-size: 12px; color: var(--text-tertiary);
+  margin-top: 6px; padding-bottom: 4px;
+}
+.setup-labels .lab { font-family: var(--font-mono); }
+.setup-labels .lab b { color: var(--text-secondary); font-weight: var(--w-m); }
+.setup-labels .lab .when { color: var(--text-tertiary); font-size: 11px; margin-left: 6px; }
+
+.setup-disclosure {
+  margin-top: 10px;
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary);
+}
+.setup-disclosure summary { cursor: pointer; list-style: none; padding: 4px 0; }
+.setup-disclosure summary::-webkit-details-marker { display: none; }
+.setup-disclosure summary::before { content: "▸ "; color: var(--text-tertiary); }
+.setup-disclosure[open] summary::before { content: "▾ "; color: var(--text-secondary); }
+.setup-disclosure summary:hover { color: var(--text-primary); }
+
+.slices-table {
+  width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12.5px;
+}
+.slices-table th, .slices-table td {
+  text-align: left; padding: 6px 8px;
+  border-bottom: var(--hair) dashed var(--border);
+}
+.slices-table th {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tracking-tag);
+  text-transform: uppercase; color: var(--text-secondary); font-weight: var(--w-m);
+}
+.slices-table td.id { font-family: var(--font-mono); color: var(--text-secondary); }
+.slices-table td.status { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); }
+
+.setup-empty {
+  font-size: 13px; color: var(--text-tertiary);
+  padding: 18px 0; font-family: var(--font-mono);
+}
+.setup-empty code { font-size: 12.5px; color: var(--accent-primary); }
+
+/* Sealed setup — one-line summary, dots stay visible */
+.setup-sealed-line {
+  font-family: var(--font-mono); font-size: 12.5px;
+  color: var(--text-secondary); padding: 4px 0;
+}
+.setup-sealed-line b { color: var(--tertiary-700); font-weight: var(--w-m); }
+:root[data-theme="dark"] .setup-sealed-line b { color: var(--tertiary-400); }
+
+/* =========================================================
+   DELIVERY — phased (tabs) and flat
+   ========================================================= */
+.del-tabs {
+  display: grid;
+  grid-template-columns: repeat(var(--col-count, 4), minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+@media (max-width: 900px) { .del-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 540px) { .del-tabs { grid-template-columns: 1fr; } }
+.del-tab {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 12px;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--surface-card);
+  border: var(--hair) solid var(--border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  color: var(--text-primary); font: inherit; text-align: left;
+  transition: border-color 100ms, background 100ms, box-shadow 100ms;
+  min-height: 92px;
+}
+.del-tab:hover { box-shadow: 0 1px 3px rgba(10,11,11,0.05); }
+.del-tab:hover { border-color: var(--border-strong); }
+.del-tab.active {
+  border-color: var(--accent-primary);
+  background: var(--accent-soft);
+}
+:root[data-theme="dark"] .del-tab.active {
+  border-color: var(--tertiary-400);
+  background: rgba(197,220,85,0.10);
+}
+.del-tab-num {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em;
+  color: var(--text-tertiary); text-transform: uppercase;
+  grid-row: 1; grid-column: 1;
+}
+.del-tab-status {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--text-tertiary);
+  grid-row: 1; grid-column: 2; text-align: right;
+}
+.del-tab-status.in-progress { color: var(--tertiary-700); }
+:root[data-theme="dark"] .del-tab-status.in-progress { color: var(--tertiary-400); }
+.del-tab-status.complete { color: var(--text-secondary); }
+.del-tab-title {
+  grid-row: 2; grid-column: 1 / -1;
+  font-size: 13px; font-weight: var(--w-s); color: var(--text-primary);
+  display: flex; align-items: center; gap: 6px;
+}
+.del-tab-meta {
+  grid-row: 3; grid-column: 1 / -1;
+  display: flex; gap: 8px; align-items: center;
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.del-bar {
+  width: 110px; height: 6px; border-radius: var(--r-pill);
+  background: var(--secondary-100); overflow: hidden;
+  display: inline-block; vertical-align: middle;
+}
+:root[data-theme="dark"] .del-bar { background: var(--secondary-700); }
+.del-bar-fill { height: 100%; background: var(--tertiary-400); }
+
+.del-panel { display: none; }
+.del-panel.active { display: block; }
+.del-panel-head {
+  padding: 4px 0 10px;
+  border-bottom: var(--hair) dashed var(--border);
+  margin-bottom: 10px;
+  color: var(--text-secondary); font-size: 12.5px;
+  font-family: var(--font-mono);
+}
+.del-panel-head b { color: var(--text-primary); font-weight: var(--w-m); }
+.del-panel-head .theme { color: var(--text-secondary); }
+
+.del-feat {
+  display: grid;
+  grid-template-columns: 1.4fr 0.7fr 0.6fr 0.9fr 80px 70px 18px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 12.5px;
+  border-bottom: var(--hair) dashed var(--border);
+}
+.del-feat.no-who {
+  grid-template-columns: 1.4fr 0.7fr 0.9fr 80px 70px 18px;
+}
+/* +1 track for the optional feature due-date column, only when present */
+.del-feat.has-due { grid-template-columns: 1.4fr 0.7fr 0.6fr 0.9fr 80px 70px 70px 18px; }
+.del-feat.no-who.has-due { grid-template-columns: 1.4fr 0.7fr 0.9fr 80px 70px 70px 18px; }
+.del-feat.no-who .who { display: none; }
+
+/* Blocked-by column — Patina chip per dep id. Empty when no blockers; the
+   empty cell IS the signal (a single chip in an otherwise-empty column
+   stands out at a glance across a phase's feature rows). Patina (not
+   Verdigris) deliberately — Verdigris is the dashboard's progress accent,
+   Patina here means "attention / depends on something". */
+.del-feat .blocked-cell {
+  display: flex; gap: 4px; flex-wrap: wrap; align-items: center;
+  font-family: var(--font-mono); font-size: 11px; min-width: 0;
+}
+.del-feat .blocked-chip {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: var(--r-pill);
+  background: var(--primary-50); color: var(--primary-500);
+  border: var(--hair) solid var(--primary-300);
+  font-weight: var(--w-m); white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+:root[data-theme="dark"] .del-feat .blocked-chip {
+  background: rgba(125,165,155,0.15);
+  color: var(--primary-300);
+  border-color: var(--primary-400);
+}
+.del-feat:last-child { border-bottom: none; }
+.del-feat .name { font-family: var(--font-mono); font-size: 13.5px; color: var(--text-primary); font-weight: var(--w-m); }
+.del-feat .name .warn {
+  display: inline-block; color: var(--accent-warm); margin-left: 4px;
+  cursor: help;
+}
+/* Open-bug badge + rework lineage line on a feature row (FR-7). Both live
+   inside the name cell so the rigid del-feat grid stays untouched. */
+.del-feat .name .bug-badge {
+  display: inline-flex; align-items: center; gap: 3px; margin-left: 6px;
+  padding: 1px 6px; border-radius: var(--r-pill);
+  background: var(--accent-warm-soft); color: var(--accent-warm);
+  border: var(--hair) solid var(--tertiary-300);
+  font-family: var(--font-mono); font-size: 10px; font-weight: var(--w-m);
+  vertical-align: middle; cursor: help;
+}
+.del-feat .name .rework-line {
+  display: block; margin-top: 3px;
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: var(--w-r);
+  color: var(--text-tertiary); letter-spacing: 0.01em;
+}
+.del-feat .name .rework-line.reworks { color: var(--primary-500); }
+.del-feat .phase {
+  font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 2px 8px; border-radius: var(--r-pill);
+  background: var(--surface-muted); color: var(--text-secondary);
+  border: var(--hair) solid var(--border); justify-self: start;
+}
+.del-feat .phase.dev    { color: var(--primary-500); border-color: var(--primary-300); background: var(--primary-50); }
+.del-feat .phase.review { color: var(--tertiary-700); border-color: var(--tertiary-300); background: var(--tertiary-50); }
+.del-feat .phase.done   { color: var(--secondary-500); }
+.del-feat .phase.paused { color: var(--accent-warm); background: var(--accent-warm-soft); border-color: var(--tertiary-300); }
+:root[data-theme="dark"] .del-feat .phase.dev    { background: rgba(125,165,155,0.15); color: var(--primary-300); border-color: var(--primary-400); }
+:root[data-theme="dark"] .del-feat .phase.review { background: rgba(197,220,85,0.12); color: var(--tertiary-400); border-color: rgba(197,220,85,0.35); }
+.del-feat .who { color: var(--text-secondary); font-size: 12px; }
+.del-feat .due { color: var(--text-tertiary); font-family: var(--font-mono); font-size: 11px; white-space: nowrap; }
+.del-feat .ago { color: var(--text-tertiary); font-family: var(--font-mono); font-size: 11px; }
+.del-feat .caret { color: var(--text-tertiary); text-align: right; }
+
+.del-gd { display: inline-flex; gap: 3px; vertical-align: middle; }
+.del-gd span {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: transparent;
+  border: var(--hair) solid var(--secondary-300);
+}
+.del-gd span.on { background: var(--tertiary-400); border-color: var(--tertiary-600); }
+
+.del-flat-group {
+  margin-top: 14px;
+}
+.del-flat-group h3 {
+  font-family: var(--font-mono); font-size: 11px; font-weight: var(--w-m);
+  letter-spacing: var(--tracking-tag); text-transform: uppercase;
+  color: var(--text-secondary); margin: 0 0 6px;
+}
+
+.del-empty {
+  padding: 20px 0; color: var(--text-tertiary); font-size: 13px;
+  font-family: var(--font-mono);
+}
+.del-empty code { color: var(--accent-primary); font-size: 12.5px; }
+
+/* =========================================================
+   SIGNALS — 7 tiles
+   ========================================================= */
+.signals-callout {
+  border-left: 3px solid var(--accent-primary);
+  background: var(--surface-muted);
+  padding: 12px 16px;
+  margin: 10px 0 14px;
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  font-size: 12.5px; color: var(--text-secondary); line-height: 1.55;
+}
+.signals-callout p { margin: 0 0 6px; }
+.signals-callout p:last-child { margin-bottom: 0; }
+.signals-callout strong { color: var(--text-primary); }
+
+.signals {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px 18px;
+  margin-top: 4px;
+}
+@media (max-width: 1180px) { .signals { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 1024px) { .signals { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px)  { .signals { grid-template-columns: repeat(2, 1fr); } }
+.sig-lbl {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 4px;
+}
+.sig-val {
+  font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+  font-size: 19px; color: var(--text-primary); font-weight: var(--w-m);
+  line-height: 1.25;
+}
+.sig-val.placeholder { color: var(--text-tertiary); font-size: 13px; font-weight: var(--w-r); }
+.sig-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; line-height: 1.4; }
+.metrics-group { margin-top: 20px; }
+.metrics-group:first-of-type { margin-top: 10px; }
+.metrics-group-title {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-secondary); font-weight: var(--w-m);
+  margin: 0 0 10px; padding-bottom: 5px; border-bottom: var(--hair) solid var(--border);
+}
+.metrics-group .signals { grid-template-columns: repeat(4, max-content); gap: 14px 48px; }
+@media (max-width: 600px) { .metrics-group .signals { grid-template-columns: repeat(2, 1fr); gap: 14px 18px; } }
+.metrics-baseline { margin-top: 20px; font-size: 12px; color: var(--text-tertiary); line-height: 1.5; }
+.metrics-baseline strong { color: var(--text-secondary); }
+
+.spark { display: inline-flex; gap: 2px; vertical-align: middle; margin-left: 6px; height: 14px; align-items: flex-end; }
+.spark i { display: block; width: 4px; background: var(--tertiary-400); border-radius: 1px; min-height: 1px; }
+
+/* Signals drill-downs (Bugs by scheduled-fix phase; Rework lineage). Collapsed
+   by default — the tiles carry the headline, these carry the detail. */
+.sig-drill {
+  margin-top: 16px; border-top: var(--hair) solid var(--border); padding-top: 12px;
+}
+.sig-drill + .sig-drill { margin-top: 10px; border-top: none; padding-top: 0; }
+.sig-drill summary {
+  cursor: pointer; font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.04em; color: var(--text-secondary); user-select: none;
+}
+.sig-drill summary:hover { color: var(--text-primary); }
+.sig-drill[open] summary { margin-bottom: 8px; color: var(--text-primary); }
+.bug-group { margin: 8px 0 10px; }
+.bug-group-hd {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 4px;
+}
+.bug-group-hd em { color: var(--accent-primary); font-style: normal; }
+.bug-row {
+  display: flex; gap: 10px; align-items: baseline; padding: 3px 0;
+  font-size: 12px; color: var(--text-secondary);
+  border-bottom: var(--hair) dashed var(--border);
+}
+.bug-row:last-child { border-bottom: none; }
+.bug-id { font-family: var(--font-mono); color: var(--text-primary); font-weight: var(--w-m); white-space: nowrap; }
+.bug-title { flex: 1; min-width: 0; color: var(--text-primary); }
+.bug-affects { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); white-space: nowrap; }
+.bug-sev {
+  font-family: var(--font-mono); font-size: 10px; text-transform: uppercase;
+  padding: 1px 6px; border-radius: var(--r-pill); white-space: nowrap;
+  border: var(--hair) solid var(--border); color: var(--text-tertiary);
+}
+.bug-sev.sev-high   { color: var(--accent-warm); background: var(--accent-warm-soft); border-color: var(--tertiary-300); }
+.bug-sev.sev-medium { color: var(--tertiary-700); background: var(--tertiary-50); border-color: var(--tertiary-300); }
+
+/* =========================================================
+   RELEASE / UAT — conditional (hidden unless TRACKER.release non-empty)
+   ========================================================= */
+.rel-head {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 4px 0 12px;
+  font-family: var(--font-mono); font-size: 13px; color: var(--text-primary);
+}
+.rel-head .rel-id { font-weight: var(--w-s); font-size: 15px; }
+.rel-head .rel-scope { color: var(--text-tertiary); font-size: 12px; }
+.rel-status {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.10em;
+  text-transform: uppercase; padding: 3px 10px; border-radius: var(--r-pill);
+  background: var(--surface-muted); color: var(--text-secondary);
+  border: var(--hair) solid var(--border);
+}
+.rel-status.uat,
+.rel-status.regression { color: var(--tertiary-700); background: var(--tertiary-50); border-color: var(--tertiary-300); }
+.rel-status.stabilize  { color: var(--accent-warm); background: var(--accent-warm-soft); border-color: var(--tertiary-300); }
+.rel-status.signed-off { color: var(--primary-500); background: var(--primary-50); border-color: var(--primary-300); }
+.rel-status.live { color: var(--on-primary); background: var(--accent-primary); border-color: var(--accent-primary); }
+:root[data-theme="dark"] .rel-status.uat,
+:root[data-theme="dark"] .rel-status.regression { color: var(--tertiary-400); background: rgba(197,220,85,0.12); border-color: rgba(197,220,85,0.35); }
+:root[data-theme="dark"] .rel-status.signed-off { color: var(--primary-300); background: rgba(125,165,155,0.15); border-color: var(--primary-400); }
+:root[data-theme="dark"] .rel-status.live { color: var(--primary-700); background: var(--tertiary-400); border-color: var(--tertiary-400); }
+
+/* Lifecycle track — six steps (build-complete → … → live), the active one filled */
+.rel-track {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 2px 0 14px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary);
+}
+.rel-step {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px 8px; border-radius: var(--r-pill);
+  border: var(--hair) solid var(--border); background: var(--surface-card);
+  letter-spacing: 0.04em;
+}
+.rel-step.done { color: var(--text-secondary); border-color: var(--border-strong); }
+.rel-step.current {
+  color: var(--on-primary); background: var(--accent-primary);
+  border-color: var(--accent-primary); font-weight: var(--w-m);
+}
+:root[data-theme="dark"] .rel-step.current { color: var(--primary-700); }
+.rel-step-sep { color: var(--text-tertiary); }
+
+/* Cycle rows */
+.rel-cycles { margin-top: 6px; }
+.rel-cycle {
+  display: grid;
+  grid-template-columns: 70px 1fr auto auto;
+  gap: 12px; align-items: center;
+  padding: 8px 0; font-size: 12.5px;
+  border-bottom: var(--hair) dashed var(--border);
+}
+.rel-cycle:last-child { border-bottom: none; }
+.rel-cycle .cyc-id { font-family: var(--font-mono); color: var(--text-primary); font-weight: var(--w-m); }
+.rel-cycle .cyc-id .rnd { color: var(--text-tertiary); font-weight: var(--w-r); }
+.rel-cycle .cyc-type { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); }
+.rel-cycle .cyc-flows { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rel-cycle .cyc-flows b { color: var(--tertiary-700); font-weight: var(--w-m); }
+:root[data-theme="dark"] .rel-cycle .cyc-flows b { color: var(--tertiary-400); }
+.cyc-status {
+  font-family: var(--font-mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 1px 8px; border-radius: var(--r-pill);
+  border: var(--hair) solid var(--border); color: var(--text-tertiary); white-space: nowrap;
+}
+.cyc-status.passed,
+.cyc-status.passed-with-risks { color: var(--tertiary-700); background: var(--tertiary-50); border-color: var(--tertiary-300); }
+.cyc-status.failed { color: var(--accent-warm); background: var(--accent-warm-soft); border-color: var(--tertiary-300); }
+.cyc-status.running { color: var(--primary-500); background: var(--primary-50); border-color: var(--primary-300); }
+
+/* Blocking issues + triage breakdown */
+.rel-blocking {
+  margin-top: 12px; padding: 10px 14px;
+  border-left: 3px solid var(--accent-warm);
+  background: var(--accent-warm-soft); border-radius: 0 var(--r-md) var(--r-md) 0;
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary);
+}
+.rel-blocking b { color: var(--accent-warm); }
+.rel-triage {
+  display: flex; gap: 18px; flex-wrap: wrap;
+  margin-top: 14px; padding-top: 12px;
+  border-top: var(--hair) solid var(--border);
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.rel-triage .tri { display: inline-flex; align-items: baseline; gap: 6px; }
+.rel-triage .tri b { color: var(--text-primary); font-weight: var(--w-m); font-size: 14px; }
+.rel-triage .tri .lbl { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); }
+.rel-empty { padding: 16px 0; color: var(--text-tertiary); font-size: 12.5px; font-family: var(--font-mono); }
+
+/* =========================================================
+   USAGE — conditional one-liner
+   ========================================================= */
+.usage-line {
+  display: flex; align-items: center; gap: 12px;
+  font-family: var(--font-mono); font-size: 13px; color: var(--text-primary);
+  padding: 4px 0;
+  font-variant-numeric: tabular-nums;
+}
+.usage-line b { color: var(--text-primary); font-weight: var(--w-m); }
+.usage-line .arrow {
+  margin-left: auto; color: var(--accent-primary);
+  font-family: var(--font-sans); font-size: 13px; text-decoration: none;
+  border-bottom: var(--hair) solid transparent; transition: border-color 100ms;
+}
+.usage-line .arrow:hover { border-bottom-color: var(--accent-primary); }
+
+/* =========================================================
+   ACTIVITY rail
+   ========================================================= */
+.activity { padding: 2px 0; }
+.activity .row {
+  display: grid; grid-template-columns: 80px 1fr auto;
+  gap: 14px; align-items: baseline;
+  padding: 6px 0;
+  border-bottom: var(--hair) dashed var(--border);
+  font-size: 12.5px;
+}
+.activity .row:last-child { border-bottom: none; }
+.activity .when { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); }
+.activity .what { color: var(--text-primary); }
+.activity .what b { color: var(--text-primary); font-weight: var(--w-m); }
+.activity .what .kind {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-tertiary); margin-right: 6px;
+}
+.activity .ref { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); }
+.activity-empty {
+  padding: 16px 0; color: var(--text-tertiary); font-size: 12.5px;
+  font-family: var(--font-mono);
+}
+
+/* =========================================================
+   MISSING TRACKER fallback
+   ========================================================= */
+.missing { padding: 64px 32px; text-align: center; color: var(--text-secondary); }
+.missing h2 { font-size: 18px; margin: 0 0 12px; color: var(--text-primary); font-weight: var(--w-s); }
+.missing pre {
+  display: inline-block; text-align: left;
+  background: var(--surface-muted); padding: 12px 16px; border-radius: var(--r-md);
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-primary);
+  border: var(--hair) solid var(--border); margin-top: 8px;
+}
+.missing .hint { font-size: 12.5px; color: var(--text-tertiary); margin-top: 14px; }
+
+/* =========================================================
+   UTILITY
+   ========================================================= */
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="hd">
+  <div class="hd-l">
+    <div class="hd-mark" aria-hidden="true">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <path d="M32 4 C 30 14, 22 18, 22 28 C 22 34, 26 36, 26 42 C 26 38, 30 36, 30 32 C 30 38, 36 38, 36 32 C 36 38, 38 42, 38 46 C 38 40, 42 38, 42 32 C 42 26, 36 24, 36 16 C 36 26, 32 22, 32 4 Z M 32 60 C 22 60, 14 52, 14 42 C 14 50, 22 56, 32 56 C 42 56, 50 50, 50 42 C 50 52, 42 60, 32 60 Z" fill="#2A4D45"/>
+      </svg>
+    </div>
+    <div class="hd-id">
+      <span class="hd-eyebrow">Forge · Tracker</span>
+      <span class="hd-title" id="hd-project">—</span>
+    </div>
+  </div>
+  <div class="hd-c">
+    <span class="pill"><i class="ph ph-file-text"></i><span>tracker.yaml</span></span>
+    <span class="pill"><span>Harness</span><b id="hd-version">—</b></span>
+    <span class="pill live"><span>Updated</span><b id="hd-updated">—</b></span>
+  </div>
+  <div class="hd-r">
+    <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme">
+      <i class="ph ph-moon" id="theme-icon"></i>
+    </button>
+  </div>
+</header>
+
+<main class="page" id="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1 id="hero-project">—</h1>
+    <div class="hero-status" id="hero-status">—</div>
+    <div class="hero-meta" id="hero-meta" hidden></div>
+  </section>
+
+  <!-- KPI strip + overall progress -->
+  <section class="kpis" id="kpis" aria-label="At a glance"></section>
+  <section class="overall" id="overall" aria-label="Overall progress"></section>
+
+  <!-- SETUP -->
+  <div class="sec">
+    <span class="title">Setup</span>
+<span class="end" id="setup-end">—</span>
+  </div>
+  <section id="setup-body" aria-label="Setup"></section>
+
+  <!-- DELIVERY -->
+  <div class="sec">
+    <span class="title">Delivery</span>
+<span class="end" id="delivery-end">—</span>
+  </div>
+  <section id="delivery-body" aria-label="Delivery"></section>
+
+  <!-- RELEASE / UAT — conditional. Hidden unless TRACKER.release is non-empty.
+       Post-delivery lifecycle: regression → uat → stabilize → sign-off. -->
+  <div class="sec hidden" id="release-sec">
+    <span class="title">Release / UAT</span>
+<span class="end" id="release-end">—</span>
+  </div>
+  <section id="release-body" class="hidden" aria-label="Release and UAT"></section>
+
+  <!-- WAVE DRUMBEAT — conditional. Hidden unless ≥1 feature has waves[]. -->
+  <div class="sec hidden" id="wave-drumbeat-sec">
+    <span class="title">Wave Drumbeat</span>
+<span class="end" id="wave-drumbeat-end">—</span>
+  </div>
+  <section id="wave-drumbeat-body" class="hidden" aria-label="Wave drumbeat"></section>
+
+  <!-- SIGNALS -->
+  <div class="sec">
+    <span class="title">Signals</span>
+<span class="end" id="signals-end">v1 · 7 indicators</span>
+  </div>
+  <section id="signals-body" aria-label="Signals"></section>
+
+  <!-- DELIVERY METRICS — conditional. Hidden unless window.METRICS is non-empty.
+       Estimation baseline derived from .forge/metrics/*.jsonl. -->
+  <div class="sec hidden" id="metrics-sec">
+    <span class="title">Delivery Metrics</span>
+    <span class="end" id="metrics-end">—</span>
+  </div>
+  <section id="metrics-body" class="hidden" aria-label="Delivery metrics"></section>
+
+  <!-- USAGE — conditional. Hidden unless window.USAGE has rows for this project. -->
+  <div class="sec hidden" id="usage-sec">
+    <span class="title">Usage</span>
+<span class="end" id="usage-end">—</span>
+  </div>
+  <section id="usage-body" class="hidden" aria-label="Usage"></section>
+
+  <!-- ACTIVITY -->
+  <div class="sec">
+    <span class="title">Recent activity</span>
+<span class="end" id="activity-end">last 5</span>
+  </div>
+  <section id="activity-body" class="activity" aria-label="Recent activity"></section>
+
+</main>
+
+<!-- Usage data — generated from ~/.claude/forge-usage.jsonl by .claude/hooks/regen-usage-dashboard.sh.
+     Local per-developer-per-machine state; gitignored. Loaded ahead of tracker.js so window.USAGE
+     is available when the page script runs. Missing file is handled gracefully. -->
+<script src="usage.js"></script>
+
+<!-- Signals data — derived from .forge/specs|plans/**/*.md + .forge/lessons.md by the
+     regen-tracker-dashboard.sh hook. Browser can't fetch these under file://, so the hook
+     precomputes rework counts + weekly lessons cadence. Missing file → S4/S6 read as placeholders. -->
+<script src="signals.js"></script>
+
+<!-- Delivery Metrics data — aggregated from .forge/metrics/*.jsonl by the
+     regen-metrics-dashboard.sh hook. Estimation baseline (events, agent runs, snapshots).
+     Missing file or empty → the Delivery Metrics section hides cleanly. -->
+<script src="metrics.js"></script>
+
+<!-- Tracker data — generated from ../tracker.yaml. See README.md to refresh. -->
+<script src="tracker.js"></script>
+
+<script>
+/* =========================================================
+   THEME — independent of tracker data
+   ========================================================= */
+const THEME_KEY = "forge-tracker-theme";
+function applyTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  const icon = document.getElementById("theme-icon");
+  if (icon) icon.className = "ph " + (t === "dark" ? "ph-sun" : "ph-moon");
+}
+applyTheme(localStorage.getItem(THEME_KEY) || "light");
+document.getElementById("theme-toggle").addEventListener("click", () => {
+  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  localStorage.setItem(THEME_KEY, next);
+  applyTheme(next);
+});
+
+const TRACKER = window.TRACKER;
+const USAGE   = window.USAGE   || null;
+const SIGNALS = window.SIGNALS || null;
+const METRICS = window.METRICS || null;
+
+/* =========================================================
+   MISSING-DATA STATE
+   ========================================================= */
+if (!TRACKER) {
+  document.getElementById("page").innerHTML = `
+    <div class="missing">
+      <h2>Tracker data not loaded</h2>
+      <p>The dashboard couldn't find <code>tracker.js</code>, or the file didn't set <code>window.TRACKER</code>.
+      Regenerate it from <code>../tracker.yaml</code>:</p>
+      <pre>cd .forge/dashboard
+{ printf 'window.TRACKER = '; yq -o=json . ../tracker.yaml; printf ';\\n'; } &gt; tracker.js</pre>
+      <p class="hint">Then refresh this page. Requires <code>yq</code> (already installed if you're using the harness gate-state hooks).</p>
+    </div>`;
+} else {
+  /* =========================================================
+     HELPERS
+     ========================================================= */
+  const $  = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+  function pad2(n) { return String(n).padStart(2, "0"); }
+  function fmtDate(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (isNaN(d)) return iso;
+    return d.getFullYear() + "·" + pad2(d.getMonth() + 1) + "·" + pad2(d.getDate());
+  }
+  function fmtDateShort(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (isNaN(d)) return iso;
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return months[d.getMonth()] + " " + d.getDate();
+  }
+  function fmtDateTime(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (isNaN(d)) return iso;
+    return fmtDate(iso) + " · " + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+  }
+  function relTime(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    const ref = new Date(TRACKER.last_updated || Date.now());
+    if (isNaN(d) || isNaN(ref)) return "—";
+    const diff = (ref - d) / (1000 * 60 * 60);
+    if (diff < 1) return "<1h ago";
+    if (diff < 24) return Math.round(diff) + "h ago";
+    const days = Math.round(diff / 24);
+    return days + "d ago";
+  }
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  }
+  function daysBetween(aIso, bIso) {
+    if (!aIso || !bIso) return null;
+    const a = new Date(aIso), b = new Date(bIso);
+    if (isNaN(a) || isNaN(b)) return null;
+    return Math.max(0, Math.round((b - a) / (1000 * 60 * 60 * 24)));
+  }
+  function median(nums) {
+    if (!nums || nums.length === 0) return null;
+    const s = [...nums].sort((a, b) => a - b);
+    const m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2);
+  }
+  function percentile(nums, p) {
+    if (!nums || nums.length === 0) return null;
+    const s = [...nums].sort((a, b) => a - b);
+    const idx = Math.min(s.length - 1, Math.floor(s.length * p));
+    return s[idx];
+  }
+  function fmtCount(n) { return pad2(n); }
+  function fmtNum(n) {
+    if (n == null) return "—";
+    if (n >= 1e9) return (n / 1e9).toFixed(1) + "B";
+    if (n >= 1e6) return (n / 1e6).toFixed(1) + "M";
+    if (n >= 1e3) return (n / 1e3).toFixed(1) + "K";
+    return String(n);
+  }
+
+  // ISO Monday for a Date — used for grouping recent activity into weeks.
+  function isoMonday(d) {
+    const x = new Date(d);
+    const day = (x.getDay() + 6) % 7; // Mon=0..Sun=6
+    x.setDate(x.getDate() - day);
+    x.setHours(0, 0, 0, 0);
+    return x;
+  }
+
+  /* =========================================================
+     BUGS + REWORK — derived from window.TRACKER (FR-2 / FR-5 / FR-7)
+     bugs[] and features[*].follow_up_of both live in tracker.yaml, mirrored
+     verbatim into window.TRACKER — so these are computed browser-side, with no
+     signals.js precomputation (unlike the markdown-derived lessons cadence).
+     ========================================================= */
+  const BUGS = Array.isArray(TRACKER.bugs) ? TRACKER.bugs : [];
+  const BUG_OPEN_STATES = ["open", "in-progress"];
+  function bugIsOpen(b) { return BUG_OPEN_STATES.includes(b.status); }
+
+  // feature id -> [open bug ids affecting it]  (FR-7 badge; affects is authoritative)
+  const openBugIdsByFeature = {};
+  BUGS.filter(bugIsOpen).forEach(b => {
+    (b.affects || []).forEach(fid => {
+      (openBugIdsByFeature[fid] = openBugIdsByFeature[fid] || []).push(b.id);
+    });
+  });
+
+  // feature id -> [feature ids that declare follow_up_of: [...this...]]
+  // The reciprocal "reworked by" marker, derived — follow_up_of is authoritative.
+  const reworkedByMap = {};
+  Object.entries(TRACKER.features || {}).forEach(([id, f]) => {
+    (f.follow_up_of || []).forEach(target => {
+      (reworkedByMap[target] = reworkedByMap[target] || []).push(id);
+    });
+  });
+
+  /* =========================================================
+     PHASE / STATUS METADATA
+     ========================================================= */
+  const FEATURE_PHASES = ["backlog","spec","plan","dev","review","ship","done","paused","dropped"];
+  const FEATURE_PHASE_LABEL = {
+    backlog: "backlog", spec: "spec", plan: "plan", dev: "dev",
+    review: "in-review", ship: "ship", done: "done",
+    paused: "paused", dropped: "dropped"
+  };
+  // Group order used by buildDeliveryFlat() to order the per-status sections
+  // (review group first, dropped group last). Phase panels no longer use this —
+  // they sort by ticket id ascending so rows stay predictably placed across
+  // status changes (a feature flipping backlog → ship doesn't jump position).
+  const FEATURE_PHASE_SORT = ["review","dev","plan","spec","backlog","ship","paused","done","dropped"];
+
+  function gateDotsForFeature(phase) {
+    // Maps feature sub-status to a 4-bit gate fill (G1..G4) — §6 table.
+    const m = {
+      backlog: [0,0,0,0],
+      spec:    [1,0,0,0],
+      plan:    [1,1,0,0],
+      dev:     [1,1,0,0],
+      review:  [1,1,1,0],
+      ship:    [1,1,1,1],
+      done:    [1,1,1,1],
+      paused:  null,  // gates not asserted while paused
+      dropped: null
+    };
+    return m[phase] || [0,0,0,0];
+  }
+
+  /* =========================================================
+     HEADER
+     ========================================================= */
+  document.title = "Forge Tracker · " + (TRACKER.project || "Project");
+  $("#hd-project").textContent = TRACKER.project || "—";
+  $("#hd-version").textContent = TRACKER.harness_version ? "v" + TRACKER.harness_version : "—";
+  $("#hd-updated").textContent = fmtDateTime(TRACKER.last_updated) || "—";
+
+  $("#hero-project").textContent = TRACKER.project || "—";
+
+  /* =========================================================
+     STATE DERIVATION — single pass over tracker.yaml
+     ========================================================= */
+  function setupState() {
+    const s = TRACKER.setup || {};
+    const prd  = s.project_prd   || {};
+    const arch = s.architecture  || {};
+    const fnd  = s.foundation    || {};
+    const dec  = s.decomposition || {};
+
+    const gate1Passed = (prd.status  || "").startsWith("gate1-passed");
+    const gate2Passed = (arch.status || "").startsWith("gate2-passed");
+    const foundationDone = fnd.status === "done";
+    const gate3Passed = (dec.status || "").startsWith("gate3-passed") || dec.status === "passed";
+
+    const setupComplete = gate1Passed && gate2Passed && foundationDone && gate3Passed;
+
+    return {
+      prd, arch, fnd, dec,
+      gate1Passed, gate2Passed, foundationDone, gate3Passed,
+      setupComplete,
+      allNotStarted: (prd.status || "not-started") === "not-started"
+                  && (arch.status || "not-started") === "not-started"
+                  && (fnd.status || "not-started") === "not-started"
+                  && (dec.status || "not-started") === "not-started"
+    };
+  }
+
+  function deliveryState() {
+    const d = TRACKER.delivery || {};
+    const phases = Array.isArray(d.phases) ? d.phases : [];
+    const phased = phases.length > 0;
+    const features = Object.entries(TRACKER.features || {}).map(([id, f]) => ({ id, ...f }));
+
+    let currentPhase = null;
+    const inProgress = phases.find(p => p.status === "in-progress");
+    if (inProgress) currentPhase = inProgress;
+    else if (d.current_phase != null) currentPhase = phases.find(p => p.id === d.current_phase) || null;
+
+    // Per-phase aggregates. "shipped" covers both `ship` (PR landed, all gates
+    // passed) and `done` (Reflect also done) — both have crossed the
+    // goal-line for KPI/tab purposes; the distinction matters for the
+    // post-ship Reflect audit, not for "how many of this phase have we
+    // delivered". "inFlight" therefore excludes ship so it doesn't
+    // double-count. (FEATURE_PHASE_WEIGHT below keeps ship=5/6 vs done=1
+    // intentionally — that's a more nuanced progression measure for the
+    // weighted Overall progress bar, not for the binary Shipped tile.)
+    const perPhase = phases.map(p => {
+      const inPhase = features.filter(f => f.delivery_phase === p.id);
+      const shipped = inPhase.filter(f => f.phase === "ship" || f.phase === "done").length;
+      const total = inPhase.length;
+      const inFlight = inPhase.filter(f => ["spec","plan","dev","review"].includes(f.phase)).length;
+      const paused = inPhase.filter(f => f.phase === "paused").length;
+      const dropped = inPhase.filter(f => f.phase === "dropped").length;
+      return { phase: p, features: inPhase, shipped, total, inFlight, paused, dropped };
+    });
+
+    // Aggregates for KPI strip — same ship-or-done semantics as perPhase.
+    const totalFeatures = features.length;
+    const shipped = features.filter(f => f.phase === "ship" || f.phase === "done").length;
+    const inFlight = features.filter(f => ["spec","plan","dev","review"].includes(f.phase)).length;
+    const paused = features.filter(f => f.phase === "paused").length;
+    const dropped = features.filter(f => f.phase === "dropped").length;
+    const lockedFeats = phased
+      ? phases.filter(p => p.status === "locked").reduce((s, p) => s + features.filter(f => f.delivery_phase === p.id).length, 0)
+      : 0;
+    const remaining = Math.max(0, totalFeatures - shipped - inFlight);
+
+    // Blocked feature count (any feature with non-empty blocked_by)
+    const blocked = features.filter(f => f.blocked_by && f.blocked_by.length > 0).length;
+
+    // Open accepted risks (PRD + arch) — surfaced in hero secondary line only.
+    const riskCount =
+      ((TRACKER.setup?.project_prd?.accepted_risks  || []).length) +
+      ((TRACKER.setup?.architecture?.accepted_risks || []).length);
+
+    return {
+      d, phases, phased, features, currentPhase, perPhase,
+      totalFeatures, shipped, inFlight, paused, dropped, lockedFeats, remaining,
+      blocked, riskCount,
+      anyFeatureDue: features.some(f => f.due_date != null)
+    };
+  }
+
+  const SETUP = setupState();
+  const DEL   = deliveryState();
+
+  /* =========================================================
+     HERO STATUS LINE  (FR-4 — §4 table)
+     ========================================================= */
+  function heroStatusString() {
+    const s = TRACKER.setup || {};
+    const prd  = s.project_prd   || {};
+    const arch = s.architecture  || {};
+    const fnd  = s.foundation    || {};
+    const dec  = s.decomposition || {};
+
+    if (!DEL.phased && DEL.totalFeatures === 0) {
+      // No phases ever defined and no features — likely pre-Gate-3 or early.
+      // Fall through to setup-state strings below.
+    }
+
+    // Flat-mode (no phases ever defined) but features exist — last row of table.
+    if (!DEL.phased && DEL.totalFeatures > 0) {
+      return `${fmtCount(DEL.inFlight)} features in flight · ${fmtCount(DEL.shipped)} shipped · ${fmtCount(DEL.paused + DEL.dropped)} paused`;
+    }
+
+    // Setup not started — every setup.* still not-started.
+    if (SETUP.allNotStarted) return "Setup · PRD not started";
+
+    // Setup in progress, Gate 1 not yet passed.
+    if (!SETUP.gate1Passed) {
+      if ((prd.status || "") === "in-progress" || (prd.status || "") === "not-started") {
+        return prd.status === "not-started" ? "Setup · PRD not started" : "Setup · PRD in progress";
+      }
+      return "Setup · PRD in progress";
+    }
+
+    // Gate 1 passed, before Gate 2.
+    if (SETUP.gate1Passed && !SETUP.gate2Passed) {
+      return "Setup · Gate 1 passed · Architecture in progress";
+    }
+
+    // Gate 2 passed, foundation in progress.
+    if (SETUP.gate2Passed && !SETUP.foundationDone) {
+      const slices = fnd.slices || [];
+      const done = slices.filter(x => x.status === "done").length;
+      const total = slices.length;
+      return `Setup · Gate 2 passed · Foundation in progress (${done}/${total} slices)`;
+    }
+
+    // Foundation done, before Gate 3.
+    if (SETUP.foundationDone && !SETUP.gate3Passed) {
+      return "Setup · Foundation complete · Decomposition in progress";
+    }
+
+    // Gate 3 passed, no delivery phases defined.
+    if (SETUP.gate3Passed && !DEL.phased) {
+      // Flat-mode small project — but no features yet → "phases not yet defined" reads cleaner.
+      return "Setup complete · Delivery phases not yet defined";
+    }
+
+    // Setup complete, phases defined.
+    if (SETUP.gate3Passed && DEL.phased) {
+      const allSealed = DEL.phases.every(p => p.status === "complete");
+      if (allSealed) {
+        return `All phases sealed · ${fmtCount(DEL.shipped)}/${fmtCount(DEL.totalFeatures)} shipped`;
+      }
+      // Active phase?
+      if (DEL.currentPhase) {
+        const cp = DEL.currentPhase;
+        const per = DEL.perPhase.find(x => x.phase.id === cp.id);
+        const inflight = per ? per.inFlight : 0;
+        const total = per ? per.total : 0;
+        return `Phase ${cp.id} · ${cp.title || ""} · ${fmtCount(inflight)}/${fmtCount(total)} in flight`;
+      }
+      // No phase active — between phases.
+      const lastSealed = [...DEL.phases].filter(p => p.status === "complete").sort((a, b) => b.id - a.id)[0];
+      const nextLocked = [...DEL.phases].filter(p => p.status === "locked" || p.status === "planning").sort((a, b) => a.id - b.id)[0];
+      if (lastSealed && nextLocked) {
+        return `Setup complete · Phase ${lastSealed.id} sealed · Phase ${nextLocked.id} not yet opened`;
+      }
+      return "Setup complete · Awaiting phase opening";
+    }
+
+    // Default fallback (shouldn't be reachable, but keeps the line non-empty).
+    return "Setup in progress";
+  }
+
+  function buildHero() {
+    $("#hero-status").innerHTML = escapeHtml(heroStatusString())
+      .replace(/(\d+\/\d+)/, '<b>$1</b>')
+      .replace(/(Phase \d+)/, '<b>$1</b>');
+
+    const parts = [];
+    if (DEL.riskCount > 0) parts.push(`<b>${fmtCount(DEL.riskCount)} risk${DEL.riskCount === 1 ? "" : "s"}</b>`);
+    if (DEL.blocked   > 0) parts.push(`${fmtCount(DEL.blocked)} blocked`);
+    if (TRACKER.last_updated) parts.push(`updated ${relTime(TRACKER.last_updated) || "—"}`);
+
+    const metaEl = $("#hero-meta");
+    if (parts.length === 0) {
+      metaEl.hidden = true;
+    } else {
+      metaEl.hidden = false;
+      metaEl.innerHTML = parts.join(" · ");
+    }
+  }
+
+  /* =========================================================
+     KPI STRIP + OVERALL PROGRESS  (FR-12)
+     ========================================================= */
+
+  // Weighted overall-progress formula. The naive `shipped / total` reads 0%
+  // until a feature lands `done`, which hides all the setup + decomposition +
+  // in-flight work the team has already done. The weighted form gives:
+  //   5%   to setup (PRD / Architecture / Foundation / Decomposition gates)
+  //   95%  to delivery (each non-paused/dropped feature contributes its own
+  //        progression across backlog → spec → plan → dev → review → ship → done)
+  // Setup is weighted lightly on purpose: stakeholders care about delivered
+  // features, not pre-implementation gates, so the headline number tracks
+  // delivery almost entirely. A project with all 4 setup gates passed and zero
+  // features touched reads 5%. A project with the same gates plus half its
+  // features in dev reads 5% + 95% × (avg feature progress = 0.5) = 52.5%.
+  // Paused/dropped features
+  // are excluded from the delivery denominator — they don't drag a project's
+  // overall score down for being honest about scope changes.
+  const FEATURE_PHASE_WEIGHT = {
+    backlog: 0,
+    spec:    1/6,
+    plan:    2/6,
+    dev:     3/6,
+    review:  4/6,
+    ship:    5/6,
+    done:    1
+  };
+  function computeProgress() {
+    const s = TRACKER.setup || {};
+    const prd  = s.project_prd   || {};
+    const arch = s.architecture  || {};
+    const fnd  = s.foundation    || {};
+    const dec  = s.decomposition || {};
+
+    function gateScore(status, passedPrefix) {
+      if (!status || status === "not-started") return 0;
+      if (status === "in-progress") return 0.5;
+      if (status.startsWith(passedPrefix + "-passed") || status === "passed" || status === "done") return 1;
+      return 0.25; // started in some other way
+    }
+    function foundationScore() {
+      if (fnd.status === "done") return 1;
+      const slices = fnd.slices || [];
+      if (slices.length > 0) {
+        return slices.filter(x => x.status === "done").length / slices.length;
+      }
+      return fnd.status === "in-progress" ? 0.5 : 0;
+    }
+    const setupParts = [
+      gateScore(prd.status,  "gate1"),
+      gateScore(arch.status, "gate2"),
+      foundationScore(),
+      gateScore(dec.status,  "gate3")
+    ];
+    const setupProgress = setupParts.reduce((a, b) => a + b, 0) / 4;
+
+    const counted = DEL.features.filter(f => f.phase !== "paused" && f.phase !== "dropped");
+    let featuresProgress = 0;
+    if (counted.length > 0) {
+      const sum = counted.reduce((s, f) => s + (FEATURE_PHASE_WEIGHT[f.phase] ?? 0), 0);
+      featuresProgress = sum / counted.length;
+    }
+
+    const SETUP_W = 0.05, FEATURES_W = 0.95;
+    const overall = setupProgress * SETUP_W + featuresProgress * FEATURES_W;
+    return {
+      setupPct:    Math.round(setupProgress * 100),
+      featuresPct: Math.round(featuresProgress * 100),
+      overallPct:  Math.round(overall * 100),
+      countedFeatures: counted.length
+    };
+  }
+  const PROGRESS = computeProgress();
+
+  function buildKpis() {
+    const phaseCount = DEL.phased ? DEL.phases.length : 0;
+    const totalSub = DEL.phased ? `across ${phaseCount} phase${phaseCount === 1 ? "" : "s"}` : "in flat list";
+
+    // Count gates started (in-progress + passed), not just passed — gates in-progress must not score 0.
+    const _su = TRACKER.setup || {};
+    const _prd  = _su.project_prd   || {};
+    const _arch = _su.architecture  || {};
+    const _dec  = _su.decomposition || {};
+    const gatesStarted =
+      ((_prd.status  || "not-started") !== "not-started" ? 1 : 0) +
+      ((_arch.status || "not-started") !== "not-started" ? 1 : 0) +
+      ((_dec.status  || "not-started") !== "not-started" ? 1 : 0);
+    const gatesPassed3 = (SETUP.gate1Passed ? 1 : 0) + (SETUP.gate2Passed ? 1 : 0) + (SETUP.gate3Passed ? 1 : 0);
+    const gatesSub = gatesPassed3 === 3 ? "all passed" : gatesStarted > 0 ? "in progress" : "not started";
+
+    // Shipped tile reports `(ship + done) / total` — features in `ship` have
+    // landed their PR with all gates passed and read as "shipped" to a human
+    // reader; `done` adds Reflect-done on top. The overall progress bar below
+    // uses the weighted formula (FEATURE_PHASE_WEIGHT) which keeps ship and
+    // done distinct.
+    const shippedPct = DEL.totalFeatures > 0 ? Math.round((DEL.shipped / DEL.totalFeatures) * 100) : 0;
+
+    let inFlightSub = "—";
+    if (DEL.inFlight > 0) {
+      if (DEL.phased) {
+        // Phase set is computed off the same in-flight definition as DEL.inFlight
+        // (excludes ship/done — those are counted toward Shipped, not In flight).
+        const phaseSet = new Set(
+          DEL.features
+            .filter(f => ["spec","plan","dev","review"].includes(f.phase) && f.delivery_phase != null)
+            .map(f => f.delivery_phase)
+        );
+        if (phaseSet.size === 1) {
+          inFlightSub = `in Phase ${[...phaseSet][0]}`;
+        } else if (phaseSet.size > 1) {
+          inFlightSub = `across ${phaseSet.size} phases`;
+        } else {
+          inFlightSub = "unassigned phase";
+        }
+      } else {
+        inFlightSub = `${DEL.inFlight} active`;
+      }
+    } else {
+      inFlightSub = "nothing active";
+    }
+
+    const remainingSub = [];
+    if (DEL.paused  > 0) remainingSub.push(`${DEL.paused} paused`);
+    if (DEL.dropped > 0) remainingSub.push(`${DEL.dropped} dropped`);
+    if (DEL.lockedFeats > 0) remainingSub.push(`${DEL.lockedFeats} locked`);
+
+    const tiles = [
+      { lbl: "Setup gates",    val: `${gatesStarted} / 3`,        sub: gatesSub },
+      { lbl: "Total features", val: fmtCount(DEL.totalFeatures),  sub: totalSub },
+      { lbl: "Shipped",        val: fmtCount(DEL.shipped),        sub: `${shippedPct}% shipped`, cls: "shipped" },
+      { lbl: "In flight",      val: fmtCount(DEL.inFlight),       sub: inFlightSub,             cls: "in-flight" },
+      { lbl: "Remaining",      val: fmtCount(DEL.remaining),      sub: remainingSub.join(" · ") || "—" }
+    ];
+
+    $("#kpis").innerHTML = tiles.map(t => `
+      <div class="kpi ${t.cls || ""}">
+        <div class="kpi-lbl">${t.lbl}</div>
+        <div class="kpi-val">${t.val}</div>
+        <div class="kpi-sub">${escapeHtml(t.sub)}</div>
+      </div>
+    `).join("");
+
+    // Overall = weighted setup (5%) + delivery (95%). The breakdown line
+    // below the bar shows the two components so the reader can see WHY the
+    // headline number is what it is (e.g., 30% = mostly-done setup, early
+    // delivery).
+    const pct = PROGRESS.overallPct;
+    $("#overall").innerHTML = `
+      <div class="overall-head">
+        <span>Overall progress</span>
+        <span class="overall-pct">${pct}%</span>
+      </div>
+      <div class="overall-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"
+           title="Setup (5% weight) ${PROGRESS.setupPct}% · Delivery (95% weight) ${PROGRESS.featuresPct}%">
+        <div class="overall-fill" style="width: ${pct}%;"></div>
+      </div>
+      <div class="overall-breakdown">
+        <span>Setup <b>${PROGRESS.setupPct}%</b> <span class="dim">/ 5% weight</span></span>
+        <span class="dim">·</span>
+        <span>Delivery <b>${PROGRESS.featuresPct}%</b> <span class="dim">/ 95% weight</span>${PROGRESS.countedFeatures > 0 ? ` <span class="dim">(${PROGRESS.countedFeatures} feature${PROGRESS.countedFeatures === 1 ? "" : "s"})</span>` : ""}</span>
+      </div>
+    `;
+  }
+
+  /* =========================================================
+     SETUP — dot row + labels + slices disclosure
+     ========================================================= */
+  function setupDotState(item, gateKeyPrefix) {
+    // hollow / half / full
+    const st = item?.status || "not-started";
+    if (st === "not-started") return "empty";
+    if (st === gateKeyPrefix + "-passed" || st === gateKeyPrefix + "-passed-with-risks" || st === gateKeyPrefix + "-passed-with-spikes" || st === "passed" || st === "done") return "full";
+    return "half";
+  }
+
+  function buildSetup() {
+    const body = $("#setup-body");
+    const s = TRACKER.setup || {};
+    const prd = s.project_prd || {};
+    const arch = s.architecture || {};
+    const fnd = s.foundation || {};
+    const dec = s.decomposition || {};
+
+    // End tag in section header
+    if (SETUP.setupComplete) $("#setup-end").textContent = "complete";
+    else if (fnd.status === "in-progress") $("#setup-end").textContent = "foundation in progress";
+    else if (SETUP.allNotStarted) $("#setup-end").textContent = "not started";
+    else $("#setup-end").textContent = "in progress";
+
+    // Empty / pre-state
+    if (SETUP.allNotStarted) {
+      body.innerHTML = `
+        <div class="setup-empty">
+          No setup work yet. Run <code>/forge-prd-check</code> to begin Gate 1.
+        </div>`;
+      return;
+    }
+
+    // Resolve dot states
+    const prdDot  = setupDotState(prd,  "gate1");
+    const archDot = setupDotState(arch, "gate2");
+    const fndDot  = fnd.status === "done" ? "full" : (fnd.status === "in-progress" ? "half" : "empty");
+    const decDot  = setupDotState(dec,  "gate3");
+
+    const labels = [
+      { lbl: "PRD",          when: prd.last_gate_run },
+      { lbl: "Architecture", when: arch.last_gate_run },
+      { lbl: "Foundation",   when: fnd.last_updated },
+      { lbl: "Decomposition",when: dec.last_gate_run }
+    ];
+
+    const dotsRow = `
+      <div class="setup-dots" aria-label="Setup gates">
+        <span class="setup-dot"><span class="dot ${prdDot === 'empty' ? '' : prdDot}" aria-label="PRD ${prdDot}"></span><b>PRD</b></span>
+        <span class="setup-line"></span>
+        <span class="setup-dot"><span class="dot ${archDot === 'empty' ? '' : archDot}" aria-label="Architecture ${archDot}"></span><b>Arch</b></span>
+        <span class="setup-line"></span>
+        <span class="setup-dot"><span class="dot ${fndDot === 'empty' ? '' : fndDot}" aria-label="Foundation ${fndDot}"></span><b>Foundation</b></span>
+        <span class="setup-line"></span>
+        <span class="setup-dot"><span class="dot ${decDot === 'empty' ? '' : decDot}" aria-label="Decomposition ${decDot}"></span><b>Decomp</b></span>
+      </div>`;
+
+    if (SETUP.setupComplete) {
+      // Sealed mode — dot row + one-line summary. Labels go behind a disclosure.
+      const lastGate = [prd.last_gate_run, arch.last_gate_run, fnd.last_updated, dec.last_gate_run]
+        .filter(Boolean).sort().slice(-1)[0];
+      const labelsBlock = `
+        <details class="setup-disclosure">
+          <summary>Gate detail</summary>
+          <div class="setup-labels">
+            ${labels.map(l => `
+              <div class="lab"><b>${l.lbl}</b>${l.when ? `<span class="when">${fmtDate(l.when)}</span>` : ""}</div>
+            `).join("")}
+          </div>
+        </details>`;
+
+      body.innerHTML = `
+        ${dotsRow}
+        <div class="setup-sealed-line"><b>✓ Setup complete</b>${lastGate ? ` · sealed ${fmtDate(lastGate)}` : ""}</div>
+        ${labelsBlock}
+      `;
+      return;
+    }
+
+    // Active mode — dot row, labels visible, foundation slices behind disclosure when present.
+    const slices = fnd.slices || [];
+    const slicesDone = slices.filter(x => x.status === "done").length;
+    const slicesDisclosure = slices.length === 0 ? "" : `
+      <details class="setup-disclosure">
+        <summary>${slicesDone}/${slices.length} foundation slices</summary>
+        <table class="slices-table">
+          <thead><tr><th>ID</th><th>Title</th><th>Status</th><th>Assignee</th></tr></thead>
+          <tbody>
+            ${slices.map(s => `
+              <tr>
+                <td class="id">${escapeHtml(s.id)}</td>
+                <td>${escapeHtml(s.title || "")}</td>
+                <td class="status">${escapeHtml(s.status || "—")}</td>
+                <td>${escapeHtml(s.assignee || "—")}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </details>`;
+
+    body.innerHTML = `
+      ${dotsRow}
+      <div class="setup-labels">
+        ${labels.map(l => `
+          <div class="lab"><b>${l.lbl}</b>${l.when ? `<span class="when">${fmtDate(l.when)}</span>` : ""}</div>
+        `).join("")}
+      </div>
+      ${slicesDisclosure}
+    `;
+  }
+
+  /* =========================================================
+     DELIVERY — phased (tabs) and flat
+     ========================================================= */
+  const PHASE_STATE_KEY = "forge-tracker-phase-state";   // active tab id
+  function readActivePhaseId() {
+    try { return localStorage.getItem(PHASE_STATE_KEY); } catch(e) { return null; }
+  }
+  function writeActivePhaseId(id) {
+    try { localStorage.setItem(PHASE_STATE_KEY, String(id)); } catch(e) {}
+  }
+
+  function gateDots(arr) {
+    return `<span class="del-gd" aria-hidden="true">${
+      arr.map(b => `<span${b ? ' class="on"' : ""}></span>`).join("")
+    }</span>`;
+  }
+
+  function buildFeatureRow(f, opts) {
+    const omitWho = !!(opts && opts.omitWho);
+    const phase = f.phase || "backlog";
+    const gates = gateDotsForFeature(phase) || [0,0,0,0];
+    // Blocked-by column — each dep id renders as its own chip (Patina-500
+    // family). Empty cell when no blockers; the visual contrast across a
+    // column of empty cells is the signal. Chip carries the dep id only;
+    // hover for full "Blocked by ..." tooltip.
+    const blockedHtml = (f.blocked_by && f.blocked_by.length)
+      ? f.blocked_by.map(b => `<span class="blocked-chip" title="Blocked by ${escapeHtml(b)}">↳ ${escapeHtml(b)}</span>`).join("")
+      : "";
+    // Feature owner: `owner` is the canonical key (matches setup-level `owner`
+    // and the PRD's Owner column). Fall back to `assignee` for legacy projects
+    // bootstrapped before the convention landed.
+    const who = f.owner ?? f.assignee;
+    // Render the feature key alongside its title so the row is scannable
+    // against tracker.yaml / spec filenames. Falls back to id-only if the
+    // feature entry has no title yet (early-backlog state).
+    const titleText = f.title ? `${f.id} · ${f.title}` : f.id;
+    const whoCell = omitWho
+      ? ""
+      : `<span class="who">${who ? escapeHtml(who) : "—"}</span>`;
+    // Open-bug badge + rework lineage (FR-7) — rendered inside the name cell so
+    // the rigid del-feat column grid is untouched.
+    const openBugIds = openBugIdsByFeature[f.id] || [];
+    const bugBadge = openBugIds.length
+      ? `<span class="bug-badge" title="Open bug${openBugIds.length > 1 ? "s" : ""}: ${escapeHtml(openBugIds.join(", "))}">🐞 ${openBugIds.length}</span>`
+      : "";
+    const reworksLine = (f.follow_up_of && f.follow_up_of.length)
+      ? `<span class="rework-line reworks" title="This feature reworks ${escapeHtml(f.follow_up_of.join(", "))}">↳ reworks ${escapeHtml(f.follow_up_of.join(", "))}</span>`
+      : "";
+    const reworkedByIds = reworkedByMap[f.id] || [];
+    const reworkedByLine = reworkedByIds.length
+      ? `<span class="rework-line" title="Reworked by ${escapeHtml(reworkedByIds.join(", "))}">↰ reworked by ${escapeHtml(reworkedByIds.join(", "))}</span>`
+      : "";
+    // Feature due-date column — shown only when at least one feature in the
+    // delivery has a date. Feature-level dates are optional (set via the
+    // /forge-set-dates command); when none are set the column is omitted.
+    const showDue = DEL.anyFeatureDue;
+    const dueCell = showDue
+      ? `<span class="due" title="${f.due_date ? "Target delivery " + escapeHtml(f.due_date) : "No target date"}">${f.due_date ? fmtDateShort(f.due_date) : "—"}</span>`
+      : "";
+    return `
+      <div class="del-feat${omitWho ? ' no-who' : ''}${showDue ? ' has-due' : ''}" data-feature="${escapeHtml(f.id)}">
+        <span class="name">${escapeHtml(titleText)}${bugBadge}${reworksLine}${reworkedByLine}</span>
+        <span class="phase ${phase}">${escapeHtml(FEATURE_PHASE_LABEL[phase] || phase)}</span>
+        ${whoCell}
+        <span class="blocked-cell">${blockedHtml}</span>
+        ${gateDots(gates)}
+        ${dueCell}
+        <span class="ago">${relTime(f.last_updated) || "—"}</span>
+        <span class="caret">→</span>
+      </div>
+    `;
+  }
+
+  // Phase panels (and flat-mode groups) sort by ticket id ascending so rows
+  // keep their position as a feature moves through phases. Earlier versions
+  // bucketed by phase-status priority (review → ... → done → dropped) on the
+  // theory that "what needs attention" should bubble up, but that made rows
+  // jump position on every status change and made it hard to find a known id
+  // in a long phase. Natural-numeric compare so FEAT-002 sorts before FEAT-011.
+  function sortFeaturesForPanel(features) {
+    return [...features].sort((a, b) =>
+      String(a.id).localeCompare(String(b.id), undefined, { numeric: true, sensitivity: "base" })
+    );
+  }
+
+  function phaseTabStatusLabel(p) {
+    switch (p.status) {
+      case "complete":    return { text: "✓ sealed",     cls: "complete" };
+      case "in-progress": return { text: "● in progress", cls: "in-progress" };
+      case "locked":      return { text: "⊘ locked",     cls: "" };
+      case "planning":    return { text: "planning",     cls: "" };
+      default:            return { text: p.status || "—", cls: "" };
+    }
+  }
+
+  function phaseDriftWarning(p) {
+    if (p.status === "complete" && !p.sealed) {
+      return `<span class="warn" title="Phase status is 'complete' but no 'sealed' date is set. Update tracker.yaml.">⚠</span>`;
+    }
+    return "";
+  }
+
+  function buildDeliveryPhased() {
+    const body = $("#delivery-body");
+    const phases = DEL.phases;
+    const features = DEL.features;
+    const orphanFeatures = features.filter(f =>
+      f.delivery_phase != null && !phases.some(p => p.id === f.delivery_phase)
+    );
+
+    // No features at all
+    if (features.length === 0) {
+      body.innerHTML = `<div class="del-empty">Features will populate after <code>/forge-decompose</code>.</div>`;
+      $("#delivery-end").textContent = "no features";
+      return;
+    }
+
+    // Build tabs. "shipped" here counts ship + done — see deliveryState().
+    const tabs = phases.map(p => {
+      const per = DEL.perPhase.find(x => x.phase.id === p.id);
+      const shipped = per ? per.shipped : 0;
+      const total = per ? per.total : 0;
+      const pct = total > 0 ? Math.round((shipped / total) * 100) : 0;
+      const st = phaseTabStatusLabel(p);
+      const drift = phaseDriftWarning(p);
+      return `
+        <button class="del-tab" data-tab="${p.id}" type="button" aria-pressed="false">
+          <span class="del-tab-num">P${p.id}</span>
+          <span class="del-tab-status ${st.cls}">${st.text}</span>
+          <span class="del-tab-title">${escapeHtml(p.title || "(untitled)")} ${drift}</span>
+          <span class="del-tab-meta">
+            <span class="del-bar"><span class="del-bar-fill" style="width: ${pct}%;"></span></span>
+            <span>${pad2(shipped)}/${pad2(total)}</span>
+            ${p.due_date ? `<span class="del-tab-due" style="margin-left:auto; color: var(--text-tertiary);" title="Target delivery ${escapeHtml(p.due_date)}">due ${fmtDateShort(p.due_date)}</span>` : ""}
+          </span>
+        </button>
+      `;
+    }).join("");
+
+    // Determine default active tab
+    const stored = readActivePhaseId();
+    let activeId = null;
+    if (stored && phases.some(p => String(p.id) === stored)) {
+      activeId = stored;
+    } else if (DEL.currentPhase) {
+      activeId = String(DEL.currentPhase.id);
+    } else {
+      // First non-locked, else first
+      const candidate = phases.find(p => p.status !== "locked") || phases[0];
+      if (candidate) activeId = String(candidate.id);
+    }
+
+    // Build panels
+    const panels = phases.map(p => {
+      const per = DEL.perPhase.find(x => x.phase.id === p.id);
+      const inPhase = per ? per.features : [];
+      const sealedTxt = p.sealed ? `sealed ${fmtDateShort(p.sealed)}` : null;
+
+      // Header: title · theme · context line
+      let headBits = [`<b>${escapeHtml(p.title || `Phase ${p.id}`)}</b>`];
+      if (p.status === "in-progress") {
+        const days = p.started ? daysBetween(p.started, TRACKER.last_updated || new Date().toISOString()) : null;
+        const medianSealed = (() => {
+          const durations = phases
+            .filter(x => x.status === "complete" && x.started && x.sealed)
+            .map(x => daysBetween(x.started, x.sealed))
+            .filter(d => d != null);
+          return median(durations);
+        })();
+        if (days != null) headBits.push(`day ${days}`);
+        if (medianSealed != null) headBits.push(`median sealed: ${medianSealed}d`);
+      } else if (p.status === "complete") {
+        if (sealedTxt) headBits.push(sealedTxt);
+      } else if (p.status === "locked") {
+        const waits = phases.filter(x => x.id < p.id && x.status !== "complete");
+        if (waits.length > 0) headBits.push(`waits on Phase ${waits[waits.length - 1].id}`);
+        else                  headBits.push("locked");
+      } else if (p.status === "planning") {
+        headBits.push("planning");
+      }
+      if (p.due_date) headBits.push(`due ${fmtDateShort(p.due_date)}`);
+      if (p.theme) headBits.push(`<span class="theme">${escapeHtml(p.theme)}</span>`);
+      const head = headBits.join(" · ");
+
+      // Body
+      let panelBody = "";
+      if (inPhase.length === 0) {
+        if (p.status === "locked") {
+          panelBody = `<div class="del-empty">No features assigned to this phase yet.</div>`;
+        } else if (p.status === "planning") {
+          panelBody = `<p style="font-size: 12.5px; color: var(--text-tertiary); padding: 4px 0;">In planning. Feature decomposition is being shaped — exact scope and order will land during <code>/forge-decompose</code> for this phase.</p>`;
+        } else {
+          panelBody = `<div class="del-empty">No features assigned to this phase.</div>`;
+        }
+      } else if (p.status === "locked") {
+        // Render locked-phase features as rows (same table shape as active
+        // phases) but with the assignee column suppressed — features in a
+        // locked phase rarely have owners assigned yet, and the empty column
+        // adds noise without information.
+        panelBody = sortFeaturesForPanel(inPhase).map(f => buildFeatureRow(f, { omitWho: true })).join("");
+      } else {
+        panelBody = sortFeaturesForPanel(inPhase).map(f => buildFeatureRow(f)).join("");
+      }
+
+      return `
+        <div class="del-panel" data-panel="${p.id}">
+          <div class="del-panel-head">${head}</div>
+          ${panelBody}
+        </div>
+      `;
+    }).join("");
+
+    // Cap the visible tab columns at 4. Fewer phases → fewer columns so
+    // tabs stretch full-width rather than leaving an empty grid track.
+    const colCount = Math.min(4, Math.max(1, phases.length));
+    body.innerHTML = `<div class="del-tabs" role="tablist" style="--col-count: ${colCount}">${tabs}</div>${panels}`;
+
+    // Orphan features (delivery_phase doesn't match any phase id)
+    if (orphanFeatures.length > 0) {
+      const orphanHtml = `
+        <div class="del-flat-group" style="margin-top: 24px;">
+          <h3>⚠ Unassigned phase (drift)</h3>
+          ${sortFeaturesForPanel(orphanFeatures).map(f => buildFeatureRow(f)).join("")}
+        </div>`;
+      body.insertAdjacentHTML("beforeend", orphanHtml);
+    }
+
+    // Wire up tab clicks
+    const tabEls   = $$(".del-tab", body);
+    const panelEls = $$(".del-panel", body);
+    function activate(id) {
+      tabEls.forEach(t => {
+        const match = t.dataset.tab === String(id);
+        t.classList.toggle("active", match);
+        t.setAttribute("aria-pressed", match ? "true" : "false");
+      });
+      panelEls.forEach(p => p.classList.toggle("active", p.dataset.panel === String(id)));
+      writeActivePhaseId(id);
+    }
+    tabEls.forEach(t => t.addEventListener("click", () => activate(t.dataset.tab)));
+    if (activeId != null) activate(activeId);
+
+    // End-tag
+    const sealed = phases.filter(p => p.status === "complete").length;
+    $("#delivery-end").textContent = `${sealed}/${phases.length} phases sealed`;
+  }
+
+  function buildDeliveryFlat() {
+    const body = $("#delivery-body");
+    const features = DEL.features;
+    if (features.length === 0) {
+      body.innerHTML = `<div class="del-empty">Features will populate after <code>/forge-decompose</code>.</div>`;
+      $("#delivery-end").textContent = "no features";
+      return;
+    }
+
+    // Group by sub-status in §6 order
+    const groups = FEATURE_PHASE_SORT.map(p => ({
+      key: p,
+      label: FEATURE_PHASE_LABEL[p] || p,
+      items: features.filter(f => f.phase === p)
+    })).filter(g => g.items.length > 0);
+
+    body.innerHTML = groups.map(g => `
+      <div class="del-flat-group">
+        <h3>${g.label} <span style="color:var(--text-tertiary);">· ${g.items.length}</span></h3>
+        ${sortFeaturesForPanel(g.items).map(f => buildFeatureRow(f)).join("")}
+      </div>
+    `).join("");
+
+    $("#delivery-end").textContent = `flat · ${features.length} feature${features.length === 1 ? "" : "s"}`;
+  }
+
+  function buildDelivery() {
+    if (DEL.phased) buildDeliveryPhased();
+    else            buildDeliveryFlat();
+  }
+
+  /* =========================================================
+     SIGNALS — S1..S6
+     ========================================================= */
+  function computeSignals() {
+    const phases = DEL.phases;
+    const features = DEL.features;
+
+    // S1 — Phase throughput (current phase). "shipped" = ship + done (same
+    // semantics as the Shipped KPI tile and the phase tab).
+    let s1;
+    if (DEL.currentPhase) {
+      const per = DEL.perPhase.find(x => x.phase.id === DEL.currentPhase.id);
+      const inflight = per ? per.inFlight : 0;
+      const paused = per ? per.paused : 0;
+      const shipped = per ? per.shipped : 0;
+      const total = per ? per.total : 0;
+      s1 = {
+        value: `${pad2(shipped)}/${pad2(total)} shipped`,
+        sub: `${pad2(inflight)} in flight${paused ? " · " + pad2(paused) + " paused" : ""}`
+      };
+    } else if (DEL.phased) {
+      s1 = { value: "—", sub: "no phase active", placeholder: true };
+    } else {
+      // Flat mode — show overall
+      s1 = {
+        value: `${pad2(DEL.shipped)}/${pad2(DEL.totalFeatures)} shipped`,
+        sub: `${pad2(DEL.inFlight)} in flight${DEL.paused ? " · " + pad2(DEL.paused) + " paused" : ""}`
+      };
+    }
+
+    // S2 — Phase pace
+    let s2;
+    if (DEL.currentPhase && DEL.currentPhase.started) {
+      const days = daysBetween(DEL.currentPhase.started, TRACKER.last_updated || new Date().toISOString());
+      const sealedDurations = phases
+        .filter(p => p.status === "complete" && p.started && p.sealed)
+        .map(p => daysBetween(p.started, p.sealed))
+        .filter(d => d != null);
+      const med = median(sealedDurations);
+      if (med != null) {
+        s2 = { value: `Day ${days}`, sub: `median sealed: ${med}d` };
+      } else {
+        s2 = { value: `Day ${days}`, sub: "no completed phase yet" };
+      }
+    } else {
+      s2 = { value: "—", sub: "no pace data yet", placeholder: true };
+    }
+
+    // S3 — Feature lead time (median + p75 across shipped features). "Shipped"
+    // here matches the Shipped KPI tile — both `ship` (PR landed) and `done`
+    // (Reflect also done) count; the lead-time measurement is started → last
+    // ship-or-done update, which is meaningful at the ship boundary already.
+    let s3;
+    const shippedFeats = features.filter(f => (f.phase === "ship" || f.phase === "done") && f.started && f.last_updated);
+    if (shippedFeats.length > 0) {
+      const lts = shippedFeats.map(f => daysBetween(f.started, f.last_updated)).filter(d => d != null);
+      const med = median(lts);
+      const p75 = percentile(lts, 0.75);
+      // Optional trend: last 4w vs prior 4w
+      const now = TRACKER.last_updated ? new Date(TRACKER.last_updated) : new Date();
+      const fourW = new Date(now); fourW.setDate(fourW.getDate() - 28);
+      const eightW = new Date(now); eightW.setDate(eightW.getDate() - 56);
+      const recent = shippedFeats.filter(f => new Date(f.last_updated) >= fourW)
+                                 .map(f => daysBetween(f.started, f.last_updated)).filter(d => d != null);
+      const prior  = shippedFeats.filter(f => new Date(f.last_updated) >= eightW && new Date(f.last_updated) < fourW)
+                                 .map(f => daysBetween(f.started, f.last_updated)).filter(d => d != null);
+      let trendBit = "";
+      if (recent.length > 0 && prior.length > 0) {
+        const mR = median(recent), mP = median(prior);
+        const delta = mR - mP;
+        const arrow = delta < 0 ? "↓" : (delta > 0 ? "↑" : "→");
+        trendBit = ` (last 4w: ${arrow} ${Math.abs(delta)}d)`;
+      }
+      s3 = { value: `${med}d · ${p75}d`, sub: `median · p75${trendBit}` };
+    } else {
+      s3 = { value: "—", sub: "no shipped features yet", placeholder: true };
+    }
+
+    // S4 — Rework (rework features = non-empty follow_up_of; FR-5 / FR-8).
+    // Browser-computed from window.TRACKER, NOT signals.js. A spec/plan Rev no
+    // longer counts as rework — follow_up_of is the authoritative signal.
+    let s4;
+    const reworkFeatures = features.filter(f => Array.isArray(f.follow_up_of) && f.follow_up_of.length > 0);
+    if (reworkFeatures.length === 0) {
+      s4 = { value: "—", sub: "no rework lineage yet", placeholder: true };
+    } else {
+      const targets = new Set();
+      reworkFeatures.forEach(f => f.follow_up_of.forEach(t => targets.add(t)));
+      s4 = {
+        value: `${pad2(reworkFeatures.length)}`,
+        sub: `reworking ${pad2(targets.size)} earlier feature${targets.size === 1 ? "" : "s"}`
+      };
+    }
+
+    // S5 — Paused / dropped ratio
+    let s5;
+    const stranded = DEL.paused + DEL.dropped;
+    // Exclude backlog entries that were never picked up — proxy: features
+    // with phase != backlog OR with `started` set count as "decomposed".
+    const decomposed = features.filter(f => (f.phase && f.phase !== "backlog") || f.started).length;
+    if (decomposed === 0 && stranded === 0) {
+      s5 = { value: "—", sub: "no features yet", placeholder: true };
+    } else {
+      const subBits = [];
+      if (DEL.paused  > 0) subBits.push(`${DEL.paused} paused`);
+      if (DEL.dropped > 0) subBits.push(`${DEL.dropped} dropped`);
+      s5 = {
+        value: `${pad2(stranded)} / ${pad2(decomposed)}`,
+        sub: subBits.join(" · ") || "0 stranded"
+      };
+    }
+
+    // S6 — Lessons cadence (from signals.js)
+    // Three states: dated entries → weekly sparkline; legacy/undated entries →
+    // total count with "undated" sub-label; nothing → placeholder.
+    let s6;
+    const lessons = SIGNALS?.lessons;
+    const weekly = lessons?.weekly || [];
+    const datedTotal = weekly.reduce((s, w) => s + (w.count || 0), 0);
+    const undatedTotal = lessons?.undated_total || 0;
+    if (datedTotal > 0) {
+      const thisWeek = weekly[weekly.length - 1].count;
+      const max = Math.max(1, ...weekly.map(w => w.count));
+      const spark = `<span class="spark">${weekly.map(w => `<i style="height:${Math.max(2, Math.round((w.count / max) * 14))}px"></i>`).join("")}</span>`;
+      s6 = { value: `${thisWeek}${spark}`, sub: `this week · ${datedTotal} in 4 wk`, html: true };
+    } else if (undatedTotal > 0) {
+      s6 = {
+        value: `${undatedTotal}`,
+        sub: `total · undated format (use ### YYYY-MM-DD — title for cadence)`
+      };
+    } else {
+      s6 = { value: "—", sub: "no lessons data", placeholder: true };
+    }
+
+    // S7 — Open bugs (FR-6). Browser-computed from window.TRACKER.bugs. Open =
+    // status ∈ {open, in-progress}. fixed/wontfix bugs stay in the collection as
+    // history but don't count here.
+    let s7;
+    const openBugs = BUGS.filter(bugIsOpen);
+    if (BUGS.length === 0) {
+      s7 = { value: "—", sub: "no bugs filed", placeholder: true };
+    } else if (openBugs.length === 0) {
+      s7 = { value: "00", sub: `all ${pad2(BUGS.length)} resolved` };
+    } else {
+      const sev = { high: 0, medium: 0, low: 0 };
+      openBugs.forEach(b => { if (sev[b.severity] != null) sev[b.severity]++; });
+      const affected = new Set();
+      openBugs.forEach(b => (b.affects || []).forEach(a => affected.add(a)));
+      const sevBits = [];
+      if (sev.high)   sevBits.push(`${sev.high} high`);
+      if (sev.medium) sevBits.push(`${sev.medium} med`);
+      if (sev.low)    sevBits.push(`${sev.low} low`);
+      s7 = {
+        value: `${pad2(openBugs.length)}`,
+        sub: `${sevBits.join(" · ") || "open"} · ${pad2(affected.size)} feature${affected.size === 1 ? "" : "s"}`
+      };
+    }
+
+    return { s1, s2, s3, s4, s5, s6, s7 };
+  }
+
+  function buildSignals() {
+    const sigs = computeSignals();
+    const tiles = [
+      { id: "S1", lbl: "Phase throughput", data: sigs.s1 },
+      { id: "S2", lbl: "Phase pace",       data: sigs.s2 },
+      { id: "S3", lbl: "Lead time",        data: sigs.s3 },
+      { id: "S4", lbl: "Rework",           data: sigs.s4 },
+      { id: "S5", lbl: "Paused / dropped", data: sigs.s5 },
+      { id: "S6", lbl: "Lessons cadence",  data: sigs.s6 },
+      { id: "S7", lbl: "Open bugs",        data: sigs.s7 }
+    ];
+
+    const callout = `
+      <div class="signals-callout">
+        <p><strong>Reading the signals:</strong> these establish a baseline and surface direction; none prove the harness is better or worse than not using it.</p>
+        <p>Lessons cadence dropping over time is <strong>good</strong> (stabilization). <strong>Rework</strong> counts features that redo earlier passes (<code>follow_up_of</code>); <strong>Open bugs</strong> are post-ship defects grouped by their scheduled-fix phase — expand the lists below the tiles.</p>
+      </div>`;
+
+    const grid = `
+      <div class="signals">
+        ${tiles.map(t => `
+          <div>
+            <div class="sig-lbl">${t.lbl}</div>
+            <div class="sig-val ${t.data.placeholder ? 'placeholder' : ''}">${t.data.html ? t.data.value : escapeHtml(t.data.value)}</div>
+            <div class="sig-sub">${escapeHtml(t.data.sub)}</div>
+          </div>
+        `).join("")}
+      </div>`;
+
+    $("#signals-body").innerHTML = callout + grid + buildBugsDrill() + buildReworkDrill();
+  }
+
+  // Bugs drill-down (FR-6): open bugs grouped by scheduled-fix delivery_phase, the
+  // current phase flagged. Collapsed by default; empty string when no open bugs.
+  function buildBugsDrill() {
+    const open = BUGS.filter(bugIsOpen);
+    if (open.length === 0) return "";
+    const groups = {};
+    open.forEach(b => {
+      const key = (b.delivery_phase == null) ? "—" : String(b.delivery_phase);
+      (groups[key] = groups[key] || []).push(b);
+    });
+    const keys = Object.keys(groups).sort((a, b) => {
+      const na = a === "—" ? Infinity : Number(a);
+      const nb = b === "—" ? Infinity : Number(b);
+      return na - nb;
+    });
+    const cur = (TRACKER.delivery && TRACKER.delivery.current_phase != null)
+      ? String(TRACKER.delivery.current_phase) : null;
+    const body = keys.map(k => {
+      const label = k === "—" ? "Unscheduled" : `Phase ${k}`;
+      const isCur = cur != null && k === cur;
+      const rows = groups[k].map(b => `
+        <div class="bug-row">
+          <span class="bug-id">${escapeHtml(b.id)}</span>
+          <span class="bug-sev sev-${escapeHtml(b.severity || "low")}">${escapeHtml(b.severity || "—")}</span>
+          <span class="bug-title">${escapeHtml(b.title || "")}</span>
+          <span class="bug-affects">${escapeHtml((b.affects || []).join(", "))}</span>
+        </div>`).join("");
+      return `<div class="bug-group"><div class="bug-group-hd">${label}${isCur ? " <em>· current</em>" : ""} · ${groups[k].length} open</div>${rows}</div>`;
+    }).join("");
+    return `<details class="sig-drill"><summary>🐞 ${open.length} open bug${open.length === 1 ? "" : "s"} — by scheduled-fix phase</summary>${body}</details>`;
+  }
+
+  // Rework drill-down (FR-8): each rework feature → the features it reworks.
+  function buildReworkDrill() {
+    const rework = DEL.features.filter(f => Array.isArray(f.follow_up_of) && f.follow_up_of.length > 0);
+    if (rework.length === 0) return "";
+    const rows = rework.map(f => `
+      <div class="bug-row">
+        <span class="bug-id">${escapeHtml(f.id)}</span>
+        <span class="bug-title">${escapeHtml(f.title || "")}</span>
+        <span class="bug-affects">↳ reworks ${escapeHtml(f.follow_up_of.join(", "))}</span>
+      </div>`).join("");
+    return `<details class="sig-drill"><summary>↳ ${rework.length} rework feature${rework.length === 1 ? "" : "s"} — lineage</summary>${rows}</details>`;
+  }
+
+  /* =========================================================
+     RELEASE / UAT — conditional (hidden unless TRACKER.release non-empty)
+     Renders the post-delivery lifecycle from window.TRACKER.release +
+     window.TRACKER.uat_issues — both ride the existing tracker-mirror pipeline,
+     so there's no new hook. Mirrors buildUsage()'s hidden-when-empty posture.
+     ========================================================= */
+  const REL_LIFECYCLE = ["build-complete", "regression", "uat", "stabilize", "signed-off", "live"];
+  const REL_STEP_LABEL = {
+    "build-complete": "build complete", regression: "regression", uat: "UAT",
+    stabilize: "stabilize", "signed-off": "signed off", live: "live"
+  };
+  // A UAT defect counts as unresolved (still gates sign-off) until verified-closed.
+  const UAT_UNRESOLVED = ["triage", "accepted", "fixed"];
+
+  function buildRelease() {
+    const rel = TRACKER.release;
+    const hasRelease = rel && typeof rel === "object" && !Array.isArray(rel) && Object.keys(rel).length > 0 && rel.id;
+    if (!hasRelease) {
+      // Section stays hidden — NFR-1 (backward compatible empty state)
+      $("#release-sec").classList.add("hidden");
+      $("#release-body").classList.add("hidden");
+      return;
+    }
+    $("#release-sec").classList.remove("hidden");
+    $("#release-body").classList.remove("hidden");
+
+    const issues = Array.isArray(TRACKER.uat_issues) ? TRACKER.uat_issues : [];
+    const relIssues = issues.filter(i => i.release_id == null || i.release_id === rel.id);
+    const cycles = Array.isArray(rel.cycles) ? rel.cycles : [];
+    const status = rel.status || "build-complete";
+
+    // Lifecycle track — steps before current = done, current highlighted.
+    const curIdx = REL_LIFECYCLE.indexOf(status);
+    const track = REL_LIFECYCLE.map((step, i) => {
+      const cls = i < curIdx ? "done" : (i === curIdx ? "current" : "");
+      return `<span class="rel-step ${cls}">${escapeHtml(REL_STEP_LABEL[step] || step)}</span>`;
+    }).join('<span class="rel-step-sep">›</span>');
+
+    // Header line.
+    const scope = (Array.isArray(rel.scope_phases) && rel.scope_phases.length)
+      ? `phases ${rel.scope_phases.join(", ")}` : "no phases scoped";
+    let signoff = "";
+    if (status === "live" && rel.live) {
+      signoff = ` · live ${fmtDate(rel.live)}${rel.live_by ? " by " + escapeHtml(rel.live_by) : ""}`;
+    } else if (rel.signed_off) {
+      signoff = ` · signed off ${fmtDate(rel.signed_off)}${rel.signoff_by ? " by " + escapeHtml(rel.signoff_by) : ""}`;
+    }
+    const head = `
+      <div class="rel-head">
+        <span class="rel-id">${escapeHtml(rel.id)}</span>
+        <span class="rel-status ${escapeHtml(status)}">${escapeHtml(REL_STEP_LABEL[status] || status)}</span>
+        <span class="rel-scope">${escapeHtml(scope)}${signoff}</span>
+      </div>
+      <div class="rel-track">${track}</div>`;
+
+    // Cycle list with flow pass-counts (e.g. "07 / 10 passed").
+    let cyclesHtml;
+    if (cycles.length === 0) {
+      cyclesHtml = `<div class="rel-empty">No test/validation cycles recorded yet.</div>`;
+    } else {
+      cyclesHtml = `<div class="rel-cycles">` + cycles.map(c => {
+        const flows = Array.isArray(c.flows) ? c.flows : [];
+        const passed = flows.filter(f => f.status === "passed").length;
+        const flowCount = flows.length > 0
+          ? `<b>${fmtCount(passed)}</b> / ${fmtCount(flows.length)} flows passed`
+          : `<span class="dim">no flows listed</span>`;
+        const round = (c.round != null && c.round > 1) ? ` <span class="rnd">· round ${c.round}</span>` : "";
+        const cstat = c.status || "planned";
+        return `
+          <div class="rel-cycle">
+            <span class="cyc-id">${escapeHtml(c.id || "—")}${round}</span>
+            <span class="cyc-type">${escapeHtml(c.type || "")}${c.owner ? " · " + escapeHtml(c.owner) : ""}</span>
+            <span class="cyc-flows">${flowCount}</span>
+            <span class="cyc-status ${escapeHtml(cstat)}">${escapeHtml(cstat)}</span>
+          </div>`;
+      }).join("") + `</div>`;
+    }
+
+    // Blocking issues — unresolved blocking defects gate the sign-off gate.
+    const blocking = relIssues.filter(i =>
+      i.blocking === true && UAT_UNRESOLVED.includes(i.status));
+    const blockingHtml = blocking.length === 0 ? "" : `
+      <div class="rel-blocking">
+        <b>⚠ ${blocking.length} blocking issue${blocking.length === 1 ? "" : "s"}</b> gating sign-off:
+        ${blocking.map(i => `${escapeHtml(i.id)}${i.bug_ref ? " → " + escapeHtml(i.bug_ref) : ""}`).join(" · ")}
+      </div>`;
+
+    // Triage breakdown by kind.
+    const byKind = { defect: 0, "change-request": 0, query: 0 };
+    relIssues.forEach(i => { if (byKind[i.kind] != null) byKind[i.kind]++; });
+    const openIssues = relIssues.filter(i => !["closed", "rejected"].includes(i.status)).length;
+    const triageHtml = relIssues.length === 0 ? `
+      <div class="rel-triage"><span class="tri dim">No UAT issues raised yet.</span></div>` : `
+      <div class="rel-triage">
+        <span class="tri"><b>${fmtCount(relIssues.length)}</b><span class="lbl">UAT issues</span></span>
+        <span class="tri"><b>${fmtCount(byKind.defect)}</b><span class="lbl">defects</span></span>
+        <span class="tri"><b>${fmtCount(byKind["change-request"])}</b><span class="lbl">change reqs</span></span>
+        <span class="tri"><b>${fmtCount(byKind.query)}</b><span class="lbl">queries</span></span>
+        <span class="tri"><b>${fmtCount(openIssues)}</b><span class="lbl">open</span></span>
+      </div>`;
+
+    $("#release-body").innerHTML = head + cyclesHtml + blockingHtml + triageHtml;
+
+    const cur = rel.current_cycle ? `cycle ${rel.current_cycle}` : (REL_STEP_LABEL[status] || status);
+    $("#release-end").textContent = cur;
+  }
+
+  /* =========================================================
+     USAGE — conditional one-line summary
+     ========================================================= */
+
+  // Same rate table as before (was inline in old index.html); used only here
+  // and in usage.html. Pricing surfaces ONLY in this section (FR-11).
+  const RATES = {
+    "claude-opus-4-7":   { input:  5.00, output: 25.00, cache_read: 0.50, cache_creation: 10.00 },
+    "claude-opus-4-6":   { input:  5.00, output: 25.00, cache_read: 0.50, cache_creation: 10.00 },
+    "claude-opus-4-5":   { input:  5.00, output: 25.00, cache_read: 0.50, cache_creation: 10.00 },
+    "claude-opus-4-1":   { input: 15.00, output: 75.00, cache_read: 1.50, cache_creation: 30.00 },
+    "claude-sonnet-4-6": { input:  3.00, output: 15.00, cache_read: 0.30, cache_creation:  6.00 },
+    "claude-sonnet-4-5": { input:  3.00, output: 15.00, cache_read: 0.30, cache_creation:  6.00 },
+    "claude-haiku-4-5":  { input:  1.00, output:  5.00, cache_read: 0.10, cache_creation:  2.00 },
+    "default":           { input:  5.00, output: 25.00, cache_read: 0.50, cache_creation: 10.00 }
+  };
+
+  function costForRow(row) {
+    const r = RATES[row.model] || RATES.default;
+    return ((row.input_tokens          || 0) / 1e6) * r.input
+         + ((row.output_tokens         || 0) / 1e6) * r.output
+         + ((row.cache_read_tokens     || 0) / 1e6) * r.cache_read
+         + ((row.cache_creation_tokens || 0) / 1e6) * r.cache_creation;
+  }
+  function fmtCost(usd) {
+    if (usd == null || isNaN(usd)) return "—";
+    if (usd >= 10000) return "$" + Math.round(usd).toLocaleString();
+    if (usd >= 1)     return "$" + usd.toFixed(2);
+    if (usd >= 0.01)  return "$" + usd.toFixed(3);
+    if (usd === 0)    return "$0.00";
+    return "<$0.01";
+  }
+
+  function buildUsage() {
+    const hasRows = USAGE && USAGE.totals && (USAGE.by_day || []).length > 0;
+    if (!hasRows) {
+      // Section stays hidden — FR-7
+      $("#usage-sec").classList.add("hidden");
+      $("#usage-body").classList.add("hidden");
+      return;
+    }
+    $("#usage-sec").classList.remove("hidden");
+    $("#usage-body").classList.remove("hidden");
+
+    // This week's rows: by_day rows whose `day` falls in the current ISO week.
+    const now = TRACKER.last_updated ? new Date(TRACKER.last_updated) : new Date();
+    const weekStart = isoMonday(now);
+    const weekRows = (USAGE.by_day || []).filter(r => {
+      const d = new Date(r.day);
+      return !isNaN(d) && d >= weekStart && d < new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+    });
+
+    const sumWeek = weekRows.reduce((s, r) => ({
+      input_tokens:          (s.input_tokens          || 0) + (r.input_tokens          || 0),
+      output_tokens:         (s.output_tokens         || 0) + (r.output_tokens         || 0),
+      cache_read_tokens:     (s.cache_read_tokens     || 0) + (r.cache_read_tokens     || 0),
+      cache_creation_tokens: (s.cache_creation_tokens || 0) + (r.cache_creation_tokens || 0)
+    }), {});
+    const weekTokens = (sumWeek.input_tokens || 0) + (sumWeek.output_tokens || 0) + (sumWeek.cache_read_tokens || 0) + (sumWeek.cache_creation_tokens || 0);
+
+    // Cost: sum cost per model row, scaled to this week's fraction-by-model is
+    // not knowable from by_day (which mixes models). Best honest signal: sum
+    // by_model rows (exact across all time) — for the week, fall back to an
+    // approximation: weekly tokens × global $/MTok blended rate. To avoid
+    // misleading numbers, we instead compute "all-time cost" from by_model and
+    // "this-week tokens" from by_day. The weekly cost line uses the all-time
+    // average per-token cost × week tokens. Honest: it's an estimate.
+    const allCost = (USAGE.by_model || []).reduce((s, r) => s + costForRow(r), 0);
+    const allTokens = (USAGE.by_model || []).reduce((s, r) =>
+      s + (r.input_tokens || 0) + (r.output_tokens || 0) + (r.cache_read_tokens || 0) + (r.cache_creation_tokens || 0), 0);
+    const avgUsdPerToken = allTokens > 0 ? allCost / allTokens : 0;
+    const weekCost = weekTokens * avgUsdPerToken;
+
+    $("#usage-body").innerHTML = `
+      <div class="usage-line">
+        <span><b>${fmtNum(weekTokens)}</b> tokens this week</span>
+        <span class="dim">·</span>
+        <span><b>${fmtCost(weekCost)}</b> est. cost (API rates)</span>
+        <a class="arrow" href="usage.html" target="_blank" rel="noopener">See full usage detail →</a>
+      </div>
+    `;
+    $("#usage-end").textContent = `week of ${fmtDateShort(weekStart.toISOString())}`;
+  }
+
+  /* =========================================================
+     DELIVERY METRICS — conditional (hidden unless window.METRICS non-empty)
+     Estimation baseline derived from .forge/metrics/*.jsonl.
+     ========================================================= */
+  function buildMetrics() {
+    const hasMetrics = METRICS && !METRICS.empty && (
+      ((METRICS.events && METRICS.events.total) || 0) > 0 ||
+      ((METRICS.agent_runs && METRICS.agent_runs.total) || 0) > 0 ||
+      ((METRICS.snapshots && METRICS.snapshots.count) || 0) > 0
+    );
+    if (!hasMetrics) {
+      $("#metrics-sec").classList.add("hidden");
+      $("#metrics-body").classList.add("hidden");
+      return;
+    }
+
+    $("#metrics-sec").classList.remove("hidden");
+    $("#metrics-body").classList.remove("hidden");
+
+    const ev = METRICS.events || {};
+    const runs = METRICS.agent_runs || {};
+    const snaps = METRICS.snapshots || {};
+    const cyc = METRICS.cycle || {};
+    const thr = METRICS.throughput || {};
+    const value = v => (v == null ? "—" : fmtNum(v));
+    const days = v => (v == null ? "—" : `${value(v)}d`);
+    const hrs  = v => (v == null ? "—" : `${value(v)}h`);
+    const rate = v => (v == null ? "—" : value(v));
+    const winN = thr.window_days || METRICS.window_days || 14;
+
+    // Group 1 — cycle time. The feature clock starts at feature_started (the first
+    // /forge-deliver invocation), so spec authoring is captured rather than lost.
+    // Wave 1 carries the decomp+build ramp (spec_approved → wave-1 merged); later
+    // waves are build-only (prev-wave merged → this-wave merged) and run faster.
+    const cycleTiles = [
+      { lbl: "Median feature cycle", value: days(cyc.median_feature_days), sub: `start → done · ${value(snaps.count || 0)} feature${(snaps.count || 0) === 1 ? "" : "s"}` },
+      { lbl: "Spec authoring", value: hrs(cyc.median_spec_hours), sub: "1st deliver → spec approved" },
+      { lbl: "Wave 1 cycle", value: hrs(cyc.median_wave1_hours), sub: "spec → 1st wave · decomp + build" },
+      { lbl: "Later-wave cycle", value: hrs(cyc.median_later_wave_hours), sub: `build only · ${value(cyc.later_wave_count || 0)} later wave${(cyc.later_wave_count || 0) === 1 ? "" : "s"}` }
+    ];
+    // Group 2 — throughput (team velocity over a rolling window).
+    const thrTiles = [
+      { lbl: "Features / day", value: rate(thr.features_per_day), sub: `${value(thr.features_in_window || 0)} in last ${winN}d` },
+      { lbl: "Waves / day", value: rate(thr.waves_per_day), sub: `${value(thr.waves_in_window || 0)} in last ${winN}d` }
+    ];
+    // Group 3 — complexity / load signals (what a feature costs).
+    const cmpTiles = [
+      { lbl: "Median WIs / feature", value: value(snaps.median_workitems), sub: "complexity size signal" },
+      { lbl: "Median agent runs", value: value(snaps.median_agent_runs), sub: "implementation-load signal" }
+    ];
+
+    const grid = (title, tiles) => `
+      <div class="metrics-group">
+        <div class="metrics-group-title">${escapeHtml(title)}</div>
+        <div class="signals">
+          ${tiles.map(t => `
+            <div>
+              <div class="sig-lbl">${escapeHtml(t.lbl)}</div>
+              <div class="sig-val">${escapeHtml(t.value)}</div>
+              <div class="sig-sub">${escapeHtml(t.sub)}</div>
+            </div>`).join("")}
+        </div>
+      </div>`;
+
+    // baseline volume — the denominators behind the medians, demoted to a footnote.
+    const baseline = `${value(ev.features_done)} features · ${value(ev.waves_merged)} waves · `
+      + `${value(runs.total)} agent runs (${value(runs.repairs || 0)} repair/retry) · `
+      + `${value(snaps.count || 0)} snapshot${(snaps.count || 0) === 1 ? "" : "s"}`;
+
+    $("#metrics-body").innerHTML = `
+      <div class="signals-callout">
+        <p><strong>Reading the metrics:</strong> these are historical baselines and estimation signals from append-only ledgers, not delivery commitments.</p>
+      </div>
+      ${grid("Cycle time", cycleTiles)}
+      ${grid(`Throughput · rolling ${winN}d`, thrTiles)}
+      ${grid("Complexity signals", cmpTiles)}
+      <p class="metrics-baseline"><strong>Baseline volume:</strong> ${escapeHtml(baseline)}</p>`;
+    $("#metrics-end").textContent = METRICS.generated_at ? `updated ${fmtDateShort(METRICS.generated_at)}` : "v1 baseline";
+  }
+
+  /* =========================================================
+     RECENT ACTIVITY
+     ========================================================= */
+  function buildActivity() {
+    const events = [];
+
+    // Phase transitions
+    (DEL.phases || []).forEach(p => {
+      if (p.sealed)  events.push({ when: p.sealed,  kind: "phase",   text: `Phase ${p.id} <b>${escapeHtml(p.title || "")}</b> sealed`, ref: "delivery" });
+      if (p.started && p.status !== "complete") events.push({ when: p.started, kind: "phase", text: `Phase ${p.id} <b>${escapeHtml(p.title || "")}</b> opened`, ref: "delivery" });
+    });
+
+    // Feature last_updated
+    DEL.features.forEach(f => {
+      if (f.last_updated) {
+        events.push({
+          when: f.last_updated,
+          kind: "feature",
+          text: `<b>${escapeHtml(f.title || f.id)}</b> · ${escapeHtml(FEATURE_PHASE_LABEL[f.phase] || f.phase || "")}`,
+          ref: f.jira || f.id
+        });
+      }
+    });
+
+    // Setup gate runs
+    const s = TRACKER.setup || {};
+    [["project_prd","Gate 1 (PRD)"], ["architecture","Gate 2 (Arch)"], ["decomposition","Gate 3 (Decomp)"]].forEach(([k, label]) => {
+      const it = s[k] || {};
+      if (it.last_gate_run) events.push({ when: it.last_gate_run, kind: "gate", text: `<b>${label}</b> run`, ref: it.status || "" });
+    });
+
+    const sorted = events
+      .filter(e => e.when)
+      .sort((a, b) => new Date(b.when) - new Date(a.when))
+      .slice(0, 5);
+
+    if (sorted.length === 0) {
+      $("#activity-body").innerHTML = `<div class="activity-empty">No tracked activity yet.</div>`;
+      $("#activity-end").textContent = "—";
+      return;
+    }
+
+    $("#activity-body").innerHTML = sorted.map(e => `
+      <div class="row">
+        <span class="when">${relTime(e.when) || fmtDate(e.when)}</span>
+        <span class="what"><span class="kind">${e.kind}</span>${e.text}</span>
+        <span class="ref">${escapeHtml(e.ref || "")}</span>
+      </div>
+    `).join("");
+    $("#activity-end").textContent = `last ${sorted.length}`;
+  }
+
+  /* =========================================================
+     WAVE DRUMBEAT (conditional — renders only when a feature
+     carries waves[]; hidden entirely in feature-mode projects)
+     ========================================================= */
+  function buildWaveDrumbeat() {
+    const features = Object.entries(TRACKER.features || {}).map(([id, f]) => ({ id, ...f }));
+    const featuresWithWaves = features.filter(f => Array.isArray(f.waves) && f.waves.length > 0);
+
+    // Conditional render — only show if at least one feature has waves[].
+    if (featuresWithWaves.length === 0) return;
+
+    const sec  = $("#wave-drumbeat-sec");
+    const body = $("#wave-drumbeat-body");
+    sec.classList.remove("hidden");
+    body.classList.remove("hidden");
+
+    // GitHub org/owner for click-through PR-search URLs. Read from
+    // window.TRACKER.github_org (a tracker.yaml field projects set). When unset,
+    // repo cells render as plain text rather than broken links.
+    const ORG = (TRACKER.github_org || "");
+
+    // Flatten all waves across features, normalized:
+    //   { featureId, waveNum, status, merged_at, deps, repos }
+    // `repos` is the union of workitems[*].touched_repos for that wave —
+    // used to compute per-repo click-through URLs.
+    const allWaves = [];
+    featuresWithWaves.forEach(f => {
+      (f.waves || []).forEach(w => {
+        const wis = Array.isArray(w.workitems) ? w.workitems : [];
+        const repos = Array.from(new Set(wis.flatMap(wi => Array.isArray(wi.touched_repos) ? wi.touched_repos : [])));
+        allWaves.push({
+          featureId: f.id,
+          featureTitle: f.title || "",
+          waveNum: w.wave,
+          status: w.status || "planned",
+          merged_at: w.merged_at || null,
+          deps: Array.isArray(w.depends_on) ? w.depends_on : [],
+          repos,
+        });
+      });
+    });
+
+    // --- "Today" list: waves whose `merged_at` is today's ISO date.
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const mergedToday = allWaves.filter(w => (w.merged_at || "").startsWith(todayIso));
+
+    // --- 14-day bar list: counts of waves merged per day, last 14 days.
+    function dayShift(iso, deltaDays) {
+      const d = new Date(iso + "T00:00:00");
+      d.setUTCDate(d.getUTCDate() + deltaDays);
+      return d.toISOString().slice(0, 10);
+    }
+    const last14 = [];
+    for (let i = 13; i >= 0; i--) {
+      const iso = dayShift(todayIso, -i);
+      const count = allWaves.filter(w => (w.merged_at || "").startsWith(iso)).length;
+      last14.push({ iso, count });
+    }
+    const maxCount = Math.max(1, ...last14.map(d => d.count));
+
+    // --- Median wave-to-wave merge latency over the last 30 days, per feature.
+    // For each feature with ≥2 merged waves in the last 30 days, compute
+    // pairwise (waves[N+1].merged_at - waves[N].merged_at) for sequentially
+    // numbered N, N+1, then aggregate medians across features. This merge-to-
+    // merge figure includes wave N+1's implementation time on top of the human
+    // handoff wait between merges — a coarse but informative wave-cadence proxy.
+    const cutoff30 = dayShift(todayIso, -29);
+    const latenciesDays = [];
+    featuresWithWaves.forEach(f => {
+      const merged = (f.waves || [])
+        .filter(w => w.status === "merged" && w.merged_at && w.merged_at >= cutoff30)
+        .sort((a, b) => a.wave - b.wave);
+      for (let i = 0; i < merged.length - 1; i++) {
+        const a = merged[i];
+        const b = merged[i + 1];
+        if (b.wave === a.wave + 1) {
+          const dayA = new Date(a.merged_at + "T00:00:00");
+          const dayB = new Date(b.merged_at + "T00:00:00");
+          const diffDays = Math.max(0, (dayB - dayA) / (1000 * 60 * 60 * 24));
+          latenciesDays.push(diffDays);
+        }
+      }
+    });
+    function medianOf(arr) {
+      if (arr.length === 0) return null;
+      const sorted = [...arr].sort((a, b) => a - b);
+      const m = Math.floor(sorted.length / 2);
+      return sorted.length % 2 ? sorted[m] : (sorted[m - 1] + sorted[m]) / 2;
+    }
+    const medianLatency = medianOf(latenciesDays);
+
+    // --- Wave-PR click-through URL helper. The tracker does not carry wave-PR
+    // URLs, so the link is a GitHub PR search by the wave's head branch.
+    function wavePrSearchUrl(repo, featureId, waveNum) {
+      const headSpec = encodeURIComponent(`head:feature/${featureId}-wave-${waveNum}`);
+      return `https://github.com/${ORG}/${repo}/pulls?q=is%3Apr+${headSpec}`;
+    }
+
+    // --- Repo cell: links when github_org is set, plain text otherwise.
+    function repoCell(repos, featureId, waveNum) {
+      if (repos.length === 0) return `<span style="color: var(--text-tertiary);">no touched repos recorded</span>`;
+      if (!ORG) return escapeHtml(repos.join(", "));
+      return repos.map(r => `<a href="${wavePrSearchUrl(r, featureId, waveNum)}" target="_blank" rel="noopener">${escapeHtml(r)}</a>`).join(", ");
+    }
+
+    // --- Status pill helper.
+    function waveStatusPill(s) {
+      switch (s) {
+        case "merged":      return `<span class="del-tab-status complete">● merged</span>`;
+        case "pr-open":     return `<span class="del-tab-status in-progress">◐ pr-open</span>`;
+        case "in-progress": return `<span class="del-tab-status in-progress">● in progress</span>`;
+        default:            return `<span class="del-tab-status">${escapeHtml(s)}</span>`;
+      }
+    }
+
+    // --- Render.
+    const totalMerged = allWaves.filter(w => w.status === "merged").length;
+    const totalOpen   = allWaves.filter(w => w.status === "pr-open").length;
+    $("#wave-drumbeat-end").textContent =
+      `${pad2(totalMerged)} merged · ${pad2(totalOpen)} pr-open` +
+      (medianLatency != null ? ` · median ${medianLatency.toFixed(1)}d wave-merge→wave-merge (30d)` : "");
+
+    // 14-day bar list.
+    const barHtml = last14.map(d => {
+      const heightPct = Math.round((d.count / maxCount) * 100);
+      const label = d.iso.slice(5);   // MM-DD
+      return `
+        <div class="wd-bar-col" title="${d.iso}: ${d.count} wave(s) merged">
+          <div class="wd-bar" style="height: ${Math.max(4, heightPct)}%"></div>
+          <div class="wd-bar-count">${d.count > 0 ? d.count : ""}</div>
+          <div class="wd-bar-label">${label}</div>
+        </div>`;
+    }).join("");
+
+    // Today list.
+    const todayHtml = mergedToday.length === 0
+      ? `<div class="del-empty">No waves merged today.</div>`
+      : mergedToday.map(w => `
+            <div class="wd-row">
+              <span class="wd-row-id"><b>${escapeHtml(w.featureId)}</b> wave ${w.waveNum}</span>
+              <span class="wd-row-title">${escapeHtml(w.featureTitle)}</span>
+              <span class="wd-row-repos">${repoCell(w.repos, w.featureId, w.waveNum)}</span>
+            </div>`).join("");
+
+    // Open / in-progress waves (live).
+    const liveWaves = allWaves.filter(w => w.status === "pr-open" || w.status === "in-progress");
+    const liveHtml = liveWaves.length === 0
+      ? ""
+      : `
+        <h4 class="wd-subhead">Live waves</h4>
+        ${liveWaves.map(w => {
+          const depsTxt = w.deps.length > 0 ? `deps: [${w.deps.join(", ")}]` : "no deps";
+          return `
+            <div class="wd-row">
+              <span class="wd-row-id"><b>${escapeHtml(w.featureId)}</b> wave ${w.waveNum}</span>
+              <span class="wd-row-title">${waveStatusPill(w.status)} · ${escapeHtml(depsTxt)}</span>
+              <span class="wd-row-repos">${repoCell(w.repos, w.featureId, w.waveNum)}</span>
+            </div>`;
+        }).join("")}`;
+
+    body.innerHTML = `
+      <style>
+        .wd-bars { display: flex; gap: 4px; align-items: flex-end; height: 96px; padding: 8px 0 0; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+        .wd-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+        .wd-bar { width: 100%; max-width: 24px; background: var(--accent-primary); border-radius: 2px 2px 0 0; min-height: 4px; }
+        .wd-bar-count { font-size: 10px; color: var(--text-secondary); height: 12px; }
+        .wd-bar-label { font-size: 9.5px; color: var(--text-tertiary); font-family: var(--font-mono); }
+        .wd-subhead { margin: 16px 0 6px; font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+        .wd-row { display: grid; grid-template-columns: 140px 1fr 180px; gap: 12px; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 12.5px; align-items: baseline; }
+        .wd-row-id { font-family: var(--font-mono); font-size: 12px; }
+        .wd-row-title { color: var(--text-secondary); }
+        .wd-row-repos { font-size: 11.5px; text-align: right; }
+        .wd-row-repos a { color: var(--accent-primary); text-decoration: none; }
+        .wd-row-repos a:hover { text-decoration: underline; }
+      </style>
+      <div class="wd-bars" aria-label="14-day wave-merge bar chart">${barHtml}</div>
+      <h4 class="wd-subhead">Merged today (${mergedToday.length})</h4>
+      ${todayHtml}
+      ${liveHtml}
+    `;
+  }
+
+  /* =========================================================
+     INIT
+     ========================================================= */
+  buildHero();
+  buildKpis();
+  buildSetup();
+  buildDelivery();
+  buildRelease();
+  buildWaveDrumbeat();
+  buildSignals();
+  buildMetrics();
+  buildUsage();
+  buildActivity();
+}
+</script>
+</body>
+</html>

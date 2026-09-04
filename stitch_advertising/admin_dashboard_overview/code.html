@@ -1,0 +1,326 @@
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={theme:{extend:{"colors":{"surface-container":"#eceef0","on-secondary-container":"#57657a","surface-container-high":"#e6e8ea","error":"#ba1a1a","surface-container-low":"#f2f4f6","on-error-container":"#93000a","inverse-on-surface":"#eff1f3","secondary":"#515f74","on-tertiary-fixed-variant":"#005236","surface-variant":"#e0e3e5","background":"#f7f9fb","surface-container-lowest":"#ffffff","primary":"#000000","tertiary":"#000000","primary-container":"#131b2e","on-secondary":"#ffffff","surface-dim":"#d8dadc","outline":"#76777d","outline-variant":"#c6c6cd","secondary-fixed":"#d5e3fc","surface":"#f7f9fb","on-surface-variant":"#45464d","inverse-surface":"#2d3133","tertiary-container":"#002113","secondary-container":"#d5e3fc","surface-container-highest":"#e0e3e5","on-secondary-fixed-variant":"#3a485b","surface-bright":"#f7f9fb","primary-fixed-dim":"#bec6e0","tertiary-fixed":"#6ffbbe","secondary-fixed-dim":"#b9c7df","on-tertiary-container":"#009668","on-primary-fixed":"#131b2e","surface-tint":"#565e74","inverse-primary":"#bec6e0","on-primary":"#ffffff","on-tertiary-fixed":"#002113","on-primary-container":"#7c839b","error-container":"#ffdad6","on-tertiary":"#ffffff","primary-fixed":"#dae2fd","on-surface":"#191c1e","on-background":"#191c1e","on-primary-fixed-variant":"#3f465c","on-secondary-fixed":"#0d1c2e","on-error":"#ffffff","tertiary-fixed-dim":"#4edea3"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"sidebar-width":"260px","stack-compact":"8px","gutter":"16px","table-row-height":"48px","container-padding":"24px","sidebar-collapsed":"72px","stack-loose":"16px","base":"4px"},"fontFamily":{"data-mono":["Manrope"],"body-sm":["Manrope"],"title-sm":["Manrope"],"label-caps":["Manrope"],"body-md":["Manrope"],"display-lg":["Manrope"],"headline-md":["Manrope"]},"fontSize":{"data-mono":["14px",{"lineHeight":"20px","fontWeight":"500"}],"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"title-sm":["18px",{"lineHeight":"24px","fontWeight":"600"}],"label-caps":["11px",{"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"display-lg":["30px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}]}}}}</script><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/></head><body class="bg-background font-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-[260px] bg-primary-container text-on-primary-container z-50 flex flex-col transition-all duration-300 shadow-xl"><div class="h-16 flex items-center px-6 gap-3 mb-4"><img alt="Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XMvA35tJ3JcmWW3Qh3xuToENDZURqJ1hmeBHnUShjH3TfjHFrsty1rDgk6ZZXiRzRrl5h2hyOf-U1lMxLdyRjK4o_nENdqc7M6Gw4J1vIqE1dtKyT6spOTht3m3YOjV1R9ERGFYFXwdnZf925Wzhb4t6Dlm77n0lAzfv6ZA1VpUjPQCN4_blxeNViKO-T4kc-8czpVEr9jcpd-P0TGwyqUNBdDhouBDBJYzF50DX0P2to8OAv5mNLTqKIb"/><span class="font-headline-md text-title-sm text-on-primary tracking-tight">LankaListings</span></div><nav class="flex-1 space-y-1 px-3 overflow-y-auto" data-active-classes="bg-secondary/20 text-on-primary border-l-4 border-tertiary-fixed"><a aria-current="page" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors bg-secondary/20 text-on-primary border-l-4 border-tertiary-fixed" data-path="dashboard" href="#"><span class="material-symbols-outlined">dashboard</span><span class="font-body-md">Dashboard</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:bg-surface-container-highest/10 hover:text-on-primary transition-colors" data-path="advertisements" href="#"><span class="material-symbols-outlined">ads_click</span><span class="font-body-md">Advertisements</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:bg-surface-container-highest/10 hover:text-on-primary transition-colors" data-path="moderation-queue" href="#"><span class="material-symbols-outlined">fact_check</span><span class="font-body-md">Moderation Queue</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:bg-surface-container-highest/10 hover:text-on-primary transition-colors" data-path="users" href="#"><span class="material-symbols-outlined">group</span><span class="font-body-md">Users</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:bg-surface-container-highest/10 hover:text-on-primary transition-colors" data-path="categories" href="#"><span class="material-symbols-outlined">category</span><span class="font-body-md">Categories</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:bg-surface-container-highest/10 hover:text-on-primary transition-colors" data-path="reports" href="#"><span class="material-symbols-outlined">assessment</span><span class="font-body-md">Reports</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:bg-surface-container-highest/10 hover:text-on-primary transition-colors" data-path="plans-promotions" href="#"><span class="material-symbols-outlined">loyalty</span><span class="font-body-md">Plans &amp; Promotions</span></a><div class="my-4 border-t border-on-primary-container/10"></div><a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:bg-surface-container-highest/10 hover:text-on-primary transition-colors" data-path="settings" href="#"><span class="material-symbols-outlined">settings</span><span class="font-body-md">Settings</span></a></nav></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-16 bg-surface/80 backdrop-blur-xl border-b border-outline-variant z-40 flex items-center justify-between px-8"><div class="flex items-center bg-surface-container-low px-4 py-2 rounded-full w-96 border border-outline-variant"><span class="material-symbols-outlined text-on-surface-variant text-lg">search</span><input class="bg-transparent border-none outline-none ml-2 text-body-sm w-full text-on-surface" placeholder="Global search..." type="text"/></div><div class="flex items-center gap-6"><button class="relative text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined">notifications</span><span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span></button><div class="flex items-center gap-3 pl-6 border-l border-outline-variant"><div class="text-right"><p class="text-body-sm font-semibold text-on-surface">Admin User</p><p class="text-label-caps text-on-surface-variant uppercase">Super Admin</p></div><img alt="Profile" class="w-9 h-9 rounded-full object-cover border border-outline-variant" src="https://lh3.googleusercontent.com/aida/AEtjO1V33vFFIOps13-q95aDbuU-dsrdeMr4lO6CusKGzCttFlklUGI3mDV5ONbu4J_DMJgGUpBB6QWBz7TreGVGtyR3CtVNBHA6koSrGwZPgHB8lHSJjGy-sbUhQN7ezjqPYPik0i6BPkk_lBYY-CB9xGTWnEkP3WRGEisDSX8jtU0oLmNaBhcHf8WZ1jWMIMeNm-AugibLCyfSInMcDA0kVKRbY5q8zTcNCJ5NNcQdSRpJrsKLiOCzkf47ebI"/></div></div></header><main class="relative pt-16 min-h-screen bg-background"><div class="flex flex-col w-full px-6 py-6 gap-6">
+<!-- KPI Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start mb-2">
+<span class="text-label-caps text-on-surface-variant uppercase">Ads Awaiting Review</span>
+<span class="material-symbols-outlined text-outline">pending_actions</span>
+</div>
+<div>
+<div class="text-display-lg text-on-surface font-data-mono mb-1">482</div>
+<div class="flex items-center gap-1 text-body-sm text-[#d97706]">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>+12% since yesterday</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start mb-2">
+<span class="text-label-caps text-on-surface-variant uppercase">Active Ads</span>
+<span class="material-symbols-outlined text-outline">check_circle</span>
+</div>
+<div>
+<div class="text-display-lg text-on-surface font-data-mono mb-1">24,150</div>
+<div class="flex items-center gap-1 text-body-sm text-[#059669]">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>+2.5k this week</span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start mb-2">
+<span class="text-label-caps text-on-surface-variant uppercase">Reported Ads</span>
+<span class="material-symbols-outlined text-outline">report</span>
+</div>
+<div>
+<div class="text-display-lg text-on-surface font-data-mono mb-1">34</div>
+<div class="flex items-center gap-1 text-body-sm text-error">
+<span class="material-symbols-outlined text-[16px]">warning</span>
+<span>Action required</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start mb-2">
+<span class="text-label-caps text-on-surface-variant uppercase">New Users Today</span>
+<span class="material-symbols-outlined text-outline">group_add</span>
+</div>
+<div>
+<div class="text-display-lg text-on-surface font-data-mono mb-1">156</div>
+<div class="flex items-center gap-1 text-body-sm text-secondary">
+<span class="material-symbols-outlined text-[16px]">info</span>
+<span>On track</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Content Area: Charts & Table vs Sidebar -->
+<div class="flex flex-col lg:flex-row gap-6 w-full">
+<!-- Left Column (Main Data) -->
+<div class="flex flex-col flex-1 gap-6 min-w-0">
+<!-- Charts Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+<!-- Category Chart -->
+<div class="bg-surface-container-lowest p-5 rounded-xl shadow-sm h-64 flex flex-col relative overflow-hidden">
+<h3 class="text-title-sm text-on-surface mb-4">Listings by Category</h3>
+<div class="flex-1 flex items-end gap-2 px-2 pb-2">
+<!-- Simulated Bar Chart -->
+<div class="flex-1 bg-secondary/20 rounded-t-sm h-[80%] relative group">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-inverse-surface text-inverse-on-surface text-label-caps px-2 py-1 rounded transition-opacity">Vehicles</div>
+</div>
+<div class="flex-1 bg-secondary/20 rounded-t-sm h-[65%] relative group">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-inverse-surface text-inverse-on-surface text-label-caps px-2 py-1 rounded transition-opacity">Property</div>
+</div>
+<div class="flex-1 bg-secondary/20 rounded-t-sm h-[45%] relative group">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-inverse-surface text-inverse-on-surface text-label-caps px-2 py-1 rounded transition-opacity">Electronics</div>
+</div>
+<div class="flex-1 bg-secondary/20 rounded-t-sm h-[30%] relative group">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-inverse-surface text-inverse-on-surface text-label-caps px-2 py-1 rounded transition-opacity">Services</div>
+</div>
+<div class="flex-1 bg-secondary/20 rounded-t-sm h-[20%] relative group">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-inverse-surface text-inverse-on-surface text-label-caps px-2 py-1 rounded transition-opacity">Jobs</div>
+</div>
+</div>
+<div class="flex justify-between text-label-caps text-on-surface-variant px-2 mt-2 border-t border-outline-variant/30 pt-2">
+<span>Veh</span><span>Prp</span><span>Elc</span><span>Srv</span><span>Job</span>
+</div>
+</div>
+<!-- Regional Distribution -->
+<div class="bg-surface-container-lowest p-5 rounded-xl shadow-sm h-64 flex flex-col relative overflow-hidden">
+<h3 class="text-title-sm text-on-surface mb-4">Regional Distribution</h3>
+<div class="flex-1 overflow-y-auto pr-2 space-y-3 scrollbar-hide">
+<div>
+<div class="flex justify-between text-body-sm mb-1">
+<span class="text-on-surface font-medium">Western Province</span>
+<span class="text-on-surface-variant font-data-mono">12,450</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-1.5">
+<div class="bg-primary h-1.5 rounded-full" style="width: 75%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-body-sm mb-1">
+<span class="text-on-surface font-medium">Central Province</span>
+<span class="text-on-surface-variant font-data-mono">4,120</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-1.5">
+<div class="bg-primary/80 h-1.5 rounded-full" style="width: 45%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-body-sm mb-1">
+<span class="text-on-surface font-medium">Southern Province</span>
+<span class="text-on-surface-variant font-data-mono">3,890</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-1.5">
+<div class="bg-primary/60 h-1.5 rounded-full" style="width: 35%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-body-sm mb-1">
+<span class="text-on-surface font-medium">North Western</span>
+<span class="text-on-surface-variant font-data-mono">1,800</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-1.5">
+<div class="bg-primary/40 h-1.5 rounded-full" style="width: 20%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Needs Attention Table -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col min-h-[400px]">
+<div class="p-5 border-b border-outline-variant/30 flex justify-between items-center bg-surface/50 backdrop-blur-sm">
+<div>
+<h3 class="text-title-sm text-on-surface">Needs Attention</h3>
+<p class="text-body-sm text-on-surface-variant">High-priority moderation queue</p>
+</div>
+<button class="text-body-sm font-semibold text-primary hover:text-primary-container px-3 py-1.5 rounded-lg transition-colors">
+            View All
+          </button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-label-caps text-on-surface-variant">
+<th class="p-3 font-semibold w-12 text-center pl-4">Ad</th>
+<th class="p-3 font-semibold">Title &amp; Category</th>
+<th class="p-3 font-semibold">Seller</th>
+<th class="p-3 font-semibold">Submitted</th>
+<th class="p-3 font-semibold text-right">AI Flags</th>
+<th class="p-3 font-semibold text-center w-24">Action</th>
+</tr>
+</thead>
+<tbody class="text-body-sm align-middle">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant/20 hover:bg-surface-container-low/50 transition-colors group h-14">
+<td class="p-2 pl-4">
+<div class="w-10 h-10 rounded bg-surface-container-highest overflow-hidden" data-alt="A clean, professional thumbnail image of a white Toyota Corolla 2018 parked on a sunny street in Colombo. Soft natural lighting, crisp details, corporate aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC_O5XO-tSHcCtj_0VaXrgQnnc0vfFNWzf3m470dOd5AHkOODF1CktbOqQIrA1vnmhsVZBQCgO8kIi5M54NUbga-m-4XSELdpAI9HJTc2GlITsfIHM-WPzqO7WqwFWze6mYO77e_EO-3PhTtBdvKMYJ5MMQWApDhb_udhJcb7mz1TQ50GyEyp9Rfsn_nVUW-Au69L-F6gdJBDA8AUqm_OEdddQq62jCupQ4HP-wZlAE5VggIW8IJb8RfQ')"></div>
+</td>
+<td class="p-2">
+<div class="font-medium text-on-surface truncate max-w-[200px]">Toyota Corolla 2018</div>
+<div class="text-on-surface-variant text-[12px]">Vehicles &gt; Cars</div>
+</td>
+<td class="p-2">
+<div class="text-on-surface truncate max-w-[120px]">Kamal P.</div>
+</td>
+<td class="p-2 text-on-surface-variant font-data-mono text-[12px]">10m ago</td>
+<td class="p-2 text-right">
+<div class="inline-flex items-center gap-1.5 bg-error/10 text-error px-2 py-0.5 rounded-full text-[11px] font-semibold">
+<span class="material-symbols-outlined text-[14px]">warning</span> Price Outlier (98%)
+                  </div>
+</td>
+<td class="p-2 text-center">
+<button class="opacity-0 group-hover:opacity-100 bg-primary text-on-primary px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all shadow-sm hover:shadow">
+                    Review
+                  </button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant/20 hover:bg-surface-container-low/50 transition-colors group h-14">
+<td class="p-2 pl-4">
+<div class="w-10 h-10 rounded bg-surface-container-highest overflow-hidden" data-alt="Thumbnail image of an empty plot of lush green land in Kandy, Sri Lanka. Hilly terrain in the background, bright daylight, real estate listing style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDs-mY8sgUkQ1EpVkZMGQhLvM4rJuBVTb6GFLurOAuDbFVM3PtzWqUdoc5ugbzqQ1bOLMACBJfCV7odRGRK82U6U_I5piLfFhFgnH5DGkG93iE-79GiKk9IcvuIumUjiaDuFfMqoeWSyokaXocv9ruq2JO4AE5WtwL4g2_QvFQvCCgczteIVon_wXggWbWMVZz8psNiNDRrnGeb_5zPGu5-Ac_OplEFDr-IIVVEewr5hgFbpzlXtc6CvA')"></div>
+</td>
+<td class="p-2">
+<div class="font-medium text-on-surface truncate max-w-[200px]">20 Perch Land in Kandy</div>
+<div class="text-on-surface-variant text-[12px]">Property &gt; Land</div>
+</td>
+<td class="p-2">
+<div class="text-on-surface truncate max-w-[120px]">Silva Real Estate</div>
+</td>
+<td class="p-2 text-on-surface-variant font-data-mono text-[12px]">45m ago</td>
+<td class="p-2 text-right">
+<div class="inline-flex items-center gap-1.5 bg-[#f59e0b]/10 text-[#d97706] px-2 py-0.5 rounded-full text-[11px] font-semibold">
+<span class="material-symbols-outlined text-[14px]">content_copy</span> Duplicate Image (85%)
+                  </div>
+</td>
+<td class="p-2 text-center">
+<button class="opacity-0 group-hover:opacity-100 bg-primary text-on-primary px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all shadow-sm hover:shadow">
+                    Review
+                  </button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-outline-variant/20 hover:bg-surface-container-low/50 transition-colors group h-14">
+<td class="p-2 pl-4">
+<div class="w-10 h-10 rounded bg-surface-container-highest overflow-hidden" data-alt="Thumbnail image of an iPhone 13 Pro Max in graphite color, resting on a clean white table. Top down view, studio lighting, electronics listing aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDEuJEyNnlSqjKCmzJvR0HDEjUbFGtEAKcfoRmjPwMpUYbFjo4PRCJr5GO0VMn0mw8RQ0qNKMocmxtKa4-h0z3zy3_xcz8viqS1gZMPjahKwgP5fNCOq21H1t_KmD2JrhBIcBVhsUllQgTpOTmFwr5HxuhNPLp9sxzHY20kUTV485aH8Qcje29Hi_3G4-FvpWxKEyl9-to3zANHhmH5DNXX223LriyOnudIL4HMDw9CI9YBe06MdEoFSQ')"></div>
+</td>
+<td class="p-2">
+<div class="font-medium text-on-surface truncate max-w-[200px]">iPhone 13 Pro Max 256GB</div>
+<div class="text-on-surface-variant text-[12px]">Electronics &gt; Phones</div>
+</td>
+<td class="p-2">
+<div class="text-on-surface truncate max-w-[120px]">TechHub LK</div>
+</td>
+<td class="p-2 text-on-surface-variant font-data-mono text-[12px]">1h ago</td>
+<td class="p-2 text-right">
+<div class="inline-flex items-center gap-1.5 bg-error/10 text-error px-2 py-0.5 rounded-full text-[11px] font-semibold">
+<span class="material-symbols-outlined text-[14px]">gavel</span> User Reported (3)
+                  </div>
+</td>
+<td class="p-2 text-center">
+<button class="opacity-0 group-hover:opacity-100 bg-primary text-on-primary px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all shadow-sm hover:shadow">
+                    Review
+                  </button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="border-b border-outline-variant/20 hover:bg-surface-container-low/50 transition-colors group h-14">
+<td class="p-2 pl-4">
+<div class="w-10 h-10 rounded bg-surface-container-highest overflow-hidden" data-alt="Thumbnail image of a modern sofa set in a living room setup. Grey fabric, minimalist design, interior furniture listing style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDgbIAaHG8bq63SFDABVTPpLBQsZxm4fGLZk7GY1jdkYrzyM_2j6v_LDfkNtD2_QMBSxtRDFAr4AGzXmFar8aS2NRX-hKoapjhFxeWVNGV2Dt02LGFJp-9sIZ9NuMqok5Colq_yNHsSRzW4hC_nzpxl5_kkxW6YBvN_UEP1MVlCNCqeDoLq8XngEN06hhrVh50wnsoXa7NMTe8Tzq_ErFtW8dzPfuGwpoAMjDxOYlEtqtkpFGAsLx5aDg')"></div>
+</td>
+<td class="p-2">
+<div class="font-medium text-on-surface truncate max-w-[200px]">Modern L-Shape Sofa</div>
+<div class="text-on-surface-variant text-[12px]">Home &gt; Furniture</div>
+</td>
+<td class="p-2">
+<div class="text-on-surface truncate max-w-[120px]">Nimal F.</div>
+</td>
+<td class="p-2 text-on-surface-variant font-data-mono text-[12px]">2h ago</td>
+<td class="p-2 text-right">
+<div class="inline-flex items-center gap-1.5 bg-[#f59e0b]/10 text-[#d97706] px-2 py-0.5 rounded-full text-[11px] font-semibold">
+<span class="material-symbols-outlined text-[14px]">policy</span> Suspicious Links (72%)
+                  </div>
+</td>
+<td class="p-2 text-center">
+<button class="opacity-0 group-hover:opacity-100 bg-primary text-on-primary px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all shadow-sm hover:shadow">
+                    Review
+                  </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right Column (Sidebar) -->
+<div class="flex flex-col gap-6 w-full lg:w-80 flex-shrink-0">
+<!-- Quick Actions -->
+<div class="bg-surface-container-lowest p-5 rounded-xl shadow-sm">
+<h3 class="text-title-sm text-on-surface mb-4">Quick Actions</h3>
+<div class="flex flex-col gap-2">
+<button class="flex items-center gap-3 w-full p-3 rounded-lg bg-surface-container-low hover:bg-surface-container-high transition-colors text-on-surface text-body-sm font-medium text-left">
+<span class="material-symbols-outlined text-primary">add_circle</span>
+            Create Category
+          </button>
+<button class="flex items-center gap-3 w-full p-3 rounded-lg bg-surface-container-low hover:bg-surface-container-high transition-colors text-on-surface text-body-sm font-medium text-left">
+<span class="material-symbols-outlined text-primary">assessment</span>
+            View Daily Reports
+          </button>
+<button class="flex items-center gap-3 w-full p-3 rounded-lg bg-primary text-on-primary hover:bg-primary/90 transition-colors text-body-sm font-medium text-left shadow-sm">
+<span class="material-symbols-outlined">rule</span>
+            Review Full Queue
+          </button>
+</div>
+</div>
+<!-- Recent Activity Feed -->
+<div class="bg-surface-container-lowest p-5 rounded-xl shadow-sm flex-1 flex flex-col min-h-[400px]">
+<div class="flex justify-between items-center mb-4">
+<h3 class="text-title-sm text-on-surface">Activity Log</h3>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">history</span>
+</div>
+<div class="flex-1 relative">
+<div class="absolute left-2.5 top-2 bottom-2 w-[1px] bg-outline-variant/30"></div>
+<div class="space-y-4 pl-8 relative text-body-sm">
+<!-- Log Item 1 -->
+<div class="relative">
+<div class="absolute -left-[27px] top-1 w-2 h-2 rounded-full bg-[#059669] ring-4 ring-surface-container-lowest"></div>
+<div class="text-on-surface font-medium">Mod-02 approved Ad #1245</div>
+<div class="text-on-surface-variant text-[12px] font-data-mono">2 mins ago</div>
+</div>
+<!-- Log Item 2 -->
+<div class="relative">
+<div class="absolute -left-[27px] top-1 w-2 h-2 rounded-full bg-error ring-4 ring-surface-container-lowest"></div>
+<div class="text-on-surface font-medium">System flagged Ad #5678 for review</div>
+<div class="text-on-surface-variant text-[12px] font-data-mono">15 mins ago</div>
+<div class="mt-1 bg-error/5 border border-error/10 rounded px-2 py-1 text-[11px] text-error">Reason: Price Outlier</div>
+</div>
+<!-- Log Item 3 -->
+<div class="relative">
+<div class="absolute -left-[27px] top-1 w-2 h-2 rounded-full bg-secondary ring-4 ring-surface-container-lowest"></div>
+<div class="text-on-surface font-medium">Admin updated category 'Electronics'</div>
+<div class="text-on-surface-variant text-[12px] font-data-mono">1 hour ago</div>
+</div>
+<!-- Log Item 4 -->
+<div class="relative">
+<div class="absolute -left-[27px] top-1 w-2 h-2 rounded-full bg-[#059669] ring-4 ring-surface-container-lowest"></div>
+<div class="text-on-surface font-medium">Mod-01 approved 15 Ads in bulk</div>
+<div class="text-on-surface-variant text-[12px] font-data-mono">2 hours ago</div>
+</div>
+<!-- Log Item 5 -->
+<div class="relative">
+<div class="absolute -left-[27px] top-1 w-2 h-2 rounded-full bg-outline ring-4 ring-surface-container-lowest"></div>
+<div class="text-on-surface font-medium">System backup completed</div>
+<div class="text-on-surface-variant text-[12px] font-data-mono">3 hours ago</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div></main></div></body></html>

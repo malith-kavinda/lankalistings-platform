@@ -1,0 +1,137 @@
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Manrope:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primary-fixed-variant": "#3f465c", "secondary-fixed-dim": "#4edea3", "surface-tint": "#565e74", "surface-container-lowest": "#ffffff", "tertiary-fixed": "#ffdf9f", "primary": "#000000", "on-error": "#ffffff", "surface": "#f7f9fb", "on-surface-variant": "#45464d", "on-background": "#191c1e", "error-container": "#ffdad6", "on-tertiary-fixed-variant": "#5c4300", "secondary": "#006c49", "on-primary-fixed": "#131b2e", "secondary-fixed": "#6ffbbe", "outline": "#76777d", "tertiary-container": "#261a00", "on-tertiary": "#ffffff", "on-primary": "#ffffff", "error": "#ba1a1a", "primary-fixed-dim": "#bec6e0", "primary-container": "#131b2e", "primary-fixed": "#dae2fd", "outline-variant": "#c6c6cd", "inverse-surface": "#2d3133", "inverse-on-surface": "#eff1f3", "surface-bright": "#f7f9fb", "on-secondary-fixed": "#002113", "on-tertiary-fixed": "#261a00", "surface-container-high": "#e6e8ea", "surface-container-low": "#f2f4f6", "surface-variant": "#e0e3e5", "on-surface": "#191c1e", "surface-container-highest": "#e0e3e5", "on-secondary": "#ffffff", "tertiary-fixed-dim": "#f9bd22", "on-error-container": "#93000a", "on-tertiary-container": "#a87d00", "background": "#f7f9fb", "on-primary-container": "#7c839b", "surface-container": "#eceef0", "surface-dim": "#d8dadc", "secondary-container": "#6cf8bb", "tertiary": "#000000", "inverse-primary": "#bec6e0", "on-secondary-fixed-variant": "#005236", "on-secondary-container": "#00714d" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "xs": "8px", "margin-desktop": "32px", "base": "4px", "sm": "16px", "lg": "40px", "margin-mobile": "16px", "xl": "64px", "gutter": "20px", "md": "24px" }, "fontFamily": { "price-xl": ["Manrope"], "label-caps": ["Inter"], "body-sm": ["Manrope"], "display-lg": ["Manrope"], "body-lg": ["Manrope"], "metadata": ["Inter"], "headline-lg": ["Manrope"], "headline-md": ["Manrope"], "headline-lg-mobile": ["Manrope"] } } } }</script><style>@layer base { body { -webkit-tap-highlight-color: transparent; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } }</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-lg"><header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-14 flex items-center px-margin-mobile gap-sm"><button class="w-10 h-10 -ml-2 flex items-center justify-center text-on-surface-variant" onclick="history.back()"><span class="material-symbols-outlined">arrow_back</span></button><h1 class="font-headline-md text-headline-md text-primary tracking-tight">Listing Review</h1></div></header><main class="pt-14 min-h-screen bg-surface"><div class="flex flex-col w-full pb-safe">
+<!-- Image Preview Panel -->
+<div class="px-margin-mobile pt-sm pb-xs bg-surface-container-lowest">
+<div class="flex items-center justify-between mb-xs">
+<h2 class="font-headline-md text-headline-md text-on-surface">Source Document</h2>
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant transition-transform duration-300" id="toggle-image">
+<span class="material-symbols-outlined text-[20px]">expand_more</span>
+</button>
+</div>
+<div class="relative w-full rounded-xl overflow-hidden transition-all duration-300 origin-top h-48 bg-surface-variant flex items-center justify-center" id="image-container">
+<!-- Placeholder for the source image -->
+<img alt="Source Document Scan" class="object-cover w-full h-full opacity-90 mix-blend-multiply pointer-events-none" data-alt="A scanned official document, high contrast, clear text on white paper, showing a vehicle registration certificate with a subtle overlay indicating a scanning process. The lighting is even, simulating a flatbed scan. The overall tone is professional and administrative." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAehCmwmwj_9vHALragzlp1XjuwfF_IwfmrVgJMY4cerSELqyzelNzY_0zOkpH_zoeF23HeOa3jjpmcIkLeIOHAFfRw_o3uaqLiSCyZwg3mD-t_dtoKRW-CGBhkSYXf0Sbw7OB1pgLWYlbAATIn_scBhDo7s8_uWSoDYgRp2FGXid3OMiPl_Dn6-f4trhZXmMvElrcFr874_mUtKItw93pEPkahwjjgWG-x2khU-UmPfaZz_PUNMD4mSw"/>
+<!-- Simulate a scanning line overlay -->
+<div class="absolute top-0 left-0 w-full h-1 bg-secondary shadow-[0_0_8px_rgba(0,108,73,0.5)] animate-[scan_2s_ease-in-out_infinite]"></div>
+<button class="absolute bottom-sm right-sm w-10 h-10 bg-surface-container-lowest/80 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center text-primary transition-transform active:scale-95">
+<span class="material-symbols-outlined">zoom_in</span>
+</button>
+</div>
+</div>
+<!-- AI Extracted Data Panel -->
+<div class="flex-1 px-margin-mobile py-sm bg-surface">
+<div class="flex items-center justify-between mb-md">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Extracted Data</h2>
+<p class="font-metadata text-metadata text-on-surface-variant mt-1">Review AI predictions against source</p>
+</div>
+<div class="flex items-center gap-xs bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span class="font-label-caps text-label-caps">98% Match</span>
+</div>
+</div>
+<div class="flex flex-col gap-sm">
+<!-- Field 1: High Confidence -->
+<div class="bg-surface-container-lowest rounded-xl p-sm shadow-sm relative overflow-hidden group">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary transition-all group-hover:w-1.5"></div>
+<div class="flex justify-between items-start mb-2 pl-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Registration Number</label>
+<span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Verified
+           </span>
+</div>
+<input class="w-full bg-transparent font-body-lg text-on-surface outline-none pl-2 focus:text-primary transition-colors" readonly="" type="text" value="WP CBA-4321"/>
+</div>
+<!-- Field 2: Medium Confidence (Needs Review) -->
+<div class="bg-surface-container-lowest rounded-xl p-sm shadow-sm relative overflow-hidden ring-1 ring-tertiary-fixed-dim/30">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary-fixed-dim animate-pulse"></div>
+<div class="flex justify-between items-start mb-2 pl-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
+             Chassis Number
+             <span class="material-symbols-outlined text-[14px] text-tertiary-fixed-dim cursor-help" title="Possible misread on character 4">info</span>
+</label>
+<span class="bg-tertiary-fixed-dim/20 text-on-tertiary-fixed-variant px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim"></span> Review
+           </span>
+</div>
+<div class="relative pl-2">
+<input class="w-full bg-transparent font-body-lg text-on-surface outline-none border-b border-tertiary-fixed-dim/50 pb-1 focus:border-primary transition-colors" type="text" value="NZE141-60293"/>
+<button class="absolute right-0 top-1/2 -translate-y-1/2 text-on-surface-variant p-1">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+</div>
+</div>
+<!-- Field 3: High Confidence -->
+<div class="bg-surface-container-lowest rounded-xl p-sm shadow-sm relative overflow-hidden group">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary transition-all group-hover:w-1.5"></div>
+<div class="flex justify-between items-start mb-2 pl-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Make &amp; Model</label>
+<span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Verified
+           </span>
+</div>
+<input class="w-full bg-transparent font-body-lg text-on-surface outline-none pl-2 focus:text-primary transition-colors" readonly="" type="text" value="Toyota Corolla Axio"/>
+</div>
+<!-- Field 4: High Confidence -->
+<div class="bg-surface-container-lowest rounded-xl p-sm shadow-sm relative overflow-hidden group">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary transition-all group-hover:w-1.5"></div>
+<div class="flex justify-between items-start mb-2 pl-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Year of Manufacture</label>
+<span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Verified
+           </span>
+</div>
+<input class="w-full bg-transparent font-body-lg text-on-surface outline-none pl-2 focus:text-primary transition-colors" readonly="" type="text" value="2008"/>
+</div>
+</div>
+<div class="h-24"></div> <!-- Spacer for sticky bottom bar -->
+</div>
+<!-- Sticky Bottom Action Bar -->
+<div class="fixed bottom-0 left-0 w-full bg-surface-container-lowest/90 backdrop-blur-md px-margin-mobile py-sm pb-[calc(1rem+env(safe-area-inset-bottom,0px))] shadow-[0_-4px_24px_rgba(0,0,0,0.06)] z-40 flex items-center justify-between gap-xs">
+<button class="flex flex-col items-center justify-center w-14 h-12 text-error rounded-lg hover:bg-error/5 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[20px] mb-0.5">close</span>
+<span class="font-metadata text-[10px] font-semibold">Reject</span>
+</button>
+<button class="flex-1 h-12 bg-surface-container text-on-surface rounded-lg font-body-sm font-semibold shadow-sm active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">flag</span>
+      Flag Issue
+    </button>
+<button class="flex-1 h-12 bg-secondary text-on-secondary rounded-lg font-body-sm font-semibold shadow-md shadow-secondary/20 active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">check</span>
+      Approve
+    </button>
+</div>
+</div>
+<style>
+  @keyframes scan {
+    0% { top: 0; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('toggle-image');
+    const imageContainer = document.getElementById('image-container');
+    let isExpanded = true;
+
+    toggleBtn.addEventListener('click', () => {
+      isExpanded = !isExpanded;
+      if (isExpanded) {
+        imageContainer.style.height = '12rem'; // 48 units
+        imageContainer.style.opacity = '1';
+        toggleBtn.style.transform = 'rotate(0deg)';
+      } else {
+        imageContainer.style.height = '0px';
+        imageContainer.style.opacity = '0';
+        toggleBtn.style.transform = 'rotate(180deg)';
+      }
+    });
+  });
+</script></main></body></html>

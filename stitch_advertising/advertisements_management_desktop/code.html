@@ -1,0 +1,261 @@
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={theme:{extend:{"colors":{"surface-container":"#eceef0","on-secondary-container":"#57657a","surface-container-high":"#e6e8ea","error":"#ba1a1a","surface-container-low":"#f2f4f6","on-error-container":"#93000a","inverse-on-surface":"#eff1f3","secondary":"#515f74","on-tertiary-fixed-variant":"#005236","surface-variant":"#e0e3e5","background":"#f7f9fb","surface-container-lowest":"#ffffff","primary":"#000000","tertiary":"#000000","primary-container":"#131b2e","on-secondary":"#ffffff","surface-dim":"#d8dadc","outline":"#76777d","outline-variant":"#c6c6cd","secondary-fixed":"#d5e3fc","surface":"#f7f9fb","on-surface-variant":"#45464d","inverse-surface":"#2d3133","tertiary-container":"#002113","secondary-container":"#d5e3fc","surface-container-highest":"#e0e3e5","on-secondary-fixed-variant":"#3a485b","surface-bright":"#f7f9fb","primary-fixed-dim":"#bec6e0","tertiary-fixed":"#6ffbbe","secondary-fixed-dim":"#b9c7df","on-tertiary-container":"#009668","on-primary-fixed":"#131b2e","surface-tint":"#565e74","inverse-primary":"#bec6e0","on-primary":"#ffffff","on-tertiary-fixed":"#002113","on-primary-container":"#7c839b","error-container":"#ffdad6","on-tertiary":"#ffffff","primary-fixed":"#dae2fd","on-surface":"#191c1e","on-background":"#191c1e","on-primary-fixed-variant":"#3f465c","on-secondary-fixed":"#0d1c2e","on-error":"#ffffff","tertiary-fixed-dim":"#4edea3"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"sidebar-width":"260px","stack-compact":"8px","gutter":"16px","table-row-height":"48px","container-padding":"24px","sidebar-collapsed":"72px","stack-loose":"16px","base":"4px"},"fontFamily":{"data-mono":["Manrope"],"body-sm":["Manrope"],"title-sm":["Manrope"],"label-caps":["Manrope"],"body-md":["Manrope"],"display-lg":["Manrope"],"headline-md":["Manrope"]},"fontSize":{"data-mono":["14px",{"lineHeight":"20px","fontWeight":"500"}],"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"title-sm":["18px",{"lineHeight":"24px","fontWeight":"600"}],"label-caps":["11px",{"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"display-lg":["30px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}]}}}}</script><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/></head><body class="bg-background font-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-[260px] bg-primary-container text-on-primary-container z-50 flex flex-col transition-all duration-300 shadow-xl"><div class="h-16 flex items-center px-6 gap-3 mb-4"><img alt="Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XMvA35tJ3JcmWW3Qh3xuToENDZURqJ1hmeBHnUShjH3TfjHFrsty1rDgk6ZZXiRzRrl5h2hyOf-U1lMxLdyRjK4o_nENdqc7M6Gw4J1vIqE1dtKyT6spOTht3m3YOjV1R9ERGFYFXwdnZf925Wzhb4t6Dlm77n0lAzfv6ZA1VpUjPQCN4_blxeNViKO-T4kc-8czpVEr9jcpd-P0TGwyqUNBdDhouBDBJYzF50DX0P2to8OAv5mNLTqKIb"/><span class="font-headline-md text-title-sm text-on-primary tracking-tight">LankaListings</span></div><nav class="flex-1 space-y-1 px-3 overflow-y-auto" data-active-classes="bg-secondary/20 text-on-primary border-l-4 border-tertiary-fixed"><a aria-current="page" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors bg-secondary/20 text-on-primary border-l-4 border-tertiary-fixed" data-path="dashboard" href="#"><span class="material-symbols-outlined">dashboard</span><span class="font-body-md">Dashboard</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:bg-surface-container-highest/10 hover:text-on-primary transition-colors" data-path="advertisements" href="#"><span class="material-symbols-outlined">ads_click</span><span class="font-body-md">Advertisements</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:bg-surface-container-highest/10 hover:text-on-primary transition-colors" data-path="moderation-queue" href="#"><span class="material-symbols-outlined">fact_check</span><span class="font-body-md">Moderation Queue</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:bg-surface-container-highest/10 hover:text-on-primary transition-colors" data-path="users" href="#"><span class="material-symbols-outlined">group</span><span class="font-body-md">Users</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:bg-surface-container-highest/10 hover:text-on-primary transition-colors" data-path="categories" href="#"><span class="material-symbols-outlined">category</span><span class="font-body-md">Categories</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:bg-surface-container-highest/10 hover:text-on-primary transition-colors" data-path="reports" href="#"><span class="material-symbols-outlined">assessment</span><span class="font-body-md">Reports</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:bg-surface-container-highest/10 hover:text-on-primary transition-colors" data-path="plans-promotions" href="#"><span class="material-symbols-outlined">loyalty</span><span class="font-body-md">Plans &amp; Promotions</span></a><div class="my-4 border-t border-on-primary-container/10"></div><a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:bg-surface-container-highest/10 hover:text-on-primary transition-colors" data-path="settings" href="#"><span class="material-symbols-outlined">settings</span><span class="font-body-md">Settings</span></a></nav></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-16 bg-surface/80 backdrop-blur-xl border-b border-outline-variant z-40 flex items-center justify-between px-8"><div class="flex items-center bg-surface-container-low px-4 py-2 rounded-full w-96 border border-outline-variant"><span class="material-symbols-outlined text-on-surface-variant text-lg">search</span><input class="bg-transparent border-none outline-none ml-2 text-body-sm w-full text-on-surface" placeholder="Global search..." type="text"/></div><div class="flex items-center gap-6"><button class="relative text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined">notifications</span><span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span></button><div class="flex items-center gap-3 pl-6 border-l border-outline-variant"><div class="text-right"><p class="text-body-sm font-semibold text-on-surface">Admin User</p><p class="text-label-caps text-on-surface-variant uppercase">Super Admin</p></div><img alt="Profile" class="w-9 h-9 rounded-full object-cover border border-outline-variant" src="https://lh3.googleusercontent.com/aida/AEtjO1V33vFFIOps13-q95aDbuU-dsrdeMr4lO6CusKGzCttFlklUGI3mDV5ONbu4J_DMJgGUpBB6QWBz7TreGVGtyR3CtVNBHA6koSrGwZPgHB8lHSJjGy-sbUhQN7ezjqPYPik0i6BPkk_lBYY-CB9xGTWnEkP3WRGEisDSX8jtU0oLmNaBhcHf8WZ1jWMIMeNm-AugibLCyfSInMcDA0kVKRbY5q8zTcNCJ5NNcQdSRpJrsKLiOCzkf47ebI"/></div></div></header><main class="relative pt-16 min-h-screen bg-background"><div class="flex flex-col w-full h-full relative group">
+<!-- Header Section -->
+<div class="px-container-padding py-stack-loose border-b border-outline-variant bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface">Advertisements</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 flex items-center gap-2">
+<span class="font-data-mono font-bold text-primary">24,150</span> total listings
+                <span class="inline-block w-1 h-1 rounded-full bg-outline"></span>
+<span class="text-tertiary-fixed-dim flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">arrow_upward</span> 12% vs last month</span>
+</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="h-10 px-4 rounded-lg bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors flex items-center gap-2 font-body-sm font-semibold">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                Export CSV
+            </button>
+<button class="h-10 px-5 rounded-lg bg-primary text-on-primary hover:bg-primary/90 transition-colors flex items-center gap-2 font-body-sm font-semibold shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                Create Advertisement
+            </button>
+</div>
+</div>
+<!-- Filter Bar -->
+<div class="px-container-padding py-stack-compact bg-surface-container-low border-b border-outline-variant flex flex-wrap items-center gap-4">
+<div class="relative flex-1 min-w-[240px]">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full h-9 pl-10 pr-4 rounded-md border border-outline-variant bg-surface text-body-sm font-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" placeholder="Search by Ad ID, Title, or Seller... (Cmd+K)" type="text"/>
+</div>
+<div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+<select class="h-9 px-3 rounded-md border border-outline-variant bg-surface text-body-sm font-body-sm text-on-surface appearance-none pr-8 focus:outline-none focus:border-primary-container">
+<option>All Statuses</option>
+<option>Active</option>
+<option>Pending</option>
+<option>Rejected</option>
+</select>
+<select class="h-9 px-3 rounded-md border border-outline-variant bg-surface text-body-sm font-body-sm text-on-surface appearance-none pr-8 focus:outline-none focus:border-primary-container">
+<option>All Categories</option>
+<option>Vehicles</option>
+<option>Real Estate</option>
+<option>Electronics</option>
+</select>
+<select class="h-9 px-3 rounded-md border border-outline-variant bg-surface text-body-sm font-body-sm text-on-surface appearance-none pr-8 focus:outline-none focus:border-primary-container">
+<option>Location</option>
+<option>Colombo</option>
+<option>Gampaha</option>
+<option>Kandy</option>
+</select>
+<button class="h-9 px-3 rounded-md border border-error bg-error-container/20 text-error flex items-center gap-2 font-body-sm hover:bg-error-container/40 transition-colors">
+<span class="material-symbols-outlined text-[16px]">flag</span>
+                Flagged (12)
+            </button>
+</div>
+</div>
+<!-- Data Table Container -->
+<div class="flex-1 overflow-auto bg-surface">
+<table class="w-full text-left border-collapse">
+<thead class="sticky top-0 bg-surface-container-low border-b border-outline-variant z-10">
+<tr>
+<th class="h-10 px-4 py-2 w-12 text-center">
+<input class="w-4 h-4 rounded border-outline-variant text-primary-container focus:ring-primary-container" id="selectAll" type="checkbox"/>
+</th>
+<th class="h-10 px-4 py-2 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Image</th>
+<th class="h-10 px-4 py-2 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Ad ID</th>
+<th class="h-10 px-4 py-2 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider min-w-[200px]">Listing Details</th>
+<th class="h-10 px-4 py-2 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Price (LKR)</th>
+<th class="h-10 px-4 py-2 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Seller</th>
+<th class="h-10 px-4 py-2 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Status</th>
+<th class="h-10 px-4 py-2 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Date</th>
+<th class="h-10 px-4 py-2 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider w-12"></th>
+</tr>
+</thead>
+<tbody class="font-body-sm divide-y divide-outline-variant/50">
+<!-- Row 1 -->
+<tr class="h-table-row-height hover:bg-surface-container-lowest/50 transition-colors group/row">
+<td class="px-4 text-center">
+<input class="w-4 h-4 rounded border-outline-variant text-primary-container row-checkbox" type="checkbox"/>
+</td>
+<td class="px-4">
+<img class="w-10 h-10 object-cover rounded shadow-sm border border-outline-variant/30" data-alt="A modern Japanese sedan, silver color, parked on a paved driveway with mild sunlight reflecting off the hood. Clean and professional car listing thumbnail." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAz-hhEaC1L6jexb5ipIxuSgt7MpjUGRWX3SREcjweHi7uFNUorNUkHaZUtBLlXmo9hvVSuR29mhaiWbPr0RoXCNFEQAuOQxafBCtlmIJgNZQW1Nu06IanedWcAyBYYX6xBp0CoCSyzmB-SNT4vwkduSI0Y_zsX7gkoQrUTdErMNwmnikAbvdJusWlrwUIoKwCMLD1qsQH1dhUqHcqEyOUXI-cLkXh9LeDGzS4tsIOjqsXd3TT6lHPS9g"/>
+</td>
+<td class="px-4 font-data-mono text-primary-container">LL-48291</td>
+<td class="px-4">
+<div class="font-semibold text-on-surface truncate max-w-[250px]">Toyota Axio 2018 WxB G Grade</div>
+<div class="text-on-surface-variant text-[11px] uppercase tracking-wide mt-0.5">Vehicles &gt; Cars</div>
+</td>
+<td class="px-4 font-data-mono font-medium">12,500,000</td>
+<td class="px-4">
+<div class="text-on-surface">Kamal Perera</div>
+<div class="text-on-surface-variant text-[12px] flex items-center gap-1"><span class="material-symbols-outlined text-[12px] text-on-tertiary-container">verified</span> Verified Dealer</div>
+</td>
+<td class="px-4">
+<span class="inline-flex items-center px-2 py-1 rounded-md bg-tertiary-fixed/20 text-on-tertiary-fixed-variant font-label-caps font-bold">ACTIVE</span>
+</td>
+<td class="px-4 text-on-surface-variant whitespace-nowrap">2h ago</td>
+<td class="px-4">
+<button class="text-on-surface-variant hover:text-on-surface opacity-0 group-hover/row:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="h-table-row-height bg-surface-container-lowest/30 hover:bg-surface-container-lowest/50 transition-colors group/row border-l-2 border-l-error">
+<td class="px-4 text-center">
+<input class="w-4 h-4 rounded border-outline-variant text-primary-container row-checkbox" type="checkbox"/>
+</td>
+<td class="px-4">
+<div class="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center border border-outline-variant/50 text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">image_not_supported</span>
+</div>
+</td>
+<td class="px-4 font-data-mono text-primary-container">LL-48290</td>
+<td class="px-4">
+<div class="font-semibold text-on-surface truncate max-w-[250px] flex items-center gap-2">
+                            iPhone 14 Pro Max 256GB
+                            <span class="material-symbols-outlined text-error text-[14px]" title="Flagged content">flag</span>
+</div>
+<div class="text-on-surface-variant text-[11px] uppercase tracking-wide mt-0.5">Electronics &gt; Mobile Phones</div>
+</td>
+<td class="px-4 font-data-mono font-medium">320,000</td>
+<td class="px-4">
+<div class="text-on-surface">Nuwan S.</div>
+<div class="text-on-surface-variant text-[12px]">Private Member</div>
+</td>
+<td class="px-4">
+<span class="inline-flex items-center px-2 py-1 rounded-md bg-secondary-container text-on-secondary-fixed-variant font-label-caps font-bold">PENDING</span>
+</td>
+<td class="px-4 text-on-surface-variant whitespace-nowrap">4h ago</td>
+<td class="px-4">
+<button class="text-on-surface-variant hover:text-on-surface opacity-0 group-hover/row:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="h-table-row-height hover:bg-surface-container-lowest/50 transition-colors group/row">
+<td class="px-4 text-center">
+<input class="w-4 h-4 rounded border-outline-variant text-primary-container row-checkbox" type="checkbox"/>
+</td>
+<td class="px-4">
+<img class="w-10 h-10 object-cover rounded shadow-sm border border-outline-variant/30" data-alt="A bright, modern apartment interior showing a spacious living room with large windows overlooking a city skyline. Neutral tones and minimalist furniture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBz9YRxJcRnWDz3HPnQNLqWv8ge1GEBh3Vw-9YXjapYlRut9xUQ2B_zX6lF3v7yLQAQe9AB49nSg-ZUS02LPDPCK9v-ZZTxuAClOlmbU1Yiu47YVsXWQJkttwLzSWKTIsBtQTUNttM4ecd3rzD4vPRn3xp_uLtc4MSipYeTKrNQANrHES3dUVdAg4jjaqdTffd-L5ctyYoGWuM09-cpt97I1bGoasIy-VdFlzrfR95DXqCbo6EHK28hGQ"/>
+</td>
+<td class="px-4 font-data-mono text-primary-container">LL-48285</td>
+<td class="px-4">
+<div class="font-semibold text-on-surface truncate max-w-[250px]">Luxury 3BR Apartment in Colombo 6</div>
+<div class="text-on-surface-variant text-[11px] uppercase tracking-wide mt-0.5">Property &gt; Apartments</div>
+</td>
+<td class="px-4 font-data-mono font-medium">45,000,000</td>
+<td class="px-4">
+<div class="text-on-surface">Prime Lands</div>
+<div class="text-on-surface-variant text-[12px] flex items-center gap-1"><span class="material-symbols-outlined text-[12px] text-on-tertiary-container">verified</span> Top Agency</div>
+</td>
+<td class="px-4">
+<span class="inline-flex items-center px-2 py-1 rounded-md bg-tertiary-fixed/20 text-on-tertiary-fixed-variant font-label-caps font-bold">ACTIVE</span>
+</td>
+<td class="px-4 text-on-surface-variant whitespace-nowrap">Yesterday</td>
+<td class="px-4">
+<button class="text-on-surface-variant hover:text-on-surface opacity-0 group-hover/row:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="h-table-row-height bg-surface-container-lowest/30 hover:bg-surface-container-lowest/50 transition-colors group/row opacity-75">
+<td class="px-4 text-center">
+<input class="w-4 h-4 rounded border-outline-variant text-primary-container row-checkbox" type="checkbox"/>
+</td>
+<td class="px-4">
+<img class="w-10 h-10 object-cover rounded shadow-sm border border-outline-variant/30 grayscale" data-alt="A heavily blurred, low-quality image of what appears to be a motorcycle, taken at night with poor lighting and grain." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHzmJ5fkG4XKn7sJp6H0xgWCnA9ArW0YERvYBvYZDqe9DNEbRLrlae76peToAHaqKEwO994Nw59uSxYxe8LX5ze70avhLsAPwYnPJmalGPYGYbZWonv7tHdAXiKTtH9EHhWPrAGt854AC3CnUIq9jIYUicES65SJqjzyTz0AacHsQbJhR1DINQKpJLzzRz_TawsH_6ykwLI3KzSwn0Q-q0ZnHwXjrx9t9rHR6KcLZAguLzOQF2KlWYVg"/>
+</td>
+<td class="px-4 font-data-mono text-primary-container">LL-48281</td>
+<td class="px-4">
+<div class="font-semibold text-on-surface truncate max-w-[250px] line-through text-on-surface-variant">Bajaj Pulsar 150 - Urgent Sale</div>
+<div class="text-on-surface-variant text-[11px] uppercase tracking-wide mt-0.5">Vehicles &gt; Motorcycles</div>
+</td>
+<td class="px-4 font-data-mono font-medium">450,000</td>
+<td class="px-4">
+<div class="text-on-surface">Kasun M.</div>
+<div class="text-on-surface-variant text-[12px]">Private Member</div>
+</td>
+<td class="px-4">
+<span class="inline-flex items-center px-2 py-1 rounded-md bg-error-container text-on-error-container font-label-caps font-bold">REJECTED</span>
+</td>
+<td class="px-4 text-on-surface-variant whitespace-nowrap">Yesterday</td>
+<td class="px-4">
+<button class="text-on-surface-variant hover:text-on-surface opacity-0 group-hover/row:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="px-container-padding py-3 border-t border-outline-variant bg-surface flex items-center justify-between">
+<span class="text-body-sm text-on-surface-variant">Showing <span class="font-medium text-on-surface">1</span> to <span class="font-medium text-on-surface">25</span> of <span class="font-medium text-on-surface">24,150</span> results</span>
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container-high text-on-surface-variant disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary-container text-on-primary-container font-body-sm font-medium">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container-high text-on-surface font-body-sm">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container-high text-on-surface font-body-sm">3</button>
+<span class="w-8 h-8 flex items-center justify-center text-on-surface-variant">...</span>
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container-high text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Bulk Action Toolbar (Hidden by default, shown via JS simulation below) -->
+<div class="absolute bottom-8 left-1/2 -translate-x-1/2 bg-primary-container text-on-primary-container px-6 py-3 rounded-xl shadow-xl flex items-center gap-6 translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50" id="bulkToolbar">
+<span class="font-body-sm font-semibold flex items-center gap-2 border-r border-on-primary-container/20 pr-6">
+<span id="selectedCount">0</span> selected
+        </span>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-md bg-tertiary-fixed text-on-tertiary-fixed font-body-sm font-medium hover:bg-tertiary-fixed-dim transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">check_circle</span> Approve
+            </button>
+<button class="px-3 py-1.5 rounded-md bg-error text-on-error font-body-sm font-medium hover:bg-error/90 transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">cancel</span> Reject
+            </button>
+<button class="px-3 py-1.5 rounded-md hover:bg-on-primary-container/10 font-body-sm font-medium transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">person_add</span> Assign
+            </button>
+</div>
+</div>
+</div>
+<script>
+    // Simple JS for Bulk Action Toolbar interaction
+    document.addEventListener('DOMContentLoaded', () => {
+        const selectAll = document.getElementById('selectAll');
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        const bulkToolbar = document.getElementById('bulkToolbar');
+        const selectedCountEl = document.getElementById('selectedCount');
+
+        function updateToolbar() {
+            const selectedCount = Array.from(rowCheckboxes).filter(cb => cb.checked).length;
+            selectedCountEl.textContent = selectedCount;
+            
+            if (selectedCount > 0) {
+                bulkToolbar.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+                bulkToolbar.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+            } else {
+                bulkToolbar.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+                bulkToolbar.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+            }
+            
+            selectAll.checked = selectedCount === rowCheckboxes.length && rowCheckboxes.length > 0;
+            selectAll.indeterminate = selectedCount > 0 && selectedCount < rowCheckboxes.length;
+        }
+
+        selectAll.addEventListener('change', (e) => {
+            rowCheckboxes.forEach(cb => cb.checked = e.target.checked);
+            updateToolbar();
+        });
+
+        rowCheckboxes.forEach(cb => {
+            cb.addEventListener('change', updateToolbar);
+        });
+    });
+</script></main></div></body></html>
