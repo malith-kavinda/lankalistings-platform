@@ -61,7 +61,7 @@ once Phase 1's API contract is fixed. Phase numbering follows the PRD's own §19
 |---|---|---|
 | **0A** PRD remediation ✅ | Resolve the 15 contradictions found during design; PRD → v1.1 | **Done** — PRD v1.1 committed, 35 `[RESOLVED-1.1]` markers, no remaining item blocks Phases 1–4 |
 | **0B** Fixtures ✅ | Regression corpus, category catalog, v1 prompt, baseline pin | **Done** — 10 cases, 137 tests green, Sinhala round-trips NFC byte-exact, prompt checksum pinned |
-| **1** Batch domain ✅ | 9 tables, Alembic, storage, job dispatch, `202` upload + progress + retry | **Done** — 345 tests green, `alembic check` clean, restart requeued 4 stranded items and the batch completed with no duplicate candidates |
+| **1** Batch domain ✅ | 9 tables, Alembic, storage, job dispatch, `202` upload + progress + retry | **Done** — 352 tests green, `alembic check` clean, restart requeued 4 stranded items and the batch completed with no duplicate candidates; code and security review findings fixed |
 | **2** Structured OCR | `OcrProvider` protocol + 3 env-switchable engines, blocks/bboxes/confidence, preprocessing | Fixture blocks stable; unknown `OCR_PROVIDER` dies at startup |
 | **3** LLM extraction | `LlmExtractionProvider` + 4 env-switchable providers, versioned prompts, 2-tier validation, retry/repair, 0..N candidates | AC-002/003/005/013; no live call in default suite |
 | **4** Portal | react-router + TanStack Query, bulk intake, batch progress, multi-candidate review | Upload → progress → edit → approve → visible in `frontend-web` |
@@ -171,7 +171,7 @@ visible rather than silent.
 
 ## Phase 1 — Durable Batch Domain and API ✅
 
-**Status: complete.** 345 tests green against PostgreSQL, `alembic check` reports no drift, `ruff` clean.
+**Status: complete.** 352 tests green against PostgreSQL, `alembic check` reports no drift, `ruff` clean.
 
 Delivered as five commits in `lankalistings-media-service`: the schema and test infrastructure, the item
 and batch lifecycle rules, content-addressed storage, the unit of work and repositories, batch ingestion
