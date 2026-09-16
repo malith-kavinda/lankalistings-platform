@@ -62,7 +62,7 @@ once Phase 1's API contract is fixed. Phase numbering follows the PRD's own §19
 | **0A** PRD remediation ✅ | Resolve the 15 contradictions found during design; PRD → v1.1 | **Done** — PRD v1.1 committed, 35 `[RESOLVED-1.1]` markers, no remaining item blocks Phases 1–4 |
 | **0B** Fixtures ✅ | Regression corpus, category catalog, v1 prompt, baseline pin | **Done** — 10 cases, 137 tests green, Sinhala round-trips NFC byte-exact, prompt checksum pinned |
 | **1** Batch domain ✅ | 9 tables, Alembic, storage, job dispatch, `202` upload + progress + retry | **Done** — 352 tests green, `alembic check` clean, restart requeued 4 stranded items and the batch completed with no duplicate candidates; code and security review findings fixed |
-| **2** Structured OCR | `OcrProvider` protocol + 3 env-switchable engines, blocks/bboxes/confidence, preprocessing | Fixture blocks stable; unknown `OCR_PROVIDER` dies at startup |
+| **2** Structured OCR ✅ | `OcrProvider` protocol + 3 env-switchable engines, blocks/bboxes/confidence, preprocessing | **Done** — 486 tests green; the provider reproduces all 10 corpus cases block for block; unknown `OCR_PROVIDER` dies at startup with the valid list |
 | **3** LLM extraction | `LlmExtractionProvider` + 4 env-switchable providers, versioned prompts, 2-tier validation, retry/repair, 0..N candidates | AC-002/003/005/013; no live call in default suite |
 | **4** Portal | react-router + TanStack Query, bulk intake, batch progress, multi-candidate review | Upload → progress → edit → approve → visible in `frontend-web` |
 
@@ -510,7 +510,65 @@ the JSON file is never written and never deleted, so rollback is one env var.
 **Gate**: upload 3 images → `202` + ids; `kill -9` mid-batch and restart → items resume, batch completes;
 retry a failed item → no duplicate candidates; existing test suite passes unchanged.
 
-## Phase 2 — Structured OCR (env-switchable)
+## Phase 2 — Structured OCR (env-switchable) ✅
+
+**Status: complete.** 486 tests green, `ruff` clean. Verified end to end against the running service:
+`/health` names the provider, a two-image batch converged, and the stored `ocr_extractions` rows carry
+block geometry, `box_source`, `source_ref`, `max_block_id`, `low_confidence` and `preprocess_version`.
+Sinhala survived into the database — 39 codepoints, NFC-stable — and each candidate's
+`source_block_ids` cites only blocks that exist (`[1..6]` and `[1..3]`).
+
+### Three findings that changed the design
+
+**`--tessdata-dir` cannot be passed through `pytesseract` on Windows.** Its config string is split with
+`shlex.split(config, posix=False)`, so a quoted path keeps its quote characters and an unquoted one
+splits at the space. Verified both forms fail. The Sinhala traineddata lives under a path containing a
+space, and the system Tesseract install ships `eng` but **not** `sin` — so this was the difference
+between the service reading Sinhala and not. The provider drives the binary directly and passes the
+directory through the *child process's* environment, which also removed `pytesseract` as a dependency
+and let `OCR_TIMEOUT_SECONDS` actually kill a run.
+
+**The `tsv` configfile fails silently.** Tesseract resolves configfiles relative to `TESSDATA_PREFIX`;
+pointed at a directory holding only traineddata, `tsv` is not found and Tesseract prints **plain text
+and exits zero**. A caller parsing that as TSV gets a confident answer built from nonsense.
+`-c tessedit_create_tsv=1` needs no configfile and cannot fail that way.
+
+**Preprocessing defaults were measured, not chosen.** Running the corpus under each option:
+
+| Variant | Mean confidence | Blocks |
+|---|---|---|
+| orientation only | 0.8932 | 36 |
+| + greyscale | 0.8932 | 36 |
+| + autocontrast | 0.8932 | 36 |
+| + denoise | 0.8713 | 36 |
+| threshold 128 | 0.8662 | 36 |
+
+Greyscale and autocontrast are exact no-ops on this corpus; denoising and thresholding measurably
+*hurt* clean scans. So orientation and greyscale are on by default and the rest are switches.
+
+### Corpus re-capture
+
+`capture_ocr.py` now runs the production preprocessor and provider instead of its own copy of the
+block algorithm, so the corpus and the provider cannot drift apart. The re-capture diff is
+**confidence precision plus two additive fields** (`box_source`, `detector`): block ids, boxes, texts,
+`source_ref`s and page transcripts are byte-identical, so no `evidence_within_blocks` citation in any
+`expected.json` was invalidated. Confidences rose slightly because `pytesseract` truncated them to
+integers; the raw TSV carries six decimal places. Every authored `min_mean_confidence` floor and the
+`expect_low_confidence` flag still hold.
+
+### Deviation from the plan
+
+**`vision_llm` is a seam, not an implementation.** The plan lists it under Phase 2, but its design
+builds on the schema-agnostic LLM adapters Phase 3 introduces — the plan says so itself in §Phase 3.
+Writing a second HTTP client here would guarantee the two drift apart before they were merged. The
+name is therefore *recognised and refused with a reason* ("arrives in Phase 3"), so a deployment that
+selects it fails at startup rather than on the first page. `BoxSource` exists from day one precisely
+because this provider cannot produce engine geometry.
+
+**PaddleOCR is not installed here**, so the hybrid's detection path is exercised through a detector
+double rather than the real one; the merge heuristics are pure functions and are tested exhaustively.
+The degraded path — which is what runs without the package — is verified live: identical output to
+plain Tesseract, `degraded=True`, `DETECTOR_UNAVAILABLE`.
 
 New package `media_service/ocr/` — `types.py`, `protocol.py`, `blocks.py`, `quality.py`, `compat.py`,
 `registry.py`, `providers/{tesseract,paddle_tesseract,vision_llm}.py`.
