@@ -61,7 +61,7 @@ once Phase 1's API contract is fixed. Phase numbering follows the PRD's own §19
 |---|---|---|
 | **0A** PRD remediation ✅ | Resolve the 15 contradictions found during design; PRD → v1.1 | **Done** — PRD v1.1 committed, 35 `[RESOLVED-1.1]` markers, no remaining item blocks Phases 1–4 |
 | **0B** Fixtures ✅ | Regression corpus, category catalog, v1 prompt, baseline pin | **Done** — 10 cases, 137 tests green, Sinhala round-trips NFC byte-exact, prompt checksum pinned |
-| **1** Batch domain | 9 tables, Alembic, storage, job dispatch, `202` upload + progress + retry | `kill -9` mid-batch → resumes; retry → no duplicates; **existing tests pass unchanged** |
+| **1** Batch domain ✅ | 9 tables, Alembic, storage, job dispatch, `202` upload + progress + retry | **Done** — 345 tests green, `alembic check` clean, restart requeued 4 stranded items and the batch completed with no duplicate candidates |
 | **2** Structured OCR | `OcrProvider` protocol + 3 env-switchable engines, blocks/bboxes/confidence, preprocessing | Fixture blocks stable; unknown `OCR_PROVIDER` dies at startup |
 | **3** LLM extraction | `LlmExtractionProvider` + 4 env-switchable providers, versioned prompts, 2-tier validation, retry/repair, 0..N candidates | AC-002/003/005/013; no live call in default suite |
 | **4** Portal | react-router + TanStack Query, bulk intake, batch progress, multi-candidate review | Upload → progress → edit → approve → visible in `frontend-web` |
@@ -90,12 +90,15 @@ once Phase 1's API contract is fixed. Phase numbering follows the PRD's own §19
 
 ## Before Starting
 
-1. **Write this plan to `docs/product/ocr-ad-ingestion-implementation-plan.md`** — the full detail below,
-   beside the PRD it implements, cross-linked from `docs/architecture.md` §Related and the PRD's §27.
-2. **`git init` + baseline commit.** `git status` fails at the repo root — **this workspace is not under
-   version control.** This plan touches every layer of `media-service` and rewrites
-   `management-portal/src/App.tsx`. Each phase must be revertable.
-3. **Start Docker Desktop.** The daemon is installed but not running; Phase 1 needs PostgreSQL.
+All three prerequisites are met.
+
+1. ~~**Write this plan to `docs/product/ocr-ad-ingestion-implementation-plan.md`**~~ — done; this is that
+   document, beside the PRD it implements.
+2. ~~**`git init` + baseline commit.**~~ — done. Each application is its own repository with its own
+   history, so every phase is revertable on its own.
+3. ~~**Start Docker Desktop.**~~ — done; PostgreSQL 17 runs on host port **5434** (5432 and 5433 were
+   already taken on this machine), with a separate `lankalistings_test` database created by
+   `scripts/init-databases.sql`.
 
 ## Phase 0A — PRD Remediation (no code)
 
@@ -166,7 +169,34 @@ visible rather than silent.
 
 **Gate**: corpus loads, expected counts are asserted, `sinhala_only` round-trips Sinhala Unicode byte-exact.
 
-## Phase 1 — Durable Batch Domain and API
+## Phase 1 — Durable Batch Domain and API ✅
+
+**Status: complete.** 345 tests green against PostgreSQL, `alembic check` reports no drift, `ruff` clean.
+
+Delivered as five commits in `lankalistings-media-service`: the schema and test infrastructure, the item
+and batch lifecycle rules, content-addressed storage, the unit of work and repositories, batch ingestion
+with idempotent accept and retry, the pipeline and worker, the API surface, and the JSON→PostgreSQL
+cutover.
+
+Verified manually against the running service with real Tesseract: 3 images → `202` + `Location`; a
+12-image batch converged to `awaiting_review`; a repeated `Idempotency-Key` replayed as `200` with the same
+batch id; 4 rows left in flight by a simulated crash were requeued at startup (`Requeued 4 item(s) left in
+flight by a previous run`) and finished with **12 candidates across 12 items and no duplicates**; 12
+distinct checksums for 12 images; the 4 dangling `running` OCR rows closed out as `abandoned`; a reprocess
+through the API produced generation 2 and superseded generation 1.
+
+Two decisions differ from the plan as written, both recorded in the code:
+
+- **The item state machine gained one edge.** An in-flight status may return to `uploaded`. That is
+  *requeue after abnormal termination*, which the reaper and single-instance restart recovery both need;
+  it is exposed as `requeue_abandoned` rather than as a general transition, and no other caller may take it.
+- **Services return frozen view models, not ORM rows.** Closing a unit of work expires the rows it loaded,
+  so returning one raises `DetachedInstanceError` in the route that reads it. `domain/views.py` holds the
+  read models the API maps from.
+
+Phase 1 ships the pipeline with a **rule-based extractor** that produces at most one candidate per page.
+That is the limitation Phase 3 exists to remove; it is marked `origin='ocr_heuristic'` on every candidate
+so its output is distinguishable from model output after the fact.
 
 New deps: `sqlalchemy>=2.0.30`, `alembic`, `psycopg[binary]>=3.1`, `pydantic-settings`, `python-ulid`.
 New packages `media_service/db/`, `storage/`, `jobs/`. New `docker-compose.yml` at the repo root.
