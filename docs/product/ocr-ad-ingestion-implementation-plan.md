@@ -62,7 +62,7 @@ once Phase 1's API contract is fixed. Phase numbering follows the PRD's own §19
 | **0A** PRD remediation ✅ | Resolve the 15 contradictions found during design; PRD → v1.1 | **Done** — PRD v1.1 committed, 35 `[RESOLVED-1.1]` markers, no remaining item blocks Phases 1–4 |
 | **0B** Fixtures ✅ | Regression corpus, category catalog, v1 prompt, baseline pin | **Done** — 10 cases, 137 tests green, Sinhala round-trips NFC byte-exact, prompt checksum pinned |
 | **1** Batch domain ✅ | 9 tables, Alembic, storage, job dispatch, `202` upload + progress + retry | **Done** — 352 tests green, `alembic check` clean, restart requeued 4 stranded items and the batch completed with no duplicate candidates; code and security review findings fixed |
-| **2** Structured OCR ✅ | `OcrProvider` protocol + 3 env-switchable engines, blocks/bboxes/confidence, preprocessing | **Done** — 486 tests green; the provider reproduces all 10 corpus cases block for block; unknown `OCR_PROVIDER` dies at startup with the valid list |
+| **2** Structured OCR ✅ | `OcrProvider` protocol + 3 env-switchable engines, blocks/bboxes/confidence, preprocessing | **Done** — 492 tests green; the provider reproduces all 10 corpus cases block for block; unknown `OCR_PROVIDER` dies at startup with the valid list; review findings fixed |
 | **3** LLM extraction | `LlmExtractionProvider` + 4 env-switchable providers, versioned prompts, 2-tier validation, retry/repair, 0..N candidates | AC-002/003/005/013; no live call in default suite |
 | **4** Portal | react-router + TanStack Query, bulk intake, batch progress, multi-candidate review | Upload → progress → edit → approve → visible in `frontend-web` |
 
@@ -512,7 +512,7 @@ retry a failed item → no duplicate candidates; existing test suite passes unch
 
 ## Phase 2 — Structured OCR (env-switchable) ✅
 
-**Status: complete.** 486 tests green, `ruff` clean. Verified end to end against the running service:
+**Status: complete.** 492 tests green, `ruff` clean. Verified end to end against the running service:
 `/health` names the provider, a two-image batch converged, and the stored `ocr_extractions` rows carry
 block geometry, `box_source`, `source_ref`, `max_block_id`, `low_confidence` and `preprocess_version`.
 Sinhala survived into the database — 39 codepoints, NFC-stable — and each candidate's
@@ -569,6 +569,27 @@ because this provider cannot produce engine geometry.
 double rather than the real one; the merge heuristics are pure functions and are tested exhaustively.
 The degraded path — which is what runs without the package — is verified live: identical output to
 plain Tesseract, `degraded=True`, `DETECTOR_UNAVAILABLE`.
+
+### Review pass
+
+Six findings, all fixed. Two mattered:
+
+**The shared PaddleOCR predictor was called concurrently.** The lock guarded construction only, while
+the worker pool drives `worker_concurrency` threads through one detector. A PaddleInference predictor
+is a single native object and is not safe for concurrent calls — and the bad outcome is not a crash
+but geometry that is quietly wrong, which becomes the region boxes behind block ids. Inference is now
+serialised; recognition still runs concurrently, since each region gets its own Tesseract process.
+
+**`OCR_CONCURRENCY` gated nothing.** It was parsed into `Settings`, advertised in `.env.example`, and
+referenced nowhere else — the plan's `ocr_semaphore` was never built when the async design became a
+thread pool. It is now a real semaphore around the provider call, answering a different question from
+`MAX_WORKER_CONCURRENCY`: how many pages may be *inside the engine*, not how many items may be in
+flight.
+
+The rest: a multi-frame TIFF could mix coordinate spaces (PIL reports frame zero's size while
+Tesseract emits rows for every frame) — ordering now runs per page; the column-gap ratio was
+duplicated as a literal — now shared; unreadable dimensions degraded reading order silently — now
+refused; and the hybrid set a block id that `assign_ids` always overwrote.
 
 New package `media_service/ocr/` — `types.py`, `protocol.py`, `blocks.py`, `quality.py`, `compat.py`,
 `registry.py`, `providers/{tesseract,paddle_tesseract,vision_llm}.py`.
