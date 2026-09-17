@@ -63,7 +63,7 @@ once Phase 1's API contract is fixed. Phase numbering follows the PRD's own §19
 | **0B** Fixtures ✅ | Regression corpus, category catalog, v1 prompt, baseline pin | **Done** — 10 cases, 137 tests green, Sinhala round-trips NFC byte-exact, prompt checksum pinned |
 | **1** Batch domain ✅ | 9 tables, Alembic, storage, job dispatch, `202` upload + progress + retry | **Done** — 352 tests green, `alembic check` clean, restart requeued 4 stranded items and the batch completed with no duplicate candidates; code and security review findings fixed |
 | **2** Structured OCR ✅ | `OcrProvider` protocol + 3 env-switchable engines, blocks/bboxes/confidence, preprocessing | **Done** — 492 tests green; the provider reproduces all 10 corpus cases block for block; unknown `OCR_PROVIDER` dies at startup with the valid list; review findings fixed |
-| **3** LLM extraction | `LlmExtractionProvider` + 4 env-switchable providers, versioned prompts, 2-tier validation, retry/repair, 0..N candidates | AC-002/003/005/013; no live call in default suite |
+| **3** LLM extraction ✅ | `LlmExtractionProvider` + 4 env-switchable providers, versioned prompts, 2-tier validation, retry/repair, 0..N candidates | **Done** — 631 tests green; every adapter produces identical candidates from one page; AC-002/003/005/012/013/016 each have a test that fails if the property breaks |
 | **4** Portal | react-router + TanStack Query, bulk intake, batch progress, multi-candidate review | Upload → progress → edit → approve → visible in `frontend-web` |
 
 ## Verified Environment
@@ -642,7 +642,49 @@ The hybrid **composes** the same `TesseractOcrProvider` instance rather than con
 grayscale/contrast/denoise/threshold/deskew producing an `ocr_input` derivative. The original is never
 modified. `preprocess_version` is recorded on every extraction.
 
-## Phase 3 — LLM Extraction (env-switchable)
+## Phase 3 — LLM Extraction (env-switchable) ✅
+
+**Status: complete.** 631 tests green, `ruff` clean. Verified end to end against the running service
+with real Tesseract feeding the extraction stage: both items validated on the first attempt, each run
+row carrying prompt version and checksum, schema version, catalog version and request hash;
+candidates landed `pending` citing real blocks. The production guard was exercised live —
+`MEDIA_SERVICE_ENV=production LLM_PROVIDER=fake` dies at import with the reason, `anthropic` starts
+normally, and an unset key reports `GEMINI_API_KEY is not set` rather than a value.
+
+### What the tier split bought
+
+Tier 1 is structural and **repairable**; Tier 2 is semantic and **never retries**. The concrete
+payoff is `category` being typed `str` rather than `Literal`: as a `Literal`, an advertisement in an
+unfamiliar trade would be a structural failure and would spend the item's one **paid** repair on
+something FR-LLM-011 says to accept with a warning.
+
+The evidence check is the other half. `source_block_ids ⊆ recorded OCR blocks` is the concrete
+detector for an invented advertisement, and a candidate whose citations are all unknown is
+**discarded** rather than warned about — a reviewer shown one has no way to tell it from a real
+advertisement.
+
+### Deviations and discoveries
+
+**Cross-item request-hash reuse was wrong and was removed.** The first implementation looked up any
+earlier validated run with the same hash, which collided with `uq_prov__run_candidate`: two items
+sharing one run row cannot both record candidates. The plan scopes reuse to *retrying an item*, and
+within a generation the inputs are fixed by construction — changing preprocessing or the prompt
+version is what bumps the generation — so the existing generation-scoped resume already delivers
+AC-006. The hash is recorded on every run as the provenance that makes the guarantee auditable.
+
+**The network guard patches the transport, not `Client.send`.** Starlette's `TestClient` is itself an
+httpx client talking to the app in-process; patching `send` blocked every API test in the suite while
+proving nothing about outbound calls. Patching `HTTPTransport.handle_request` blocks exactly real
+network I/O.
+
+**A dialect traversal nearly ate the `title` field.** Stripping the JSON Schema `title` *annotation*
+by key name also removed the property literally named `title`, so the model would have been shown a
+schema with no title field and would have faithfully omitted one. The rewrite distinguishes schema
+keywords from property names, and a test pins it.
+
+**The rule-based extractor moved out of the pipeline into an LLM provider**, which puts it behind the
+same startup guard as `fake`. Its unmatched-category fallback is fixed to `Other`; the prototype
+endpoint keeps `Home`, because that behaviour is pinned until Phase 4 removes it.
 
 New package `media_service/llm/` — `types.py`, `protocol.py`, `schema.py`, `dialects.py`, `validation.py`,
 `runner.py`, `service.py`, `registry.py`, `prompts/`, `providers/`.
