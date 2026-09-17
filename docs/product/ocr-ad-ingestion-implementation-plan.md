@@ -860,10 +860,67 @@ And `pyproject.toml` has `[tool.setuptools.packages.find]` but **no `package-dat
 `llm/prompts/**/*.txt`, `manifest.json`, and `categories.v1.json` would be missing from a built wheel —
 works in editable dev, fails in a deployed container. Add the globs and load via `importlib.resources`.
 
-## Phase 4 — Management Portal Workflow
+## Phase 4 — Management Portal Workflow ✅
 
-The portal is a single 488-line `App.tsx` with no router, no data layer, and no tests. This phase is its
-first real componentization.
+**Status: complete.** 685 backend tests and 104 portal tests green, `ruff` and `tsc` clean, portal
+coverage 92% statements / 80% functions. Verified end to end against the running service and a real
+browser: three fixtures uploaded (202 + `Location`), progress polled to `partial_failed`, a retry
+took it to `completed`, a three-candidate page opened as "Ad 2 of 3 from image.png", the reviewer's
+edit and approval went in one request, and the result appeared on the public feed with its Sinhala
+intact and left the queue.
+
+### Phase 4 needed a backend first
+
+The plan as written is frontend-only, but two of its three required behaviours have no server to
+call: PRD §13.2's review endpoints did not exist. The portal was talking to prototype routes with no
+concept of candidates, provenance, or evidence. So this phase built the review API (`ReviewService`,
+`ReviewRepository`, `api/review_routes.py`) before touching `App.tsx`.
+
+Approve applies the reviewer's edits **and** performs the transition in one transaction. Every
+mutating path takes a row lock and checks the reviewer's version: the lock settles a race, the
+version catches a stale screen, and they are different questions. A refused approval therefore saves
+nothing — which is the state the old two-call portal could reach and could not report.
+
+### The prototype endpoints moved, and stopped being a bypass
+
+PRD §13.2 puts the real review endpoints on `/api/v1/advertisements/...`, which the prototype already
+occupied. Those three handlers moved to `/api/v1/legacy/...` so the compatibility path in §13.3 keeps
+a working queue.
+
+Moving them surfaced a live hole. With `MEDIA_REPOSITORY=sql` — the documented migration path — the
+prototype's approve route addressed the *same* `advertisements` table and had no authentication at
+all. Reproduced before fixing: `OPERATOR_AUTH_MODE=static_token`, no credential, `POST
+/api/v1/legacy/advertisements/{id}/approve` → 200, candidate `active`. No validation, no lock, no
+audit event. It now requires an operator and refuses anything carrying provenance outright, because
+a second publish path makes invariant 2 a convention rather than a guarantee.
+
+### What running it caught that the tests could not
+
+Both halves were green against their own fixtures and still wrong, because the fixtures encoded what
+the portal assumed rather than what the server sends:
+
+- Item statuses were invented (`ocr_running`, `no_ad_found`, a `cancelled` batch). The counts bar
+  rendered a permanent zero for the bucket it had named wrong.
+- OCR boxes are `[left, top, width, height]`, not `{x, y, width, height}`, so the block overlay drew
+  nothing at all.
+- With that fixed the overlay drew, *offset*. Block coordinates are pixels in the preprocessed page,
+  not the original scan, so every box pointed at neighbouring text — worse than no overlay. Evidence
+  now carries `ocr_width`/`ocr_height`, and the overlay renders on the `ocr_input` derivative whose
+  pixels the coordinates actually describe.
+
+### Deliberately not fixed
+
+A derivative row can outlive its blob: rows marked `bytes_state='present'` whose files are gone make
+an item fail `MEDIA_BYTES_UNAVAILABLE` permanently, and `get_or_create_derivative` reuses the row on
+reprocess, so the failure repeats. Hit during the gate on dev data and repaired by regenerating the
+blobs. The real fix belongs with retention and purge, which is PRD Phase 5.
+
+Per-operator credentials are also still absent. Under `static_token` the recorded `approved_by` is a
+header the caller chooses, so the audit trail names a reviewer but proves nothing about who they
+were. `deps.py` now says so plainly rather than implying otherwise.
+
+The portal was a single 488-line `App.tsx` with no router, no data layer, and no tests. This phase is
+its first real componentization.
 
 **New dependencies**: `react-router-dom`, `@tanstack/react-query`. Test infra is greenfield — add `vitest`,
 `@testing-library/react`, `msw`.
