@@ -63,7 +63,7 @@ once Phase 1's API contract is fixed. Phase numbering follows the PRD's own §19
 | **0B** Fixtures ✅ | Regression corpus, category catalog, v1 prompt, baseline pin | **Done** — 10 cases, 137 tests green, Sinhala round-trips NFC byte-exact, prompt checksum pinned |
 | **1** Batch domain ✅ | 9 tables, Alembic, storage, job dispatch, `202` upload + progress + retry | **Done** — 352 tests green, `alembic check` clean, restart requeued 4 stranded items and the batch completed with no duplicate candidates; code and security review findings fixed |
 | **2** Structured OCR ✅ | `OcrProvider` protocol + 3 env-switchable engines, blocks/bboxes/confidence, preprocessing | **Done** — 492 tests green; the provider reproduces all 10 corpus cases block for block; unknown `OCR_PROVIDER` dies at startup with the valid list; review findings fixed |
-| **3** LLM extraction ✅ | `LlmExtractionProvider` + 4 env-switchable providers, versioned prompts, 2-tier validation, retry/repair, 0..N candidates | **Done** — 631 tests green; every adapter produces identical candidates from one page; AC-002/003/005/012/013/016 each have a test that fails if the property breaks |
+| **3** LLM extraction ✅ | `LlmExtractionProvider` + 4 env-switchable providers, versioned prompts, 2-tier validation, retry/repair, 0..N candidates | **Done** — 640 tests green; every adapter produces identical candidates from one page; AC-002/003/005/012/013/016 each have a test that fails if the property breaks; review findings fixed |
 | **4** Portal | react-router + TanStack Query, bulk intake, batch progress, multi-candidate review | Upload → progress → edit → approve → visible in `frontend-web` |
 
 ## Verified Environment
@@ -644,7 +644,7 @@ modified. `preprocess_version` is recorded on every extraction.
 
 ## Phase 3 — LLM Extraction (env-switchable) ✅
 
-**Status: complete.** 631 tests green, `ruff` clean. Verified end to end against the running service
+**Status: complete.** 640 tests green, `ruff` clean. Verified end to end against the running service
 with real Tesseract feeding the extraction stage: both items validated on the first attempt, each run
 row carrying prompt version and checksum, schema version, catalog version and request hash;
 candidates landed `pending` citing real blocks. The production guard was exercised live —
@@ -685,6 +685,31 @@ keywords from property names, and a test pins it.
 **The rule-based extractor moved out of the pipeline into an LLM provider**, which puts it behind the
 same startup guard as `fake`. Its unmatched-category fallback is fixed to `Other`; the prototype
 endpoint keeps `Home`, because that behaviour is pinned until Phase 4 removes it.
+
+### Review pass
+
+**The retry loop was unbounded, and the test written to prove otherwise could not fail.** A
+transport failure on a *repair* turn consumed neither budget: it incremented `repairs` and
+immediately decremented it again, while `attempts` — the counter the bound checks — was never
+touched on that branch. `repair_instruction` is never cleared, so every later iteration took the
+same branch and undid its own increment; backoff never grew either, since it keys off the same
+frozen counter. Measured before the fix: **46,092 calls against a budget of three**, stopped only by
+the wall-clock deadline. Against a billed provider that is roughly a call a second for four minutes,
+per item.
+
+The cause was charging a failure to whichever budget matched the *turn* rather than the *failure*.
+`attempts` now counts transport failures wherever they happen, `repairs` counts Tier 1 failures, and
+every iteration charges exactly one — so the loop is bounded by `max_attempts + max_repairs + 1`
+calls in any order. The same reproduction now makes 4 calls and reports `LLM_TIMEOUT` rather than a
+misleading deadline. The old test asserted `attempts_used <= 3`, which was trivially true because
+`attempts_used` was the counter that never moved; it now bounds the calls actually made, and the
+outcome carries `calls_made` — the number that costs money.
+
+**Every candidate was stamped `origin='ocr_heuristic'`, including real model output**, while
+`llm_extraction` sat unused in the enum. That column exists precisely so heuristic output stays
+distinguishable from model output after the fact, which is the distinction Phase 3 introduces. The
+origin now follows the provider, and the heuristic set is shared between the startup guard and the
+label so the two cannot disagree.
 
 New package `media_service/llm/` — `types.py`, `protocol.py`, `schema.py`, `dialects.py`, `validation.py`,
 `runner.py`, `service.py`, `registry.py`, `prompts/`, `providers/`.
