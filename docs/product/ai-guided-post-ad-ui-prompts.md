@@ -110,6 +110,13 @@ Every prompt below is prefixed with this block. It encodes the decisions above s
 >
 > Material Symbols Outlined for all icons. Max content width 1280px. Do not use placeholder lorem text —
 > use realistic Sri Lankan marketplace content.
+>
+> **Sample AI copy must obey the content rules in spec §8.2.** Any generated title or description shown in
+> a mockup may state only facts the seller actually entered. It must never say an item is *verified*,
+> *accident-free*, *original*, *warrantied*, *genuine*, *brand new*, *urgent* or *best price*, and must
+> never invent inspection records, service history, battery-health figures, ownership history, or test
+> results. A mockup is the visual specification engineers build to — sample copy that breaks the content
+> policy teaches the wrong behaviour.
 
 ---
 
@@ -333,15 +340,15 @@ Every prompt below is prefixed with this block. It encodes the decisions above s
 
 | Prompt | Screen | Device | Status |
 |---|---|---|---|
-| P1 | `post_ad_01_category_desktop` | DESKTOP | pending |
+| P1 | `post_ad_01_category_desktop` | DESKTOP | generated ✅ · `e245bd9ff271` |
 | P2 | `post_ad_01_category_mobile` | MOBILE | pending |
-| P3 | `post_ad_02_details_desktop` | DESKTOP | pending |
+| P3 | `post_ad_02_details_desktop` | DESKTOP | generated ✅ · `616d32b53220` |
 | P4 | `post_ad_02_details_mobile` | MOBILE | pending |
-| P5 | `post_ad_03_questions_desktop` | DESKTOP | pending |
+| P5 | `post_ad_03_questions_desktop` | DESKTOP | generated ✅ · `beb9a320157f` |
 | P6 | `post_ad_03_questions_mobile` | MOBILE | pending |
 | P7 | `post_ad_04_photos_desktop` | DESKTOP | pending |
 | P8 | `post_ad_04_photos_mobile` | MOBILE | pending |
-| P9 | `post_ad_05_description_desktop` | DESKTOP | pending |
+| P9 | `post_ad_05_description_desktop` | DESKTOP | regenerate — §8.2 · `9f6cf28d985a` |
 | P10 | `post_ad_05_description_mobile` | MOBILE | pending |
 | P11 | `post_ad_06_submit_desktop` | DESKTOP | pending |
 | P12 | `post_ad_06_submit_mobile` | MOBILE | pending |
