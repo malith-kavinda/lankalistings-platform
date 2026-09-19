@@ -12,8 +12,8 @@ error, pagination and money conventions drift — one service returns `{data: �
 array; one returns `400` for a validation failure, another `422` (FastAPI's default). Every drift becomes
 per-client special-case code.
 
-So: **the conventions in §2–§7 are binding on all five services, and where a framework default conflicts
-with them, the framework default is overridden.** FastAPI's default `422` validation body and its
+So: **the conventions in §2–§7 and §12–§13 are binding on all five services, and where a framework
+default conflicts with them, the framework default is overridden.** FastAPI's default `422` validation body and its
 `{"detail": …}` error shape both conflict and must be replaced. `[PROPOSED]`
 
 ## 2. Envelope
@@ -149,6 +149,22 @@ Grouped by owning service. Paths shown as the gateway exposes them.
 | POST | `/ads/{reference}/report` | Report an ad | FR-35 — the missing intake for the operator's flagged queue |
 | POST | `/ads/{reference}/view` | Record a view | FR-31. High-write; needs a definition of a view and abuse protection |
 
+### `listing-service` — AI-guided creation flow
+
+Added for the AI-guided Post Ad flow. These extend the seller surface above; `POST /ads`,
+`PATCH /ads/{reference}` and `POST /ads/{reference}/submit` are unchanged and remain the create, update
+and submit path. Every endpoint is ownership-scoped (§6 rule 2) and addressed by `reference` (§4).
+
+| Method | Path | Purpose | Notes |
+|---|---|---|---|
+| GET | `/ads/{reference}/creation-flow` | Resolved stage, pinned schema snapshot, saved answers, pending and stale AI results, next required or follow-up questions | The browser receives rendered field metadata only — never prompts, provider payloads, or unvalidated schema |
+| PATCH | `/ads/{reference}/creation-flow/answers` | Validate, persist, clear or skip answers | Version precondition required (§12). `422` with per-field `details` on validation failure |
+| POST | `/ads/{reference}/creation-flow/next-questions` | Resolve required fields, then invoke the decision provider when eligible | **No client-supplied question keys are trusted.** Never called while a required field is missing or invalid |
+| POST | `/ads/{reference}/content-generations` | Start an asynchronous title/description generation | Idempotency key required (§13) |
+| GET | `/ads/{reference}/content-generations/{generation_id}` | Read the seller's own generation status and result | |
+| POST | `/ads/{reference}/attribute-suggestions/{suggestion_id}/accept` | Validate, normalise and apply a proposed field value | Validated exactly as if the seller had typed it |
+| POST | `/ads/{reference}/attribute-suggestions/{suggestion_id}/ignore` | Record seller rejection | |
+
 ### `media-service` — `/api/v1/media`
 
 | Method | Path | Purpose | Notes |
@@ -157,6 +173,8 @@ Grouped by owning service. Paths shown as the gateway exposes them.
 | DELETE | `/media/{id}` | Delete an owned asset | |
 | POST | `/media/{id}/extract` | Start OCR/AI extraction | **Only if FR-34 is scoped in** |
 | GET | `/media/{id}/extraction` | Raw OCR text + per-field values with confidence | Only if FR-34 is scoped in |
+| POST | `/internal/ad-copy` | Generate title/description **candidates** from confirmed seller facts | Service-to-service only, not gateway-exposed. Returns candidates; `listing-service` validates and persists. Never writes ad state |
+| POST | `/internal/attribute-extraction` | Propose values for empty numeric/free-text schema fields from seller notes | Service-to-service only. Enum and boolean fields use the decision provider instead (doc 09 §8.3) |
 
 ### `payment-service` — `/api/v1`
 
@@ -236,3 +254,34 @@ Response contract:
 cannot be forced to update in step with a server deploy, so the API must be able to serve an old client
 while a new one ships. This is the one architectural cost of having mobile in MVP scope that is easy to
 forget until it is expensive.
+
+## 12. Optimistic concurrency
+
+`[PROPOSED]` — added for the AI-guided create flow (doc 09), where a seller can edit an answer on one
+device while a generation job started from an earlier answer snapshot is still in flight.
+
+Every mutable resource a client can edit carries an integer `version` in its `data` payload, incremented
+server-side on every accepted mutation.
+
+- A conditional mutation sends `If-Match: "<version>"`.
+- A stale precondition returns **`409 VERSION_CONFLICT`**, carrying the current version in `details`.
+  Never a silent overwrite.
+- Every accepted mutation returns the new `version`, so a client never needs a re-read to keep editing.
+- Omitting `If-Match` where it is required is **`428 PRECONDITION_REQUIRED`**.
+
+Derived AI output additionally records the `source_version` it was produced from. Once the resource
+version moves past it, that output is marked `stale` rather than silently reused.
+
+## 13. Idempotency
+
+`[PROPOSED]` — binding on every endpoint that can create a job, a payment, or a durable record.
+
+- The client sends `Idempotency-Key: <opaque>`, unique per logical operation.
+- A repeat with the same key **and the same request body** returns the original response and creates no
+  second job or record.
+- A repeat with the same key and a *different* body is **`409 IDEMPOTENCY_KEY_REUSED`**.
+- Keys are scoped per authenticated subject and retained for a configured window.
+
+This already holds informally for `POST /webhooks/payments/{gateway}` (idempotent on `gateway_reference`,
+doc 04 §5) and for `media-service`'s batch upload. §12 and §13 generalise both into one platform
+convention instead of three service-local ones.

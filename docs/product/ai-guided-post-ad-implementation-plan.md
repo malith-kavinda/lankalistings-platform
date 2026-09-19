@@ -198,7 +198,16 @@ The draft silently drops five existing requirements. All are restored:
 
 ### 0.4 Resolve the blocking open questions
 
-Each is recorded as a decision in `08` with its rationale:
+These are live `⏳ open` rows in `.forge/project-prd-signals.md`, **not** in the reconstructed
+`08-decision-log.md`. Each is resolved through the three-write procedure in `.claude/rules/prd.md`:
+fold the answer into `project-prd.md`'s body, move the row from `project-prd-signals.md` to
+`project-prd-history.md` `## Resolved Open Questions`, and append a `### Rev N` block to
+`project-prd-history.md` `## Revisions`.
+
+Because Gate 1 was bypassed by product-owner decision, each resolution is annotated
+**"resolved by product-owner decision, 2026-09-19, outside the Gate 1 ritual"** rather than being
+promoted into `CLAUDE.md § Architecture Decisions`, whose own rule is "do not promote a row here until
+its gate confirms it".
 
 | OQ | Question | Resolution |
 |---|---|---|
@@ -227,8 +236,14 @@ Removed from v1 with explicit re-entry criteria, not silently dropped:
 
 ### 0.6 Outputs
 
-`09-ai-guided-post-ad-spec.md` v2 · `05-api-contract.md` amendment · `08-decision-log.md` amendment set ·
-OQ resolutions. **Gate:** no contradiction remains between the spec and `04`/`05`/`08`.
+`09-ai-guided-post-ad-spec.md` v2 · `05-api-contract.md` amendment (§12 concurrency, §13 idempotency,
+creation-flow resource surface) · seven OQ resolutions through the PRD trichotomy · a `### Rev` entry in
+`project-prd-history.md`. **Gate:** no contradiction remains between the spec and `04`/`05`/`08`.
+
+> **Harness note.** The enforcement hooks (`guard-prd-shape`, `guard-spec-approval`,
+> `guard-plan-approval`, `guard-spec-leapfrog`) are wired in `lankalistings-harness/.claude/settings.json`
+> and do not load for a session rooted at the repository root. The rules they enforce are followed by
+> hand; nothing blocks a violation mechanically.
 
 ---
 
