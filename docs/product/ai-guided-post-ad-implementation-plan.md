@@ -100,7 +100,7 @@ Phase 3 fixes the schema contract. Phases 6–8 each require Phase 5's wizard sh
 
 | Phase | Delivers | Key gate |
 |---|---|---|
-| **0** Spec reconciliation | Spec v2, API-contract amendment, decision-log amendment, OQ resolutions | No contradiction remains between the spec and `04`/`05`/`08` |
+| **0** Spec reconciliation ✅ | Spec v2, API-contract amendment, eight OQ resolutions | **Done** — spec v2 committed; `05` gained §12/§13 and the creation-flow surface; 8 OQs resolved through the trichotomy (37 → 29 open); grep confirms zero `PENDING_REVIEW`/camelCase/`/me/advertisements`/`jev.dev` left in the spec |
 | **1** UI generation | Canonical stepper, AI component vocabulary, versioned Stitch prompt library, full flow desktop + mobile | Every screen and state in the inventory has an exported design |
 | **2A** `identity-service` | Fork, role remap, Google OAuth, email verification, response envelope | Register → verify → Google sign-in → refresh → revoke, all green |
 | **2B** `gateway-service` | Single origin, cookie-aware token resolution, route × role table | Every route × role × anonymous combination has a passing test |
@@ -244,6 +244,30 @@ creation-flow resource surface) · seven OQ resolutions through the PRD trichoto
 > `guard-plan-approval`, `guard-spec-leapfrog`) are wired in `lankalistings-harness/.claude/settings.json`
 > and do not load for a session rooted at the repository root. The rules they enforce are followed by
 > hand; nothing blocks a violation mechanically.
+
+### 0.7 Phase 0 outcome ✅
+
+| Deliverable | Evidence |
+|---|---|
+| `05` §12 optimistic concurrency, §13 idempotency, creation-flow surface | `73a539e` |
+| Eight OQs resolved through the trichotomy | `40b509c` — signals 37 → **29** open rows; 8 rows in history; Rev 1 appended |
+| Spec v2 | `2c88b35` |
+| Contract compliance | `grep` for `PENDING_REVIEW`, `PUBLISHED`, `/me/advertisements`, `ad_123`, camelCase JSON keys, SCREAMING enums and `jev.dev` across the spec: **0 matches each** |
+
+**Deviations from the plan as written:**
+
+1. **OQ resolution targeted the wrong file.** The plan said "amend `08-decision-log.md`". `08` is a
+   *reconstructed* discovery document; the live OQ register is `.forge/project-prd-signals.md`, and
+   `.claude/rules/prd.md` mandates a three-write procedure across the PRD trichotomy. Corrected before
+   execution — `08` was left untouched.
+2. **Work moved onto a feature branch.** `git-conventions.md` forbids committing to `main`; the plan's
+   first commit (`73e2c90`) had already landed there, matching the repo's actual practice across all ten
+   prior commits. Left in place; everything from `a9d4f18` onward is on `feature/ai-guided-post-ad`.
+3. **OQ-23 was resolved too**, beyond the seven the plan listed — PostgreSQL 17 was already the de-facto
+   answer in `media-service`, and leaving it open while confirming database-per-service was incoherent.
+4. **Two product values were set, not merely recorded**: the six-stage stepper (OQ-03) and the photo
+   limits (OQ-12). Both were blocking Phase 1. The photo limits are flagged in the PRD as *"set to unblock
+   delivery — cheap to change, worth a product-owner confirmation"*.
 
 ---
 
