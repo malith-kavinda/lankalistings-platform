@@ -1,619 +1,736 @@
 # AI-Guided Post Ad Flow — Product & Engineering Specification
 
-**Product:** LankaListings  
-**Document status:** Ready for harness engineering  
-**Scope:** Public Next.js Post Ad flow, FastAPI orchestration, `jev.dev` question-decision integration, content-generation and price-suggestion services  
-**Companion documents:** `01-product-requirements.md`, `04-data-model.md`, `05-api-contract.md`, `08-decision-log.md`  
+**Product:** LankaListings
+**Document status:** Reconciled — ready for engineering
+**Version:** 2.0
 **Last updated:** 19 September 2026
+**Scope:** Public Next.js Post Ad flow, `listing-service` orchestration, TypeSafe Jev decision integration, content generation and attribute suggestion
+**Companion documents:** `.forge/project-prd.md`, `04-data-model.md`, `05-api-contract.md`, `08-decision-log.md`, `docs/product/ai-guided-post-ad-implementation-plan.md`
+
+> **Revision 2.0 — what changed from the draft.** §7 is rewritten: the draft asked the decision engine to
+> return a composite outcome object, which Jev cannot produce. The wire contract throughout now matches
+> `05-api-contract.md` (snake_case, `{data, error, meta}`, `reference` in URLs, `amount_cents`) and the
+> status vocabulary matches `04-data-model.md` (`draft`/`pending`/`active`). Ownership moves from FastAPI
+> to `listing-service` per D-18. Five dropped commitments are restored (FR-3, FR-13, FR-14, FR-15, FR-33).
+> Price guidance and Sinhala/Tamil content are deferred with explicit re-entry criteria.
 
 ## 1. Purpose
 
-LankaListings is a Sri Lankan, broad classifieds marketplace. A standard advertisement is free, a featured placement is paid, and no ad can be publicly listed until an administrator approves it.
+LankaListings is a Sri Lankan, broad classifieds marketplace. A standard advertisement is free, a
+featured placement is paid, and no ad is publicly listed until an administrator approves it.
 
-This specification defines the **AI-guided Post Ad flow** entered from the public site's **Post Your Ad** button. The flow must collect only the information needed for the selected category, allow `jev.dev` to decide whether additional follow-up questions are useful, and then produce an editable, accurate advertisement draft.
+This specification defines the **AI-guided Post Ad flow** entered from the public site's **Post Your Ad**
+button. The flow collects only the information the selected category needs, lets a decision model choose
+whether follow-up questions are worth asking, and then produces an editable, accurate advertisement draft.
 
-The feature must work across vehicles, property, land, jobs, electronics, services, home & garden, fashion, and other categories. It must not become a generic chatbot or allow an AI provider to control the marketplace's mandatory data, validation, pricing, or publication decisions.
+It must work across all nine categories. It must not become a generic chatbot, and no AI provider may
+control the marketplace's mandatory data, validation, pricing, or publication decisions.
 
 ## 2. Confirmed product decisions
 
 | Area | Decision |
 |---|---|
 | Marketplace | Anyone with a LankaListings account may create an ad. |
-| Authentication | Google sign-in and email/password are supported. The seller must be signed in before a draft is saved or submitted. |
-| Market | Sri Lanka. Prices are LKR; location is Province → District → City. |
-| Publication | An ad is never public on generation. Submission changes it to `PENDING_REVIEW`; a moderator must approve it before `PUBLISHED`. |
-| Questions | A category schema defines the allowed, required, and conditional questions. `jev.dev` decides whether further eligible questions should be asked. |
-| LLM output | The LLM may generate editable title and description drafts, suggest missing structured attributes from seller text, suggest a price range, and translate content into Sinhala and Tamil. |
+| Authentication | Google sign-in and email/password, both owned by `identity-service`. The seller must be signed in before a draft is saved or submitted. |
+| Email verification | An ad cannot be submitted by a seller whose email is unverified (FR-3). |
+| Market | Sri Lanka. Prices are LKR integer minor units; location is Province → District → City. |
+| Publication | An ad is never public on generation. Submission moves it to `pending`; a moderator must approve it before `active`. |
+| Moderator actions | **Approve and reject only** (FR-33). There is no "request changes" control. |
+| Questions | A versioned category schema defines the allowed, required, and conditional questions. Jev scores which eligible follow-ups are worth asking. |
+| LLM output | The LLM may generate editable title and description drafts and suggest missing structured attributes from seller text. |
 | Seller control | Every AI result is a suggestion. The seller can edit, accept, reject, or ignore it. No AI result silently overwrites a seller answer. |
-| UI language | The existing MVP user interface remains English. Sinhala and Tamil in this scope are advertisement-content translations, not full UI localisation. |
+| Draft persistence | Autosave **and** an explicit *Save as Draft* / *Save as Draft & Exit* affordance (FR-13). |
+| UI language | English. Sinhala and Tamil are deferred — see §8.4. |
 
 ## 3. Goals and non-goals
 
 ### 3.1 Goals
 
-- Let a first-time seller create a complete, high-quality ad without understanding every category-specific field upfront.
-- Ask required questions deterministically, then use `jev.dev` to avoid unnecessary optional questions.
-- Produce a useful title, a factual detailed description, and optional Sinhala/Tamil versions from the seller's confirmed details.
-- Make price guidance evidence-based using comparable approved LankaListings ads; it is not a valuation guarantee.
-- Preserve a structured data record so public filters such as vehicle make, year, district, and price work correctly.
-- Give moderators visibility into seller-confirmed data and AI-assisted content without treating either as trusted publication approval.
-- Keep the flow resilient: a `jev.dev`, LLM, translation, or price-service failure must not prevent a seller from completing and submitting an ordinary draft.
+- Let a first-time seller create a complete, high-quality ad without knowing every category-specific field.
+- Ask required questions deterministically, then use Jev to avoid unnecessary optional questions.
+- Produce a useful title and a factual, scannable description from the seller's confirmed details.
+- Preserve a structured data record so public filters — vehicle make, year, district, price — keep working.
+- Give moderators visibility into seller-confirmed data and AI-assisted content, without treating either
+  as trusted for publication.
+- Keep the flow resilient: a decision-service, LLM, or network failure must never prevent a seller from
+  completing and submitting an ordinary draft.
 
 ### 3.2 Non-goals
 
-- A free-form chat agent that can ask arbitrary questions outside the category schema.
-- Automatic advertisement publishing, automatic moderation approval, or automatic price selection.
-- A claim that an AI-generated price is a certified valuation, a guarantee of sale, or financial advice.
-- LLM processing of private contact information, account credentials, session tokens, exact private addresses, or unpublished image files.
-- Replacing the separate admin image/OCR extraction feature.
-- Full English/Sinhala/Tamil UI localisation in this release.
-- Native mobile applications, buyer payments, escrow, auctions, or financing.
+- A free-form chat agent that can ask questions outside the category schema.
+- Automatic publishing, automatic moderation approval, or automatic price selection.
+- LLM processing of private contact information, credentials, session tokens, exact private addresses, or
+  unpublished image files.
+- Replacing the shipped operator OCR/newspaper ingestion feature.
+- Full English/Sinhala/Tamil UI localisation.
+- Buyer payments, escrow, auctions, or financing.
+
+**Deferred rather than rejected:** price guidance (§8.5) and Sinhala/Tamil ad content (§8.4). Mobile
+posting parity ships after web; mobile remains an MVP *surface* per D-11/D-27, so this is a sequencing
+decision, not a scope cut.
 
 ## 4. Definitions
 
 | Term | Meaning |
 |---|---|
-| **Core question** | A marketplace-wide question required for every relevant ad, such as category, price, and location. |
-| **Category schema** | Versioned, admin-managed configuration that defines fields, labels, validation, conditions, UI controls, and filter mapping for a category/subcategory. |
-| **Eligible question** | A schema question whose condition is true, which is not yet answered, and which the seller is permitted to skip or must answer. |
-| **Required question** | An eligible question that must be answered before the draft can advance or submit. `jev.dev` cannot omit it. |
-| **Follow-up question** | An optional or conditional schema question selected after the required set. It may improve the ad, but is never invented outside the approved schema. |
-| **Decision service** | The backend adapter around `jev.dev`. It returns whether the flow should ask zero or more eligible follow-up questions, or proceed to generation. |
-| **Generation** | An LLM call that produces structured title/description candidates and optional attribute suggestions. |
-| **Translation** | An LLM call that creates an editable Sinhala (`si`) or Tamil (`ta`) version of an already seller-approved source draft. |
-| **Price recommendation** | A statistical range produced from comparable published ads. An LLM may explain it in plain language but must not invent the range. |
-| **Draft version** | The optimistic-concurrency version and answer snapshot from which an AI result was made. |
+| **Core question** | A marketplace-wide question required for every relevant ad — category, title, description, price, location, contact preference. |
+| **Category schema** | Versioned, admin-managed configuration defining fields, labels, validation, conditions, UI controls, AI sensitivity, and filter mapping for a category/subcategory. |
+| **Eligible question** | A schema question whose visibility condition is true and which is not yet answered. |
+| **Required question** | An eligible question that must be answered before the draft can advance or submit. The decision service cannot omit it. |
+| **Follow-up question** | An optional schema question, marked `follow_up_eligible`, that may be selected after the required set is complete. Never invented outside the schema. |
+| **Decision service** | The adapter around TypeSafe Jev. It scores how useful each eligible follow-up would be; the server does the selecting. |
+| **Generation** | An LLM call in `media-service` producing title/description **candidates**. |
+| **Attribute suggestion** | A proposed value for an empty schema field, pending explicit seller acceptance. |
+| **Draft version** | The optimistic-concurrency integer (`05` §12) and answer snapshot an AI result was produced from. |
+| **Stale** | Derived AI output whose `source_version` is behind the draft's current `version`. |
 
 ## 5. User experience and flow
 
 ### 5.1 Entry and authentication
 
 1. A visitor selects **Post Your Ad** from the header, mobile navigation, account area, or a category page.
-2. If unauthenticated, the public app opens the existing Google or email/password authentication flow. On success, it returns the seller to the Post Ad flow without losing the intended action.
-3. The system creates a server-owned `DRAFT` advertisement and an ad-creation session after the seller selects a category. A seller may abandon the flow and return to the saved draft later.
-4. The flow identifies the selected category schema version and holds that version for the draft. Later schema edits must not change the questions or validation partway through a seller session.
+2. If unauthenticated, the app opens the Google or email/password flow owned by `identity-service`. On
+   success, the seller returns to the Post Ad flow without losing the intended action.
+3. After the seller selects a category, `listing-service` creates a server-owned `draft` advertisement
+   with an `LL-NNNNN` reference and an ad-creation session. A seller may abandon and resume later.
+4. The draft **pins the category schema version** at creation. Later schema edits must not change the
+   questions or validation partway through a seller's session.
 
 ### 5.2 Seller-facing stages
 
-The UI must show a concise stepper. Field questions within a stage are displayed one at a time or in compact groups on mobile, without making every answer a separate full page.
+Six stages, one canonical stepper. Field questions within a stage are shown one at a time or in compact
+groups on mobile — not one page per answer.
 
 | Stage | Purpose | Minimum behaviour |
 |---|---|---|
-| 1. Choose category | Select category and subcategory. | Show active categories only. Changing category later requires confirmation because category-specific answers can be removed. |
-| 2. Essential details | Capture required core and category fields. | Render the category schema, honour conditions, validate immediately, and autosave completed answers. |
-| 3. Smart follow-ups | Ask only eligible additional questions selected through the decision service. | Show why a question helps when available; always permit skipping optional questions. |
-| 4. Photos and location | Add photos, set Province/District/City, and select approximate location where applicable. | Exact home address is never public by default. Images use the existing secure upload process. |
-| 5. Generate and refine | Generate ad copy, suggestions, translations, and price guidance. | Clearly label AI output; seller must review/edit the final title and description. |
-| 6. Contact, preview and submit | Confirm contact preferences, preview the listing, agree to terms, and submit. | Validate the whole draft server-side and transition only to `PENDING_REVIEW`. |
+| 1. Choose category | Category and subcategory. | Active categories only. Changing category later requires confirmation, because category-specific answers can be removed. |
+| 2. Essential details | Required core and category fields, **including price**. | Render the pinned schema, honour conditions, validate immediately, autosave completed answers. |
+| 3. Smart follow-ups | Only eligible optional questions, selected through the decision service. | Show why a question helps when a reason is available; always permit skipping. |
+| 4. Photos and location | Photos, Province/District/City. | Minimum 1, maximum 12 photos, 5 MB each, JPEG/PNG/WebP/HEIC. Exact address is never public. |
+| 5. Generate and refine | Title and description drafts, attribute suggestions. | Clearly label AI output; the seller must review and may edit the final title and description. |
+| 6. Contact, preview and submit | Contact preference, buyer-view preview, terms gate, submit. | Validate the whole draft server-side; transition only to `pending`. |
 
-The user may move back to a completed stage. Moving back never discards saved answers. Any edit that changes the answer snapshot marks dependent AI output as **out of date** until it is regenerated or manually confirmed.
+**Why six and not five.** The two prior Stitch variants disagreed on whether step 4 was Preview or
+Price & Contact, and both carried a pricing block — the tell that price is a *required core field*. Price
+therefore sits in stage 2 with the other essentials, contact/preview/submit merge into one final stage,
+and the two genuinely new surfaces are added. This resolves OQ-03.
+
+The seller may move back to a completed stage; doing so never discards saved answers. Any edit that
+changes the answer snapshot marks dependent AI output **stale** until regenerated or manually confirmed.
+
+Stage 6 states the moderation expectation to the seller, presents a hard Terms-of-Service and Privacy
+acceptance gate (FR-14), and offers featuring as a **deferrable** upsell that never blocks submission
+(FR-15).
 
 ### 5.3 Vehicle example
 
-For a seller choosing **Vehicles → Cars**, the schema must present the essential fields in a logical dependency order. A valid baseline sequence is:
+For **Vehicles → Cars**, the schema presents essentials in dependency order:
 
 1. Manufacturer / make
-2. Model (filtered by make where data exists; support an `Other` value)
+2. Model (filtered by make where data exists; always supports `other`)
 3. Model year
-4. Registration status: `REGISTERED` or `UNREGISTERED`
+4. Registration status: `registered` or `unregistered`
 5. District, then City where applicable
-6. Asking price in LKR and `Negotiable` choice
+6. Asking price in LKR and negotiable flag
 
-The required schema may then require or conditionally reveal fields such as condition, mileage, fuel type, transmission, body type, engine capacity, and registration details. After essentials are complete, `jev.dev` can decide that zero, one, or several **eligible** optional follow-ups would materially improve the listing. For example, it may request mileage for a used registered Toyota or skip body type if a lower-quality entry would not benefit from it.
+The schema may then conditionally reveal condition, mileage, fuel type, transmission, body type, engine
+capacity, and registration details. After essentials are complete, Jev scores which eligible optional
+follow-ups would materially improve the listing — for example mileage on a used registered Toyota.
 
-It may not ask an unregistered vehicle seller for a registration number, ask for a make that is not in the category schema, or bypass required price/location information.
+It cannot ask an unregistered seller for a registration number (the visibility condition is false, so the
+field is never offered), ask for a make outside the schema, or bypass required price/location fields.
 
 ### 5.4 Key UI states
 
-- **Progress saved:** show a non-intrusive “Saved” status and the last saved time.
-- **Validation issue:** explain the field problem next to the field, preserve the entered value, and move keyboard focus to the first invalid field on submit.
-- **No more questions:** clearly explain that the system has enough information to create a draft; the seller can still add optional details manually.
-- **AI in progress:** show a cancellable, non-blocking progress state. The seller can continue with photos or manually author an ad.
-- **AI unavailable:** show “AI assistance is unavailable right now. You can still complete this ad manually.” Do not expose provider errors.
-- **Stale result:** display “Details changed after this suggestion was created. Review or regenerate it.”
+- **Progress saved:** non-intrusive "Saved" status with the last saved time, alongside the explicit
+  *Save as Draft* control.
+- **Validation issue:** explain the problem next to the field, preserve the entered value, and move focus
+  to the first invalid field on submit.
+- **No more questions:** explain that there is enough information to draft the ad; the seller can still
+  add optional details manually.
+- **AI in progress:** cancellable, non-blocking. The seller can continue with photos or write manually.
+- **AI unavailable:** "AI assistance is unavailable right now. You can still complete this ad manually."
+  Never expose provider errors.
+- **Stale result:** "Details changed after this suggestion was created. Review or regenerate it."
 - **Draft resumed:** restore the latest saved stage, answers, and non-stale accepted content.
-- **Schema changed:** retain the seller's draft against its original schema version. On a later edit, the API may offer a migration preview; it must never silently delete existing answers.
+- **Schema changed:** the draft stays on its pinned version. A later edit may offer a migration preview;
+  it must never silently delete existing answers.
 
 ## 6. Category schema requirements
 
 ### 6.1 Principle
 
-The category schema is the source of truth for all seller questions and all structured public filters. Neither the browser, `jev.dev`, nor the LLM is allowed to invent a persisted structured field.
+The category schema is the source of truth for all seller questions and all structured public filters.
+Neither the browser, nor Jev, nor the LLM may invent a persisted structured field.
 
-The admin portal must support creating, reviewing, testing, publishing, deactivating, and versioning category schemas. Production schema changes require an audit event and optimistic-concurrency protection.
+The admin portal supports creating, reviewing, testing, publishing, deactivating, and versioning schemas.
+Production schema changes require an audit event, a mandatory change note, and optimistic-concurrency
+protection.
 
 ### 6.2 Field definition
 
-Each field definition must include the following, even when its value is blank or inherited from the parent category:
-
 | Property | Requirement |
 |---|---|
-| `key` | Stable machine key, e.g. `vehicle.modelYear`. It cannot be changed after it is used in a published schema. |
-| `label` and `helpText` | English seller-facing text. Translation keys may be introduced later; do not use raw LLM-generated labels. |
-| `inputType` | One of `SELECT`, `MULTI_SELECT`, `RADIO`, `CHECKBOX`, `TEXT`, `TEXTAREA`, `NUMBER`, `MONEY`, `YEAR`, `DATE`, or `BOOLEAN`. |
-| `dataSource` | Static options, approved reference dataset, or API lookup. A dynamic data source must have an `Other`/manual fallback if its data may be incomplete. |
+| `key` | Stable machine key, e.g. `vehicle.model_year`. Immutable once used in a published schema. |
+| `label`, `help_text` | English seller-facing text. Never raw LLM-generated labels. |
+| `input_type` | One of `select`, `multi_select`, `radio`, `checkbox`, `text`, `textarea`, `number`, `money`, `year`, `date`, `boolean`. |
+| `data_source` | Static options, approved reference dataset, or API lookup. A dynamic source must carry an `other` manual fallback if its data may be incomplete. |
 | `required` | Boolean plus an optional conditional expression. |
-| `visibilityCondition` | Deterministic expression evaluated only from seller answers; e.g. show `registrationNumber` only when `registrationStatus = REGISTERED`. |
-| `validation` | Type, range, precision, length, allowed values, normalisation, and server-side error code. |
-| `step` and `displayOrder` | Where it appears in the seller experience. |
-| `followUpEligibility` | Whether it can be selected by `jev.dev`, and its business priority. Required fields are not follow-ups. |
-| `filterMapping` | Whether and how the value is exposed in public search/filtering. |
-| `sensitivity` | `PUBLIC`, `SELLER_PRIVATE`, or `NEVER_SEND_TO_AI`. |
-| `generationUse` | Whether it may be given to the copy generator and how it should be phrased. |
-| `deprecatedAt` | Optional timestamp; deprecated fields remain readable for existing drafts and published ads. |
+| `visibility_condition` | Deterministic expression over seller answers only, e.g. show `registration_number` only when `registration_status = 'registered'`. |
+| `validation` | Type, range, precision, length, allowed values, normalisation, and a server-side error code. |
+| `step`, `display_order` | Where it appears in the seller experience. |
+| `follow_up_eligible`, `follow_up_priority` | Whether the decision service may score it, and its business weight. Required fields are never follow-ups. |
+| `filter_mapping` | Whether and how the value is exposed in public search. |
+| `sensitivity` | `public`, `seller_private`, or `never_send_to_ai`. |
+| `generation_use` | Whether it may be given to the copy generator, and how it should be phrased. |
+| `triggers_remoderation` | Whether editing this field after approval sends the ad back to `pending` (R-4, OQ-14). |
+| `deprecated_at` | Optional. Deprecated fields stay readable for existing drafts and published ads. |
 
 ### 6.3 Core fields
 
-The following are schema-controlled core fields:
+Category and subcategory · title · description · price amount, currency and negotiability · Province,
+District and City · seller contact preference · at least one photo.
 
-- category and subcategory
-- title (generated or entered; always seller-editable)
-- description (generated or entered; always seller-editable)
-- price amount, currency, and negotiability
-- Province, District, and City
-- seller contact preference
-- at least one photo if the final category policy requires photos
-
-`title`, `description`, price, location, status, images, and attributes remain part of the existing advertisement data model. Category answers are stored in `advertisement_attributes` and validated against the schema version attached to the draft.
+`title`, `description`, price, location, status, images, and attributes remain part of the existing
+advertisement model. Accepted category answers are projected into typed `advertisement_attributes` rows
+and validated against the schema version pinned to the draft.
 
 ### 6.4 Schema example: vehicle
 
 ```json
 {
-  "schemaVersion": 3,
+  "schema_version": 3,
   "category": "vehicles/cars",
   "fields": [
     {
       "key": "vehicle.make",
-      "inputType": "SELECT",
+      "input_type": "select",
       "required": true,
-      "dataSource": "vehicle-makes",
-      "followUpEligibility": false,
-      "filterMapping": "make",
-      "generationUse": "manufacturer"
+      "data_source": "vehicle-makes",
+      "follow_up_eligible": false,
+      "filter_mapping": "make",
+      "generation_use": "manufacturer"
     },
     {
-      "key": "vehicle.modelYear",
-      "inputType": "YEAR",
+      "key": "vehicle.model_year",
+      "input_type": "year",
       "required": true,
-      "validation": {"minimum": 1950, "maximum": "CURRENT_YEAR_PLUS_1"},
-      "filterMapping": "year",
-      "generationUse": "model year"
+      "validation": { "minimum": 1950, "maximum": "current_year_plus_1" },
+      "filter_mapping": "year",
+      "generation_use": "model year"
     },
     {
-      "key": "vehicle.registrationStatus",
-      "inputType": "RADIO",
-      "options": ["REGISTERED", "UNREGISTERED"],
+      "key": "vehicle.registration_status",
+      "input_type": "radio",
+      "options": ["registered", "unregistered"],
       "required": true,
-      "generationUse": "registration status"
+      "generation_use": "registration status"
     },
     {
-      "key": "vehicle.mileageKm",
-      "inputType": "NUMBER",
+      "key": "vehicle.mileage_km",
+      "input_type": "number",
       "required": false,
-      "followUpEligibility": true,
-      "followUpPriority": 90,
-      "visibilityCondition": "vehicle.registrationStatus = 'REGISTERED'",
-      "filterMapping": "mileage",
-      "generationUse": "mileage"
+      "follow_up_eligible": true,
+      "follow_up_priority": 90,
+      "visibility_condition": "vehicle.registration_status = 'registered'",
+      "filter_mapping": "mileage",
+      "generation_use": "mileage"
     }
   ]
 }
 ```
 
-The database must validate the resolved numeric maximum for year at request time. The browser's validation is an accessibility and usability aid only; FastAPI remains authoritative.
+The server resolves `current_year_plus_1` at request time. Browser validation is a usability and
+accessibility aid only; `listing-service` remains authoritative.
 
-## 7. `jev.dev` decision service
+## 7. Decision service — TypeSafe Jev
 
-### 7.1 Responsibility and boundary
+### 7.1 What Jev is, and what that means for the design
 
-`jev.dev` is used as a **rule/schema decision engine**. Its task is to determine how many and which eligible follow-up questions should be asked after all currently required fields are complete.
+Jev is a **System One** model: it evaluates typed questions against a state and returns calibrated,
+machine-readable answers. It has exactly three primitives:
 
-The service is advisory within a strict server-enforced boundary:
-
-- It may choose only question keys supplied by FastAPI as eligible candidates.
-- It must never select a question whose condition is false, that is already answered, or that is not permitted as a follow-up.
-- It must never return a title, description, price, category, status, validation rule, or moderation outcome.
-- It must not receive account email, phone number, password data, session tokens, exact private address, raw uploaded photos, or unpublished ad contact details.
-- It must not call the LLM directly from the browser or receive browser secrets.
-
-The implementation must use a `QuestionDecisionProvider` adapter so the rest of the product depends on an internal contract rather than a `jev.dev` SDK or API shape. The adapter isolates future vendor changes and lets tests use a deterministic fake provider.
-
-### 7.2 Request contract to the adapter
-
-FastAPI constructs and validates the following minimum context. It sends only field values whose `sensitivity` permits decision use.
-
-```json
-{
-  "requestId": "req_01...",
-  "draftId": "ad_01...",
-  "schemaVersion": 3,
-  "categoryPath": ["vehicles", "cars"],
-  "currentAnswers": {
-    "vehicle.make": "Toyota",
-    "vehicle.model": "Prius",
-    "vehicle.modelYear": 2016,
-    "vehicle.registrationStatus": "REGISTERED",
-    "location.district": "Colombo",
-    "price.amount": "8750000"
-  },
-  "eligibleFollowUpQuestionKeys": [
-    "vehicle.mileageKm",
-    "vehicle.transmission",
-    "vehicle.fuelType",
-    "vehicle.bodyType"
-  ],
-  "remainingQuestionBudget": 4,
-  "previouslySkippedQuestionKeys": [],
-  "decisionPolicyVersion": "post-ad-v1"
-}
-```
-
-`remainingQuestionBudget` is a server configuration. It must be finite, category-aware, and visible in admin configuration; this prevents an external decision engine from creating a never-ending interview. The value is intentionally not hard-coded into the Next.js app.
-
-### 7.3 Required response contract
-
-```json
-{
-  "outcome": "ASK_FOLLOW_UPS",
-  "questionKeys": ["vehicle.mileageKm", "vehicle.transmission"],
-  "reasonCodes": ["IMPROVES_VEHICLE_DISCOVERY", "IMPROVES_DESCRIPTION"],
-  "decisionReference": "jev_..."
-}
-```
-
-Allowed outcomes are:
-
-| Outcome | Meaning |
+| Type | Returns |
 |---|---|
-| `ASK_FOLLOW_UPS` | Ask the ordered, validated subset of eligible question keys. |
-| `READY_FOR_GENERATION` | No useful follow-up is needed; proceed to photos/content generation. |
-| `NEED_REQUIRED_FIELDS` | The backend has identified missing required questions. This outcome is recorded but the UI follows the local schema, not the returned field list. |
+| `noul` | a probability, 0–1 |
+| `choice` | one option defined in the question's `criteria`, plus a full distribution and confidence |
+| `score` | a weighted mean over 2–10 ordinal levels, plus a distribution and confidence |
 
-The FastAPI adapter must reject and log a safe diagnostic for a malformed outcome, duplicate key, ineligible key, over-budget result, unknown key, or attempted control value. It then uses the deterministic fallback.
+It **cannot generate prose, code, or arbitrary values**, and it returns **only values defined in the
+question schema**. Documented limits: ~64,000 token budget for state plus questions, 255 `choice` options,
+2–10 `score` levels, 70–500 ms latency (typically ~100 ms), 1,200 requests/minute.
 
-### 7.4 Decision algorithm and fallback
+Two consequences drive this design:
 
-The backend evaluates the category schema first on every answer change:
+1. **Jev cannot return "which questions to ask" as a list.** The server must enumerate the candidate
+   questions itself and ask Jev to judge each one.
+2. **Jev cannot count or do arithmetic.** All ranking, thresholding, and budget maths happens in
+   `listing-service`.
 
-1. Resolve visibility and required conditions deterministically.
-2. If a required field is unanswered or invalid, return that field to the UI. Do not call `jev.dev` yet.
-3. Build the eligible optional-question set and calculate the remaining budget.
-4. Call the `QuestionDecisionProvider` with the bounded context above.
-5. Validate the response against the server's resolved schema.
-6. Present its selected questions or continue to generation.
+### 7.2 Responsibility and boundary
 
-If `jev.dev` times out, returns an invalid response, exceeds its retry policy, or is disabled, the flow must continue using this fallback:
+Jev's job is to judge **how useful each eligible follow-up question would be**, given the answers so far.
+It is advisory within a server-enforced boundary:
 
-1. Ask any schema-defined essential recommended follow-ups that are still eligible and within the local budget.
+- It only ever sees questions `listing-service` chose to ask about.
+- It never sees a question whose visibility condition is false, that is already answered, or that is not
+  `follow_up_eligible` — such fields are never put in the request.
+- It never returns a title, description, price, category, status, validation rule, or moderation outcome.
+- It never receives account email, phone number, credentials, session tokens, exact private address, raw
+  uploaded photos, or unpublished contact details.
+- It is never called from the browser, and its API key never leaves the server.
+
+The implementation uses a `QuestionDecisionProvider` interface so the product depends on an internal
+contract rather than a vendor SDK, with a deterministic fake for tests. **TypeSafe ships Python and
+JavaScript SDKs only**, so the Java implementation is a plain `RestClient` call against the documented
+JSON API.
+
+### 7.3 Request
+
+`listing-service` builds the state from answers whose `sensitivity` permits decision use, and one `noul`
+per eligible follow-up field plus one readiness question:
+
+```json
+{
+  "model": "jev-latest",
+  "state": {
+    "category": ["vehicles", "cars"],
+    "answers": {
+      "vehicle.make": "Toyota",
+      "vehicle.model": "Prius",
+      "vehicle.model_year": 2016,
+      "vehicle.registration_status": "registered",
+      "location.district": "Colombo",
+      "price.amount_cents": 875000000
+    },
+    "previously_skipped": []
+  },
+  "questions": {
+    "vehicle__mileage_km": {
+      "type": "noul",
+      "instructions": "Would knowing the vehicle's mileage in km materially improve this listing for buyers, given `answers`?"
+    },
+    "vehicle__transmission": {
+      "type": "noul",
+      "instructions": "Would knowing the transmission type materially improve this listing, given `answers`?"
+    },
+    "vehicle__fuel_type": {
+      "type": "noul",
+      "instructions": "Would knowing the fuel type materially improve this listing, given `answers`?"
+    },
+    "ready_for_generation": {
+      "type": "noul",
+      "instructions": "Do `answers` already contain enough detail to write a strong, complete advertisement?"
+    }
+  }
+}
+```
+
+Question ids replace `.` with `__` because the wire key must be a plain identifier; the adapter maps back
+to field keys. All questions evaluate in parallel, so adding candidates barely changes latency.
+
+### 7.4 Response and server-side selection
+
+```json
+{
+  "model": "jev-1.13.0",
+  "answers": {
+    "vehicle__mileage_km":   { "type": "noul", "noul": 0.94 },
+    "vehicle__transmission": { "type": "noul", "noul": 0.71 },
+    "vehicle__fuel_type":    { "type": "noul", "noul": 0.22 },
+    "ready_for_generation":  { "type": "noul", "noul": 0.38 }
+  },
+  "usage": { "input_tokens": 210, "output_tokens": 31 }
+}
+```
+
+`listing-service` then, entirely in code:
+
+1. Discards any answer key it did not send.
+2. Drops fields whose `noul` is below `decision_noul_threshold`.
+3. Ranks the survivors by `noul × follow_up_priority`.
+4. Truncates to `remaining_question_budget` — a finite, category-aware server configuration, visible in
+   admin config and never hard-coded into the Next.js app.
+5. If nothing survives, or `ready_for_generation` is high, proceeds to generation.
+
+**What this design eliminates.** The draft specification required validation against unknown keys,
+ineligible keys, already-answered keys, duplicate keys, over-budget results, and attempted control
+values. None of those are possible here, because the server owns the question set and performs the
+selection. The adapter validates only that each expected key returned with a probability in `[0, 1]`.
+
+### 7.5 Decision algorithm and fallback
+
+On every answer change, `listing-service`:
+
+1. Resolves visibility and required conditions deterministically.
+2. If a required field is unanswered or invalid, returns it to the UI. **Jev is not called.**
+3. Builds the eligible optional set and computes the remaining budget.
+4. Calls the `QuestionDecisionProvider`.
+5. Applies §7.4's selection.
+6. Presents the selected questions, or continues to generation.
+
+If Jev times out, exceeds its retry policy, returns a malformed body, trips the circuit breaker, or is
+disabled, the flow continues on this fallback:
+
+1. Ask schema-defined essential recommended follow-ups still eligible and within the local budget.
 2. If none are configured, proceed to generation with the answers already collected.
-3. Record `decisionSource = FALLBACK` for observability, but do not show internal vendor information to the seller.
+3. Record `decision_source = "fallback"` for observability. Never show vendor detail to the seller.
 
-The seller can skip an optional question. The backend records the skip and prevents the same session from re-asking it unless the seller explicitly selects **Add more details**.
+Documented Jev error codes handled explicitly: `401` (bad key — alarm, treat as disabled), `422`
+(validation — log the shape, fall back), `429` (rate limited — backoff), `529` (overloaded — backoff).
 
-### 7.5 Admin controls
+A seller may skip any optional question. The skip is recorded and the question is not re-asked in the same
+session unless the seller chooses **Add more details**.
 
-The Vite React admin portal requires a **Post Ad Question Configuration** area with:
+### 7.6 Other uses of Jev in this flow
+
+Because Jev returns only schema-defined values, it is also the right tool for two jobs the draft routed
+through the LLM:
+
+- **Enum and boolean attribute suggestions (§8.3)** — a `choice` question can only return a value listed
+  in its `criteria`, making an out-of-schema value structurally impossible.
+- **Content policy checks (§9)** — a battery of `noul` questions over seller and generated text produces a
+  gate that code consumes, which is exactly what a System One model is for.
+
+### 7.7 Admin controls
+
+The management portal requires a **Post Ad Question Configuration** area with:
 
 - category/subcategory schema version list and change history
-- field editor with validation, conditions, `followUpEligibility`, business priority, AI sensitivity, and filter mapping
-- a visual test panel: select a category, enter sample answers, inspect resolved required and eligible follow-ups, and test a decision-provider response without modifying a seller draft
-- published/draft schema states and a mandatory change note on publication
-- configurable per-category question-budget policy and fallback priorities
-- provider enable/disable control restricted to administrators
+- a field editor covering validation, conditions, `follow_up_eligible` and priority, AI sensitivity,
+  filter mapping, and re-moderation triggers
+- a visual test panel: pick a category, enter sample answers, inspect the resolved required set and
+  eligible follow-ups, and test a decision response without touching a seller draft
+- published/draft schema states with a mandatory change note on publication
+- configurable per-category question budget, noul threshold, and fallback priorities
+- a provider enable/disable kill switch, restricted to `super_admin`
 - audit events for schema, policy, and provider-setting changes
 
-## 8. LLM-assisted content requirements
+## 8. LLM-assisted content
 
 ### 8.1 General rules
 
-The LLM is a writing and suggestion service, not a system of record. It may receive only a server-created whitelist of confirmed seller inputs that are allowed by `generationUse` and `sensitivity`.
+The LLM is a writing and suggestion service, not a system of record. It runs in `media-service`, reusing
+the existing provider registry, versioned prompt registry, retry/repair runner, and two-tier JSON-schema
+validation. It receives only a server-built whitelist of confirmed seller inputs permitted by
+`generation_use` and `sensitivity`.
 
-The LLM must return JSON that validates against a strict response schema. Free-form prose responses, tool calls that can modify data, and direct writes to the database are prohibited.
+`media-service` returns **candidates**. `listing-service` validates and persists. `media-service` never
+writes ad state — the same invariant the shipped OCR pipeline already obeys.
 
-Every generated result must carry:
+The LLM must return JSON validating against a strict schema. Free-form prose responses, tool calls that
+modify data, and direct database writes are prohibited.
 
-- `generationId`
-- `sourceDraftVersion`
-- `sourceAnswersHash`
-- `promptTemplateVersion`
-- provider/model identifier retained internally for audit and troubleshooting
-- status: `PROPOSED`, `ACCEPTED`, `REJECTED`, `STALE`, or `FAILED`
+Every generated result carries `generation_id`, `source_version`, `source_answers_hash`, `prompt_version`,
+an internally-retained provider/model identifier, and a status of `proposed`, `accepted`, `rejected`,
+`stale`, or `failed`.
 
 ### 8.2 Title and description generation
 
-The service accepts seller-confirmed category data and optional seller notes, then generates:
+From seller-confirmed category data plus optional seller notes, the service generates one concise title
+candidate, one detailed scannable description candidate, and optionally a short list of missing-attribute
+suggestions kept separate from the copy.
 
-- one concise title candidate
-- one detailed, scannable description candidate
-- an optional short list of missing-attribute suggestions, separately from the copy
-
-The prompt and response validator must enforce the following content rules:
+The prompt and the response validator enforce:
 
 - Use only facts present in the approved input. Omit an unknown fact; never guess it.
-- Do not state that an item is “verified,” “accident-free,” “original,” “warrantied,” “brand new,” “urgent,” or “best price” unless the schema supplies that confirmed fact and policy permits the claim.
-- Do not invent mileage, condition, ownership history, registration details, amenities, salary, land extent, dimensions, location, seller identity, delivery, contact details, or offers.
-- Do not include phone numbers, email addresses, URLs, passwords, payment instructions, discriminatory language, prohibited-content claims, or instruction-like text from untrusted seller inputs.
-- Follow the category copy template. For example, a vehicle description should favour make/model/year, registration, mileage, transmission, fuel, condition, location, price/negotiability, and photos where confirmed.
-- Generate Unicode-safe text. It must support English, Sinhala, and Tamil scripts without transliteration unless the seller asks for transliteration in a future feature.
-- Respect server-configured maximum lengths for title and description. The server truncates nothing silently; an invalid generation is discarded and retried or shown as unavailable.
+- Never claim an item is "verified", "accident-free", "original", "warrantied", "brand new", "urgent", or
+  "best price" unless the schema supplies that confirmed fact and policy permits the claim.
+- Never invent mileage, condition, ownership history, registration details, amenities, salary, land
+  extent, dimensions, location, seller identity, delivery, contact details, or offers.
+- Never include phone numbers, email addresses, URLs, passwords, payment instructions, discriminatory
+  language, prohibited-content claims, or instruction-like text drawn from untrusted seller input.
+- Follow the category copy template. A vehicle description favours make/model/year, registration,
+  mileage, transmission, fuel, condition, location, price and negotiability where confirmed.
+- Generate Unicode-safe text.
+- Respect server-configured maximum lengths (title ≤70, description ≤4000). **Nothing is silently
+  truncated** — an invalid generation is discarded and retried, or shown as unavailable.
 
-The preview must visibly state: **“AI-generated draft — review all details before submitting.”**
+The preview states visibly: **"AI-generated draft — review all details before submitting."**
 
-The seller can edit the title and description directly. Editing generated copy does not require another LLM call. Accepting a generated draft writes it into the normal `advertisements.title` and `advertisements.description` fields only after server validation.
+The seller may edit title and description directly; editing does not trigger another LLM call. Accepting a
+draft writes into `advertisements.title` and `advertisements.description` only after server validation.
 
-### 8.3 Missing-attribute suggestions
+### 8.3 Attribute suggestions
 
-The LLM may inspect seller-provided free text and propose values for schema fields that are still empty. It must return each suggestion as a separate object:
+Split by field type, which is stricter than a single LLM path:
+
+| Field type | Route | Why |
+|---|---|---|
+| Enum, boolean | **Jev `choice`** | Can only return a value defined in the question's `criteria`. Out-of-schema values are impossible. Cap: 255 options |
+| Number, text | LLM in `media-service`, then server validation | Free-form values cannot be enumerated in advance |
+
+Each suggestion is a separate object:
 
 ```json
 {
-  "fieldKey": "vehicle.transmission",
-  "proposedValue": "AUTOMATIC",
+  "field_key": "vehicle.transmission",
+  "proposed_value": "automatic",
   "evidence": "Seller note mentions automatic transmission.",
-  "confidence": "MEDIUM"
+  "confidence": "medium"
 }
 ```
 
 Rules:
 
-- `fieldKey` must exist in the draft's category schema and be eligible under its condition.
-- The backend validates and normalises `proposedValue` exactly as if the seller typed it.
-- The UI displays suggestions beside the relevant field with **Accept** and **Ignore** actions; it never auto-populates a confirmed answer.
-- `confidence` is a review hint, not a permission to write data.
-- If a field is required, an LLM suggestion cannot satisfy it until the seller explicitly accepts it or enters a value.
-- Suggestions based only on ambiguous text must be excluded rather than guessed.
+- `field_key` must exist in the draft's pinned schema and be eligible under its condition.
+- The server validates and normalises `proposed_value` exactly as if the seller had typed it.
+- The UI shows suggestions beside the relevant field with **Accept** and **Ignore**. It never
+  auto-populates a confirmed answer.
+- `confidence` is a review hint, never permission to write data.
+- An LLM or Jev suggestion cannot satisfy a required field until the seller accepts it or enters a value.
+- Suggestions resting on ambiguous text are excluded rather than guessed.
+- Accept and ignore are both audited.
 
-### 8.4 Content translations
+### 8.4 Content translations — **deferred**
 
-After the seller approves or edits the source content, the UI offers **Create Sinhala version** and **Create Tamil version**. Translation is optional; the seller may publish only the base-language version.
+Sinhala and Tamil advertisement content is **out of scope for this release**. It contradicts the locked
+English-only MVP decision, and the draft's carve-out was not sufficient to override it.
 
-- `en`, `si`, and `ta` are stored as explicit BCP-47-style content codes in the domain model.
-- A translation uses the currently approved source title/description and the structured facts, never an earlier stale draft.
-- The translated title and description are editable before the seller includes them in the submission.
-- The UI identifies the source language and target language. It must not represent a translated draft as reviewed or moderator-approved.
-- A source-content edit marks dependent translations stale. The seller must regenerate, edit/confirm, or remove them before submission.
-- Search may index approved public translations where product policy permits. The primary published content remains deterministic and must meet the same moderation rules in every language.
+Re-entry requires all of: a formal reversal of the English-only decision; Noto Sans Sinhala and Tamil font
+loading in every client; and Sinhala/Tamil-capable moderators staffed against the 24-hour review promise
+(NFR-6) — a translated ad must meet the same moderation standard in every language.
 
-### 8.5 Price recommendation
+The data model leaves room for it: content locale variants are designed for but not built, so enabling
+translation later adds rows rather than reshaping the advertisement aggregate.
 
-Price guidance must be grounded in LankaListings data, not a model's general knowledge.
+### 8.5 Price recommendation — **deferred**
 
-1. A **Price Intelligence** service retrieves comparable, currently or recently published marketplace ads using a category-specific matching strategy: category/subcategory, location granularity, relevant attributes, and time window.
-2. It removes invalid/outlier records according to a documented, versioned statistical method.
-3. If the configurable minimum number and quality of comparable records is not met, the service returns `INSUFFICIENT_DATA`; no numeric range is shown.
-4. If sufficient data exists, it returns a lower range, typical range, upper range, comparator count, comparison factors, and a data-as-of date. Currency is LKR.
-5. The LLM may produce a short explanation from those calculated results. It must not calculate, change, or add any number to the range.
+Evidence-based price guidance is **out of scope for this release** for a structural reason: a greenfield
+marketplace has no corpus of comparable published ads, and guidance that is not grounded in real
+comparables is exactly the thing this specification refuses to ship.
 
-The seller sees the range as guidance, e.g. **“Comparable approved ads suggest Rs. X–Y. Your final price remains your choice.”** They can keep their entered price, change it, or ignore the recommendation. A recommendation never updates `price_amount` automatically.
-
-The first implementation must be able to turn price guidance off per category until sufficient marketplace data exists.
+Re-entry is per category, once that category holds enough recently-published ads to meet a configured
+comparator threshold. When it re-enters, the binding constraints are already settled: the range is
+computed statistically from comparable ads by a versioned methodology, an insufficient-data state is
+returned rather than a guessed range, the LLM may explain the numbers but may never compute or alter one,
+and a recommendation never updates `price_amount_cents` automatically.
 
 ### 8.6 Failure and safety handling
 
-- Generation, translation, and price calls run through FastAPI; API keys remain server-only.
-- Use per-seller and per-draft rate limits, an idempotency key, timeout, retry/backoff, and circuit-breaker policy.
-- Store redacted request/response metadata for troubleshooting. Do not log seller notes, generated copy, PII, or provider credentials at info level.
-- If an LLM safety filter blocks a request or output, present a neutral manual-entry fallback and retain the seller's saved answers.
-- The system must record enough audit metadata to explain a moderation issue without retaining secrets or private raw-provider payloads longer than the configured retention policy.
+- All generation runs through `listing-service` → `media-service`. Provider keys are server-only and never
+  appear in a Next.js bundle.
+- Per-seller and per-draft rate limits, idempotency keys, timeouts, retry with backoff, and a circuit
+  breaker.
+- Redacted request/response metadata is stored for troubleshooting. Seller notes, generated copy, PII, and
+  provider credentials are never logged at info level.
+- If a safety filter blocks a request or output, present a neutral manual-entry fallback and retain the
+  seller's saved answers.
+- Audit metadata must be sufficient to explain a moderation issue without retaining secrets or raw
+  provider payloads beyond the configured retention period.
 
-## 9. Data model additions
+## 9. Content policy, submission and moderation
 
-The existing `advertisements`, `advertisement_attributes`, `categories`, and `audit_events` records remain the source of truth. Add the following entities or equivalent relational structures.
+**Content policy.** Before submission, and again during moderation, seller-entered and generated text pass
+a Jev `noul` battery: contact details, URLs, prohibited-content claims, discriminatory language, and
+warranty or condition claims unsupported by the confirmed facts. A block preserves the draft and offers
+correction guidance — it never discards work.
+
+**Submission.** `POST /ads/{reference}/submit` performs full server-side validation against the draft's
+pinned schema version, enforces the terms gate and the verified-email check (FR-3), and transitions
+`draft → pending`. Nothing else may reach `pending`.
+
+**Moderation.** The queue shows seller-confirmed content, structured attributes, photos, public location,
+a clear AI-assisted marker with generation timestamp and source draft version, and accepted AI suggestions
+distinguishable from direct seller entry in an audit view. Moderators have **approve and reject with a
+reason code** — approval remains an independent human state transition, and no AI-assisted content is
+exempt from it.
+
+## 10. Data model additions
+
+`advertisements`, `advertisement_attributes`, `categories` and the existing records remain the source of
+truth. Added:
 
 | Entity | Key fields | Purpose |
 |---|---|---|
-| `category_schema_versions` | id, category_id, version, schema_json, status, created_by, change_note, published_at | Immutable, versioned seller-question configuration. |
-| `ad_creation_sessions` | id, advertisement_id, schema_version_id, current_stage, question_budget_state, last_decision_source, started_at, completed_at | Resumable Post Ad state. |
-| `ad_creation_answer_events` | id, session_id, field_key, action, value_hash, source, created_at | Audit of answer, clear, skip, and accepted-suggestion actions. Raw answer duplication is not required. |
-| `content_generations` | id, advertisement_id, source_version, source_answers_hash, type, language, output_json, status, prompt_version, created_at | Title/description and translation candidate history. |
-| `attribute_suggestions` | id, generation_id, field_key, proposed_value_json, evidence, confidence, status, resolved_at | Seller-reviewed LLM attribute proposals. |
-| `price_recommendations` | id, advertisement_id, source_version, status, range_low, range_typical, range_high, comparator_count, methodology_version, data_as_of, created_at | Auditable, evidence-based market guidance. |
-| `question_decisions` | id, session_id, provider_reference, decision_source, request_fingerprint, result_json_redacted, policy_version, created_at | Decision-provider trace with safe retention. |
-| `advertisement_content_locales` | advertisement_id, language_code, title, description, source_generation_id, status, version | Seller-confirmed content variants. |
+| `category_schema_versions` | id, category_id, version, schema_json, status, created_by, change_note, published_at | Immutable, versioned seller-question configuration |
+| `ad_creation_sessions` | id, advertisement_id, schema_version_id, current_stage, question_budget_state, last_decision_source, started_at, completed_at | Resumable Post Ad state |
+| `ad_creation_answer_events` | id, session_id, field_key, action, value_hash, source, created_at | Audit of answer, clear, skip, and accepted-suggestion actions |
+| `content_generations` | id, advertisement_id, source_version, source_answers_hash, type, output_json, status, prompt_version, created_at | Title/description candidate history |
+| `attribute_suggestions` | id, generation_id, field_key, proposed_value_json, evidence, confidence, source, status, resolved_at | Seller-reviewed attribute proposals. `source` distinguishes Jev from LLM |
+| `question_decisions` | id, session_id, decision_source, request_fingerprint, result_json_redacted, policy_version, created_at | Decision trace with safe retention |
+| `audit_events` | id, advertisement_id, actor, event_type, payload_redacted, created_at | Append-only. **New** — the draft assumed this existed; it did not |
 
 Required constraints:
 
-- unique `(category_id, version)` for a schema version
-- unique active/published schema selection per category
-- unique `(advertisement_id, language_code)` for current content locale
-- foreign-key or equivalent ownership checks from every session/result to the seller-owned advertisement
-- optimistic version checks on advertisement, schema configuration, and content-locale updates
-- immutable audit events for decisions, AI suggestion acceptance/rejection, submission, moderation, and publication
+- unique `(category_id, version)` per schema version
+- one published schema version per category
+- ownership checks from every session and result to the seller-owned advertisement
+- optimistic version checks on advertisement and schema updates (`05` §12)
+- immutable audit events for decisions, suggestion acceptance/rejection, submission, moderation, publication
 
-## 10. API contract additions
+## 11. API contract
 
-All endpoints live under `/api/v1`, use camelCase JSON, return the latest draft version after a mutation, and require the authenticated seller to own the draft. Existing `/me/advertisements` draft and submission endpoints remain valid.
+All endpoints follow `05-api-contract.md`: `/api/v1`, **snake_case fields and lower snake_case enums**, the
+mandatory `{data, error, meta}` envelope, ads addressed by **`reference`** (`LL-NNNNN`), money as
+`amount_cents`, version preconditions per §12, and idempotency keys per §13.
 
-| Method | Path | Purpose |
-|---|---|---|
-| `POST` | `/me/advertisements` | Create a `DRAFT` ad after category selection; response includes `creationSession`. |
-| `GET` | `/me/advertisements/{id}/creation-flow` | Return resolved stage, schema snapshot, saved answers, pending/stale AI results, and next required or follow-up questions. |
-| `PATCH` | `/me/advertisements/{id}/creation-flow/answers` | Validate, persist, clear, or skip answers using an `If-Match`/version precondition. |
-| `POST` | `/me/advertisements/{id}/creation-flow/next-questions` | Resolve required fields and invoke the decision service when eligible. No client-supplied question keys are trusted. |
-| `POST` | `/me/advertisements/{id}/content-generations` | Start an asynchronous title/description generation request. |
-| `GET` | `/me/advertisements/{id}/content-generations/{generationId}` | Read the seller's own generation status/result. |
-| `POST` | `/me/advertisements/{id}/attribute-suggestions/{suggestionId}/accept` | Validate and explicitly apply a proposed field value. |
-| `POST` | `/me/advertisements/{id}/attribute-suggestions/{suggestionId}/ignore` | Record seller rejection/ignore. |
-| `POST` | `/me/advertisements/{id}/translations` | Start an asynchronous `si` or `ta` translation from the current source content. |
-| `PATCH` | `/me/advertisements/{id}/content-locales/{languageCode}` | Seller edits/accepts a translated content variant. |
-| `POST` | `/me/advertisements/{id}/price-recommendations` | Calculate or retrieve current grounded price guidance for an eligible category. |
-| `POST` | `/me/advertisements/{id}/submit` | Perform complete server-side schema/content validation and move draft to `PENDING_REVIEW`. |
+The creation-flow resource surface is specified in `05-api-contract.md` §8 under
+*`listing-service` — AI-guided creation flow*, and the service-to-service generation endpoints under
+*`media-service`*. `POST /ads`, `PATCH /ads/{reference}` and `POST /ads/{reference}/submit` are unchanged.
 
-### 10.1 Example answer update
+### 11.1 Example answer update
 
 ```http
-PATCH /api/v1/me/advertisements/ad_123/creation-flow/answers
+PATCH /api/v1/ads/LL-49210/creation-flow/answers
 If-Match: "7"
 Idempotency-Key: 4be3...
+Content-Type: application/json
 ```
 
 ```json
 {
   "updates": [
-    {"fieldKey": "vehicle.modelYear", "value": 2016},
-    {"fieldKey": "vehicle.registrationStatus", "value": "REGISTERED"}
+    { "field_key": "vehicle.model_year", "value": 2016 },
+    { "field_key": "vehicle.registration_status", "value": "registered" }
   ]
 }
 ```
 
-The response includes `draftVersion`, the updated resolved schema state, stale-result flags, and `nextAction`. It returns `409` on an out-of-date version and `422` with `fieldErrors` for validation failures.
+The response carries the new `version`, the updated resolved schema state, stale-result flags, and
+`next_action`. It returns `409 VERSION_CONFLICT` on a stale precondition and `422 VALIDATION_FAILED` with
+per-field `details` on validation failure.
 
-### 10.2 Example next-question response
+### 11.2 Example next-question response
 
 ```json
 {
-  "draftId": "ad_123",
-  "draftVersion": 8,
-  "nextAction": "ASK_FOLLOW_UPS",
-  "questions": [
-    {
-      "key": "vehicle.mileageKm",
-      "label": "Mileage (km)",
-      "inputType": "NUMBER",
-      "required": false,
-      "helpText": "Helps buyers compare used vehicles."
-    }
-  ],
-  "decisionSource": "JEV"
+  "data": {
+    "reference": "LL-49210",
+    "version": 8,
+    "next_action": "ask_follow_ups",
+    "questions": [
+      {
+        "key": "vehicle.mileage_km",
+        "label": "Mileage (km)",
+        "input_type": "number",
+        "required": false,
+        "help_text": "Helps buyers compare used vehicles."
+      }
+    ],
+    "decision_source": "jev"
+  },
+  "error": null
 }
 ```
 
-The browser receives the rendered field metadata only. It never receives internal prompts, provider credentials, full provider responses, private safety policies, or unvalidated schema data.
-
-## 11. Administration and moderation requirements
-
-### 11.1 Admin configuration
-
-Administrators must be able to:
-
-- manage category-schema versions and preview the seller flow
-- configure required/conditional fields and `jev.dev` follow-up eligibility
-- configure field sensitivity so private fields are excluded from AI/decision payloads
-- configure per-category AI-copy availability, translation availability, and price-guidance availability
-- set content templates, banned claims/terms, lengths, and current prompt-template version through controlled configuration
-- manage approved vehicle make/model reference data and static select options
-- view aggregate usage, failure rate, fallback rate, stale-generation rate, and price-insufficient-data rate without exposing seller content by default
-
-### 11.2 Moderator review
-
-The moderation queue must show:
-
-- seller-confirmed primary content and language variants
-- structured attributes, photos, and public location
-- a clear marker that content was AI-assisted, with generation timestamp and source draft version
-- accepted AI attribute suggestions distinguishable from direct seller entry in an audit view
-- price guidance only as historical seller assistance; it must not bias the moderator into treating the suggested price as verified value
-- all normal reject/request-change/remove controls and mandatory reasons
-
-Moderators cannot publish automatically generated content without normal review. A moderator's approval remains an independent state transition.
+The browser receives rendered field metadata only. It never receives internal prompts, provider
+credentials, raw provider responses, safety policies, or unvalidated schema.
 
 ## 12. Security, privacy, and abuse controls
 
-- Authenticate every seller mutation and enforce advertisement ownership at the service layer.
-- Keep LLM, `jev.dev`, and pricing-provider credentials in server-side secret storage; never include them in Next.js bundles.
-- Validate every client input in FastAPI using schema-version-aware models. Treat AI output and decision-provider output as untrusted input.
-- Use rate limits for draft creation, answer mutations, generation, translation, and price requests; return `429` with a safe retry message.
-- Use idempotency keys for actions that can create jobs or modify state. A retry must not create duplicate generation or recommendation records.
-- Support request correlation IDs, immutable audit events, provider-timeout metrics, and error alarms.
-- Separate public field data from seller-private data. Do not include email, phone, exact address, login data, or raw image bytes in AI prompts or decision contexts.
-- Apply a content-policy check on seller-entered and AI-generated content before submission and again during moderation. A block must preserve the draft and offer manual correction guidance.
-- Sanitize rich/free-text input, escape it on output, and prevent prompt injection from seller notes from changing the generation system instructions.
-- Define retention and deletion rules for generation metadata, decision records, and price comparator snapshots before production launch. The live service must honour account/deletion obligations.
+- Authenticate every seller mutation at the gateway and enforce advertisement ownership in the service.
+- Keep Jev and LLM credentials in server-side secret storage; never in a Next.js bundle.
+- Validate every client input against schema-version-aware models. **Treat AI output and decision output
+  as untrusted input.**
+- Rate limit draft creation, answer mutations, generation, and suggestion acceptance; return `429`.
+- Use idempotency keys wherever an action creates a job or durable record.
+- Correlation IDs, immutable audit events, provider-timeout metrics, and error alarms throughout.
+- Separate public field data from seller-private data. Email, phone, exact address, login data and raw
+  image bytes never enter an AI prompt or decision context.
+- Sanitize free-text input, escape on output, and prevent prompt injection from seller notes altering
+  generation system instructions.
+- Define retention and deletion rules for generation metadata and decision records before production.
 
 ## 13. Accessibility, responsiveness, and performance
 
 ### 13.1 Accessibility
 
-- The wizard uses semantic headings, labelled controls, keyboard-operable option lists, visible focus states, and error announcements.
-- Progress communicates current stage and completed stages without relying on colour alone.
-- Conditional questions announce themselves when revealed; removed questions explain why their answers are no longer used.
-- AI labels, price guidance disclaimers, confidence indicators, and status badges have textual equivalents.
-- Mobile controls meet appropriate touch targets and do not require drag-only interaction for question selection or photo reordering.
+Semantic headings, labelled controls, keyboard-operable option lists, visible focus states, and announced
+errors. Progress communicates current and completed stages without relying on colour alone. Conditional
+questions announce themselves when revealed, and removed questions explain why their answers are no longer
+used. AI labels, confidence indicators, and status badges all have textual equivalents. Mobile controls
+meet touch-target minimums and never require drag-only interaction for question selection or photo
+reordering.
 
 ### 13.2 Responsive behaviour
 
-- Desktop may show the stage stepper and a live ad preview side-by-side.
-- Tablet retains a clear persistent step indicator while placing preview below forms as needed.
-- Mobile uses a compact step header, one-hand-friendly controls, sticky Continue/Back controls, and a preview sheet. It must not lose an entered answer when the keyboard opens or the device rotates.
+Desktop may show the stepper and a live ad preview side by side. Tablet keeps a persistent step indicator
+with the preview below the form. Mobile uses a compact step header, one-hand-friendly controls, sticky
+Continue/Back, and a preview sheet — and must not lose an entered answer when the keyboard opens or the
+device rotates.
 
-### 13.3 Initial service targets
+### 13.3 Service targets
 
-Targets must be verified under realistic load before launch and monitored after release:
-
-- local schema resolution and answer persistence are responsive without dependence on external AI services
-- `jev.dev` calls use a bounded timeout; timeout falls back instead of blocking the stage
-- generation, translation, and price work can be asynchronous and report status without holding the request open indefinitely
-- a seller can continue core draft creation when every optional AI integration is disabled
-- image upload remains independent from the generation request so a slow provider does not interrupt photo handling
+- Schema resolution and answer persistence are responsive without any dependence on external AI services.
+- Jev calls use a bounded timeout; a timeout falls back rather than blocking the stage.
+- Generation is asynchronous and reports status without holding a request open.
+- A seller can complete core draft creation with every optional AI integration disabled.
+- Image upload is independent of generation, so a slow provider never interrupts photo handling.
 
 ## 14. Acceptance criteria
 
 ### 14.1 Core flow
 
-- An unauthenticated visitor selecting Post Your Ad completes Google or email/password sign-in and returns to a new or resumed draft flow.
-- Selecting Vehicles → Cars shows required vehicle questions from the active schema, including make, model year, registration status, district, and LKR price in an appropriate dependency order.
-- A registered/unregistered selection correctly reveals only fields whose schema condition is true.
-- Changing the category warns the seller, removes only incompatible answers after confirmation, retains valid core data, and marks prior AI results stale.
-- Autosave persists valid entered answers, and a seller can resume the draft on another supported device/account session.
+- An unauthenticated visitor selecting Post Your Ad completes sign-in and returns to a new or resumed draft.
+- Selecting Vehicles → Cars shows required vehicle questions from the pinned schema — make, model year,
+  registration status, district, LKR price — in dependency order.
+- A registered/unregistered selection reveals only fields whose schema condition is true.
+- Changing category warns the seller, removes only incompatible answers after confirmation, retains valid
+  core data, and marks prior AI results stale.
+- Autosave persists valid answers, the explicit *Save as Draft* control works, and the seller can resume
+  on another device session.
 
 ### 14.2 Decision service
 
-- The API never calls `jev.dev` while a required resolved schema field is missing or invalid.
-- A valid `jev.dev` result can ask a bounded subset of eligible optional questions and shows them in the configured order.
-- A result that includes an unknown, already answered, ineligible, duplicate, or over-budget key is rejected by FastAPI and the local fallback is used.
-- A `jev.dev` timeout or outage does not stop the seller from reaching generation, preview, or submission.
-- An optional skipped question is not asked again in the same normal flow unless the seller selects Add more details.
+- Jev is never called while a required resolved field is missing or invalid.
+- A valid response asks a bounded subset of eligible optional questions in the configured order.
+- A response containing an unexpected key, or a probability outside `[0, 1]`, is rejected and the local
+  fallback is used.
+- A timeout, `429`, `529`, malformed body, or disabled provider does not stop the seller reaching
+  generation, preview, or submission — and does not corrupt a draft.
+- A skipped optional question is not re-asked in the same session unless the seller selects
+  *Add more details*.
 
-### 14.3 AI content and price guidance
+### 14.3 AI content
 
-- Given confirmed Toyota, Prius, 2016, registered, Colombo, and Rs. 8,750,000 data, the generation service returns an editable title and description that contain no unsupported claim.
-- Generated title/description is visibly labelled as AI-generated and cannot be submitted without normal seller review and server-side validation.
-- A proposed attribute from seller text is not persisted until the seller selects Accept; invalid proposals are rejected by server validation.
-- The seller can create, edit, accept, remove, or regenerate Sinhala and Tamil content variants. A base-content change marks them stale.
-- Price guidance is shown only when the comparable-data threshold is met. It shows comparator information and date, never overwrites seller price, and provides an insufficient-data state when data is inadequate.
-- Any change to a source answer or content records a new draft version and marks dependent output stale rather than silently reusing it.
+- Given confirmed Toyota, Prius, 2016, registered, Colombo and Rs. 8,750,000, the generation service
+  returns an editable title and description containing no unsupported claim.
+- Generated copy is visibly labelled as AI-generated and cannot be submitted without seller review and
+  server-side validation.
+- A proposed attribute is not persisted until the seller selects Accept; invalid proposals are rejected by
+  server validation; an enum suggestion out of schema range is structurally impossible.
+- Any change to a source answer records a new draft version and marks dependent output stale rather than
+  silently reusing it.
 
 ### 14.4 Moderation and security
 
-- Submitted ads move to `PENDING_REVIEW`; they do not appear in public search or detail endpoints until approved.
-- The moderator can see AI-assisted markers and audit history but must perform the same approval/rejection/request-changes decision as for manually written ads.
-- Browser network inspection confirms that no provider key, raw prompt, private contact field, or exact private address is sent to client-side code or external AI services.
-- Repeated create/generate/accept requests with the same idempotency key do not duplicate state changes.
+- Submitted ads move to `pending` and do not appear in public search or detail endpoints until approved.
+  A non-owner fetching one receives `404`, not `403`.
+- An unverified-email seller cannot submit.
+- The moderator sees AI-assisted markers and audit history, and performs the same approve/reject decision
+  as for manually written ads.
+- Browser network inspection confirms no provider key, raw prompt, private contact field, or exact address
+  reaches client-side code.
+- Repeated requests with the same idempotency key do not duplicate state changes.
 - Ownership, schema validation, rate limit, version-conflict, and content-policy tests run in CI.
 
-## 15. Harness implementation slices
+## 15. Delivery
 
-Build and review these as small vertical slices. No later slice may assume an unvalidated AI output is trusted.
+Implementation sequencing, phase gates, risks and configuration surface are specified in
+[`docs/product/ai-guided-post-ad-implementation-plan.md`](docs/product/ai-guided-post-ad-implementation-plan.md).
 
-| Slice | Deliverable | Definition of done |
-|---|---|---|
-| 1. Versioned schema foundation | Category schema version entity, admin read path, FastAPI resolver, public field renderer. | Unit/integration tests cover required/conditional field resolution and invalid schema rejection. |
-| 2. Resumable draft wizard | Auth return path, DRAFT creation, answer save/skip, optimistic versioning, mobile flow. | Seller can create/resume a vehicle draft with server-side validation and autosave. |
-| 3. `jev.dev` adapter | Internal provider contract, request/response validation, policy/budget, deterministic fake, fallback. | Contract tests prove invalid/timeout provider results cannot block or corrupt a draft. |
-| 4. Copy generation | Async job, strict structured output, preview/edit/accept states, stale detection. | Test fixtures prove no unsupported fields are persisted and seller edits are retained. |
-| 5. Attribute suggestions | Field-specific suggestions, accept/ignore actions, audit entries. | Suggestions cannot satisfy a required field or bypass schema validation without explicit seller acceptance. |
-| 6. Price intelligence | Comparable-ad query, methodology/version, range/insufficient-data response, disclaimer UI. | Tests cover no-data, outlier, category mismatch, and no automatic price replacement. |
-| 7. Translations | Content locale store, `si`/`ta` generation, edit/confirm/stale behaviour. | Unicode/script, source-version, and moderation visibility tests pass. |
-| 8. Admin, moderation, hardening | Schema test console, metrics, audit view, rate limits, privacy/content controls. | E2E covers draft → pending review → moderator approval and public visibility. |
+## 16. Remaining configuration decisions
 
-## 16. Remaining configuration decisions before production
+To be set by the product owner before production; never baked into the frontend:
 
-These values should be configured by the product owner and recorded in the decision log before production launch; the implementation must not bake them permanently into the frontend:
-
-- question budget per category and which optional fields count as fallback essentials
-- photo/file limits and ad expiry/renewal policy
+- per-category question budget, noul threshold, and which optional fields are fallback essentials
+- ad expiry and renewal policy (OQ-07)
 - whether phone verification is required before a seller's first submission
-- final prohibited-category/content policy and legal copy for Sri Lanka
-- featured placement durations/prices and payment gateway
-- price-comparator eligibility window, minimum-comparator threshold, and outlier methodology
-- retention periods for AI/decision metadata and any provider-specific data-processing agreement
-- whether approved public translation variants should be indexed and shown in search by default
+- final prohibited-category and content policy, and legal copy for Sri Lanka
+- featured placement durations, prices, and payment gateway
+- retention periods for AI and decision metadata, and any provider data-processing agreement
+- confirmation of the photo limits set in §5.2
 
 ## 17. Design principles to preserve
 
-1. **Schema before AI:** required information, validation, and public filters come from the controlled category schema.
-2. **AI is assistive:** `jev.dev` reduces unnecessary questions; the LLM improves copy and suggests data; neither decides truth or publication.
-3. **Seller owns the final ad:** suggestions are explicitly reviewed and editable.
-4. **Moderator owns publication:** every new or materially edited ad still follows the existing approval workflow.
-5. **Graceful degradation:** a seller can always create a normal manual advertisement when any AI integration fails.
+1. **Schema before AI.** Required information, validation, and public filters come from the controlled
+   category schema.
+2. **AI is assistive.** Jev reduces unnecessary questions; the LLM improves copy and suggests data.
+   Neither decides truth or publication.
+3. **The server selects; the model only judges.** Enumerating candidates server-side is what makes an
+   out-of-bounds decision structurally impossible rather than merely validated against.
+4. **Seller owns the final ad.** Suggestions are explicitly reviewed and editable.
+5. **Moderator owns publication.** Every new or materially edited ad follows the approval workflow.
+6. **Graceful degradation.** A seller can always create a normal manual advertisement when any AI
+   integration fails.
