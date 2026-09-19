@@ -38,19 +38,18 @@ Mixing live signals and audit trail into the PRD body bloats every read of the c
 > [`.forge/discovery/docs/07-harness-backlog.md`](discovery/docs/07-harness-backlog.md); slice numbering is
 > provisional until `/forge-decompose` regenerates `features.md` at Gate 3.
 >
-> **Answer OQ-01, OQ-02 and OQ-20 first.** Each of the three changes the *shape* of the plan, not a detail
-> within it: two large capabilities the UI already assumes but no decision covers, and the complete absence
-> of any team size or delivery window.
+> **Answer OQ-01 and OQ-20 first.** Each changes the *shape* of the plan, not a detail within it: a large
+> capability the UI already assumes but no decision covers, and the complete absence of any team size or
+> delivery window. **OQ-02 was the third of that set and is now resolved** — AI-assisted ad intake is in
+> scope — along with OQ-03, OQ-04, OQ-12, OQ-21, OQ-23, OQ-25 and OQ-30. See
+> [`project-prd-history.md`](project-prd-history.md) Rev 1.
 
 ### Product decisions — Gate 1 (`/forge-prd-check`)
 
 | # | Section | Topic | Question | Status | Resolution / Owner | Blocks |
 |---|---------|-------|----------|--------|--------------------|--------|
 | OQ-01 | §Deferred (Post-V1) | Messaging scope | **Is in-app messaging in MVP scope?** The account surface renders `Messages / 5` and per-ad `12 Inquiries`, and the consumer design system specifies a Chat primary action — but no locked decision mentions messaging. It is a large feature (threads, notifications, read state, abuse handling, message-content moderation). Recommendation: defer, ship phone contact only. If deferred, the Messages nav item and inquiry counters must be **removed**, not left as dead affordances | ⏳ open | Product | An entire potential milestone; #26 |
-| OQ-02 | §Deferred (Post-V1) | AI/OCR intake scope | **Is AI/OCR-assisted ad intake in MVP scope?** `review_ad_admin_desktop` is a fully designed surface for it — source image, raw OCR text, per-field confidence and warnings — yet no locked decision mentions it. It is also the strongest technical justification for FastAPI being in the stack. Recommendation: defer, but keep the review UI's field-level provenance model so extraction can later be switched on by adding data rather than redesigning review | ⏳ open | Product | `media-service` scope; #15 |
 | OQ-20 | §Constraints | Team + timeline | **What is the team size and the delivery window?** Absent from every input. Gate 2's Resource & Timeline Reality section cannot be completed without it, and nothing sized at Gate 3 is trustworthy until it lands | ⏳ open | Product | **All sizing and every date** |
-| OQ-03 | §Functional Surface > Ad creation | Wizard steps | Which post-ad stepper is correct? `post_your_ad_ad_details_desktop` shows `… Photos → Preview → Publish`; `post_your_ad_final_step_desktop` shows `… Photos → Price & Contact → Publish` — and both carry a pricing block. One is stale; the wizard cannot be built against two contradictory designs | ⏳ open | Product / Design | #9, #12 |
-| OQ-04 | §Domain Model | Category attributes | What are the attribute schemas for the **eight non-Vehicle categories**? Only Vehicles is specified (Make, Model, Year, Mileage, Transmission, Fuel Type, Engine Capacity, Registration). The largest content gap in the pack — and the schemas drive ad creation, ad detail, and search filters simultaneously | ⏳ open | Product | #8 beyond three categories, #9, #22, #24 |
 | OQ-05 | §Integration Points | Payment gateway | **Which payment gateway?** Nothing in the inputs names one. PayHere is the leading LKR candidate. The product's only revenue flow depends entirely on this answer | ⏳ open | Product / Lead | #30 |
 | OQ-06 | §Functional Surface > Featured payment | Plan catalogue | What are the promotion plans — names, prices (LKR), durations? The admin surface to manage them exists in the sidebar; the plans themselves do not | ⏳ open | Product | #28, #29, #30, #31, #32 |
 | OQ-07 | §Domain Model > Lifecycle States | Ad expiry | How long does an ad stay live before expiring? An `Expired` seller tab exists so expiry is intended, but no duration is stated anywhere | ⏳ open | Product | #40 |
@@ -58,7 +57,6 @@ Mixing live signals and audit trail into the PRD body bloats every read of the c
 | OQ-09 | §NFR > Performance | Moderation SLA | Is "typically live within 24 hours" a target or an SLA? It is already literal UI copy shown to sellers, so it is a commitment either way — the question is what it obliges operationally | ⏳ open | Product | Operator staffing; #14; NFR-6 monitoring |
 | OQ-10 | §Functional Surface > Public discovery | Contact visibility | Is the seller's phone number visible to unauthenticated visitors, or gated behind sign-in? Scraping exposure versus conversion friction | ⏳ open | Product | #24 |
 | OQ-11 | §Functional Surface > Featured payment | Featured ranking | What is the featured-vs-organic interleave — all featured first, or a capped allocation per page? Affects both revenue and result quality | ⏳ open | Product | #31 |
-| OQ-12 | §Functional Surface > Ad creation | Photo limits | Photo count minimum/maximum, per-file size cap, accepted formats? The gallery shows 12 images; no maximum is stated | ⏳ open | Product / Lead | #10 |
 | OQ-13 | §Functional Surface > Moderation | Rejection reasons | What are the rejection reason codes? Required to make R-3 and SC-7 implementable | ⏳ open | Product | #15, #16 |
 | OQ-14 | §Domain Model > Lifecycle States | Re-moderation | Which fields are "moderated" and therefore trigger a return to `pending` when edited on an `active` ad? | ⏳ open | Product / Lead | #18 |
 | OQ-15 | §Functional Surface > Report an ad | Report intake | What are the report reasons, and may visitors report anonymously? The operator flagged queue exists with nothing feeding it | ⏳ open | Product | #27 |
@@ -75,16 +73,12 @@ Mixing live signals and audit trail into the PRD body bloats every read of the c
 
 | # | Section | Topic | Question | Status | Resolution / Owner | Blocks |
 |---|---------|-------|----------|--------|--------------------|--------|
-| OQ-21 | §Constraints > Tech Stack | Service split | Confirm or reject the proposed five-service split (identity / listing / payment on Spring Boot; admin / media on FastAPI) and its capability-based language boundary. The F-002 spike informs this; rejecting it triggers the documented two-deployable fallback | ⏳ open | Lead / Gate 2 | All of S-1 (M0) |
 | OQ-22 | §Constraints > Tech Stack | Admin data access | Accept or reject `admin-service` reading the listing store **directly, read-only**, for operator table projections and KPI aggregation? If rejected, `listing-service` grows operator-facing query endpoints instead | ⏳ open | Lead / Gate 2 | #33, #34, #35, #36 |
-| OQ-23 | §Constraints > Tech Stack | Database | Database engine per service. PostgreSQL proposed — relational filtering, exact integer money, built-in full-text search | ⏳ open | Lead / Gate 2 | F-004 |
 | OQ-24 | §Integration Points | Object storage + CDN | Which object storage provider and which CDN? A listings marketplace is image-bandwidth-dominated | ⏳ open | Lead / Gate 2 | F-005, #39 |
-| OQ-25 | §Constraints > Tech Stack | Async transport | What carries the asynchronous paths — settlement, notifications, image derivatives? Queue, event bus, or scheduled polling | ⏳ open | Lead / Gate 2 | F-002, #30 |
 | OQ-26 | §Constraints > Tech Stack | Notifications | Is notification dispatch a sixth service or a shared library? A library plus one queue is proposed at MVP | ⏳ open | Lead / Gate 2 | M1 onward |
 | OQ-27 | §NFR > Observability | Observability stack | Which logging, metrics, tracing and error-reporting stack? Observability per change is required by the definition of done but nothing is named | ⏳ open | Lead / Gate 2 | F-009 |
 | OQ-28 | §Constraints > Deployment | Deployment | Deployment target, container orchestration, and CI/CD platform. Sri Lanka-proximate region proposed for latency | ⏳ open | Lead / Gate 2 | F-008, F-010 |
 | OQ-29 | §Integration Points | Email provider | Which transactional email provider? Needed for verification, password reset, rejection notices, and receipts | ⏳ open | Lead / Gate 2 | M1, #16 |
-| OQ-30 | §Domain Model | Attribute modelling | Dynamic attribute definitions or per-category typed models? Dynamic is proposed because the same definitions must drive four surfaces at once; its cost is weaker type safety and harder multi-attribute filtering. **Spike against three structurally different categories before Gate 3** | ⏳ open | Lead / Gate 2 | #8 |
 | OQ-31 | §Constraints > Deployment | Mobile release | Mobile release pipeline, versioning, and OTA-vs-store-update policy. Two app stores and review latency are a delivery path the web surfaces do not have | ⏳ open | Lead / Gate 2 | Every milestone's mobile parity |
 | OQ-32 | §NFR > Security and Compliance | Data protection | What is the PDPA posture — retention periods, data export, and deletion cascades for account deletion, media past ad deletion, and PII in logs? Cheaper to decide now than to retrofit | ⏳ open | Lead / Product | Data-model §8; #38 |
 | OQ-33 | §NFR > Security and Compliance | CVE threshold | What CVSS threshold fails the dependency-vulnerability build gate? It needs a number to be enforceable | ⏳ open | Lead / Gate 2 | F-008 |

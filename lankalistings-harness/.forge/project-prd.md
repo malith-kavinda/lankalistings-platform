@@ -108,7 +108,7 @@ Ordered by the locked build order. Each row is elaborated in §Functional Surfac
 |---|---|:--:|---|
 | S-1 | **Platform foundation** | P0 | Gateway routes to both runtimes; shared JWT validation in each; Postgres + migrations per runtime; object storage; both design-system token sets and their primitives; real lint/typecheck/test/build green per repo; dependency-vulnerability gate; structured logging with correlation ids; **one-command local boot of the whole stack**; deterministic seed dataset |
 | S-2 | **Accounts** | P0 | Email/password registration with verification, Google OAuth, **account linking across both methods**, password reset, profile, session handling on all three clients, operator roles |
-| S-3 | **Ad creation** | P0 | Five-step wizard with draft persistence: category + subcategory, common fields (title ≤70, description ≤4000, condition), category-specific attributes, multi-photo upload with a main photo, Province → District → City, LKR price with negotiable flag, preview, T&C gate, submit → `pending` |
+| S-3 | **Ad creation** | P0 | **Six-stage AI-guided wizard** with draft persistence and resume: category + subcategory, essential fields (title ≤70, description ≤4000, condition, LKR price with negotiable flag) rendered from the category's versioned schema, a **bounded set of decision-model-selected follow-up questions**, multi-photo upload with a main photo, Province → District → City, **AI-drafted title and description the seller edits and accepts**, **AI attribute suggestions the seller accepts or ignores**, preview, T&C gate, submit → `pending`. Every AI output is a suggestion; none writes ad state without explicit seller acceptance, and the flow completes with every AI integration disabled |
 | S-4 | **Moderation** | P0 | Oldest-first queue with age and flags; review with pre-approval field edits; approve; reject with a reason the seller can see; append-only decision history; bulk actions. **Plus the hard invariant: a non-`active` ad is invisible on every public read path across all three clients** |
 | S-5 | **Public discovery** | P0 | Category-led home with counts and a featured rail; free-text search; the full filter rail (category, location, price, condition, category-specific attributes, verified-sellers-only) with active-filter chips; three sort orders; grid/list toggle; result counts; cursor pagination; ad detail with spec table and `LL-NNNNN` reference; favourites |
 | S-6 | **Featured payment** | P0 | Promotion plan catalogue and its administration; purchase against an `active`, owned ad only; gateway integration with **idempotent** settlement; featured window started only on settlement; server-side featured-first ranking; expiry back to ordinary ranking; purchase history and operator reconciliation |
@@ -136,7 +136,8 @@ Ordered by the locked build order. Each row is elaborated in §Functional Surfac
 | Capability | Reasoning | Trigger to revisit |
 |---|---|---|
 | **In-app messaging** (threads, notifications, read state, message-content moderation) | Large feature absent from every locked decision, though the UI assumes it. Phone contact covers the MVP job. **Recommendation, not a decision — OQ-01** | Once moderation load is understood and phone-contact conversion is measured |
-| **AI/OCR ad intake and extraction review** | Large capability absent from every locked decision, though fully designed. **Recommendation, not a decision — OQ-02.** If deferred, the moderation review UI keeps its field-level provenance model so extraction can be switched on later by adding data, not by redesigning review | Once moderation volume justifies automating intake |
+| **AI-generated price guidance** | Requires a corpus of comparable published ads that a greenfield marketplace does not have. The service ships behind a per-category switch, default off | Per category, once that category holds enough recently-published ads to meet the comparator threshold |
+| **AI-generated Sinhala and Tamil ad content** | Distinct from the deferred Sinhala/Tamil *UI* below, but blocked by the same locked decision | A formal reversal of the English-only decision, covering Sinhala/Tamil font loading and moderator staffing against the 24-hour review promise |
 | Sinhala and Tamil UI | Named as future work in the locked decisions | Post-MVP, with copy already externalised |
 | Separate search service or read model | A separate read model adds an eventual-consistency bug class to the most visible surface in the product | When measured `GET /ads` latency justifies it |
 | Finer operator roles beyond Moderator and Super Admin | Two roles until a real permission conflict appears | First genuine conflict |
@@ -167,7 +168,13 @@ Two sequencing consequences worth stating explicitly:
 | **Account** | One identity that both sells and buys. No separate seller entity | has Credential and/or OAuthIdentity; has Roles; may have SellerVerification |
 | **Advertisement** | The core aggregate. Owned by one Account, filed under one Category, located at one City, priced in LKR | owns AdvertisementAttributes, ordered MediaAssets, ModerationDecisions, AdMetrics |
 | **Category** | Two-level taxonomy — top-level category and subcategory | has CategoryAttributeDefinitions; parent/child self-relation |
-| **CategoryAttributeDefinition** | Per-category field schema (key, type, enum values, unit, filterable) | drives ad creation, the detail spec table, **and** the search filter rail from one source |
+| **CategorySchemaVersion** | Immutable, versioned per-category question schema — field keys, labels, input types, validation, visibility and required conditions, follow-up eligibility and priority, AI sensitivity, filter mapping, re-moderation triggers. **The source of truth for every seller question and every structured public filter** | a draft pins one version at creation; supersedes the flat CategoryAttributeDefinition |
+| **AdvertisementAttribute** | An accepted answer, projected out of the schema into a typed, filterable row | belongs to Advertisement; keyed by schema field |
+| **AdCreationSession** | Resumable wizard state — resolved stage, answer snapshot, question budget, last decision source | belongs to Advertisement |
+| **QuestionDecision** | Redacted trace of a decision-service call: the questions offered, the probabilities returned, and whether the result or the deterministic fallback was used | belongs to AdCreationSession |
+| **ContentGeneration** | An AI-drafted title/description candidate with its source draft version, answer hash, prompt version, and status (proposed / accepted / rejected / stale / failed) | belongs to Advertisement |
+| **AttributeSuggestion** | A proposed value for an empty schema field, with evidence and confidence, pending explicit seller acceptance | belongs to ContentGeneration |
+| **AuditEvent** | Append-only record of decisions, suggestion acceptance and rejection, submission, moderation and publication | references Advertisement |
 | **Province / District / City** | Fixed, strictly nested reference geography | Advertisement → City → District → Province |
 | **ModerationDecision** | Append-only record of an approve/reject, its reason, its author, and any pre-approval field edits | belongs to Advertisement |
 | **PromotionPlan** | A featuring product: price and duration | referenced by FeaturingPurchase |
@@ -176,6 +183,20 @@ Two sequencing consequences worth stating explicitly:
 | **MediaAsset** | An uploaded image plus its derivatives and content checksum | referenced by Advertisement |
 | **AdReport** | A person reported an ad. Distinct from machine-generated flags | belongs to Advertisement |
 | **Favourite** | Account ↔ Advertisement, unique on the pair | — |
+
+**Attribute modelling is settled (OQ-30): a versioned schema document, projected into typed rows.** The
+two candidates each failed alone — a flat dynamic definition table cannot express the visibility
+conditions, required conditions, AI sensitivity, and follow-up eligibility the guided flow needs, while
+per-category typed models cannot be edited by an administrator without a deploy. So the schema *document*
+is authoritative for asking and validating, and every accepted answer is projected into a typed
+`AdvertisementAttribute` row so multi-attribute search filtering stays indexable. One source, two
+representations, with the projection owned by `listing-service`.
+
+**All nine category schemas are authored in full (OQ-04)** — Vehicles (cars, motorcycles,
+three-wheelers, vans/buses/lorries), Property, Land, Jobs, Electronics, Services, Home & Garden, Fashion
+and Other — together with the reference datasets they depend on: vehicle makes and models, property
+types, land extent units, and job families. Every dynamic data source carries an `Other` manual fallback
+wherever its data may be incomplete.
 
 Full field-level modelling, the index plan, and the cross-service ownership map are in
 `.forge/discovery/docs/04-data-model.md`.
@@ -266,18 +287,42 @@ on mobile, and operator role assignment.
 
 ### Ad creation (S-3)
 
-A five-step wizard with draft persistence at every step. Common fields carry hard constraints read off
-the designs: title required and ≤70 characters with a live counter, description required and ≤4000 with a
-live counter, condition, LKR price with an optional negotiable flag. Category-specific attributes are
-rendered from `CategoryAttributeDefinition` rather than hard-coded per category — the same definitions
-that drive the detail spec table and the search filter rail. Multi-photo upload with ordering and a
-designated main photo, including native camera and photo-library permissions on mobile. Location as a
-cascading Province → District → City selection. A final step with a full buyer-view preview, a hard
-Terms-of-Service and Privacy acceptance gate, the moderation expectation stated to the seller, and
-featuring offered as a **deferrable** upsell that never blocks publication.
+A **six-stage** AI-guided wizard with draft persistence at every stage, autosave, an explicit
+*Save as Draft* affordance, and resume on a later session or device:
 
-**Blocked:** the two Stitch stepper variants contradict each other on whether step 4 is Preview or
-Price & Contact (OQ-03), and only one of nine category attribute sets is specified (OQ-04).
+| Stage | Purpose |
+|---|---|
+| 1. Choose category | Category and subcategory. Changing it later requires confirmation, because category-specific answers can be removed |
+| 2. Essential details | Every required core and category field, rendered from the category's pinned schema version |
+| 3. Smart follow-ups | A **bounded** set of optional questions selected by the decision service from the schema's eligible set. Always skippable |
+| 4. Photos and location | Multi-photo upload with ordering and a designated main photo, plus Province → District → City |
+| 5. Generate and refine | AI-drafted title and description, and AI attribute suggestions. Every one is editable, and acceptance is explicit |
+| 6. Contact, preview and submit | Contact preference, full buyer-view preview, T&C gate, submit → `pending` |
+
+Common fields carry hard constraints read off the designs: title required and ≤70 characters with a live
+counter, description required and ≤4000 with a live counter, condition, LKR price with an optional
+negotiable flag. Category-specific attributes are rendered from the category's **versioned schema**
+rather than hard-coded per category — the same definitions that drive the detail spec table and the
+search filter rail. Mobile includes native camera and photo-library permissions. The final stage states
+the moderation expectation to the seller and offers featuring as a **deferrable** upsell that never
+blocks publication.
+
+**The stepper contradiction is resolved (OQ-03).** The two Stitch variants disagreed on whether step 4
+was Preview or Price & Contact, and both carried a pricing block — which was the tell. Price is a
+*required core field*, so it belongs in stage 2 with the other essentials; contact preference, preview
+and submit merge into a single final stage. The six-stage shape then adds the two genuinely new surfaces
+(Smart follow-ups, Generate and refine) without inheriting either stale variant.
+
+**Photo limits are set (OQ-12):** minimum 1, maximum 12, 5 MB per file, accepting JPEG, PNG, WebP and
+HEIC. Twelve matches the gallery design; the mobile upload copy saying "up to 10" is stale and is
+corrected. HEIC is accepted because iPhone is a common capture device in-market.
+
+**AI is assistive, never authoritative.** The category schema — not the decision service and not the
+language model — is the source of truth for what is asked, what is required, what validates, and what
+becomes a public filter. Every AI result is a suggestion the seller can edit, accept, reject or ignore;
+none writes ad state without explicit acceptance; and a seller can complete and submit an ordinary ad
+with every AI integration failed or switched off. Any edit that changes the answer snapshot marks
+dependent AI output **stale** rather than silently reusing it.
 
 ### Moderation (S-4)
 
@@ -422,14 +467,35 @@ and append-only.
 Expo React Native for mobile; a microservice backend using **both** Spring Boot and FastAPI, with FastAPI
 serving the management portal's CRUD surface.
 
-**Proposed, Gate-2 decides:** the five-service split and its language boundary — JVM owns the transactional
-core (identity, listing, payment), Python owns image/ML work and the operator BFF (admin, media);
-PostgreSQL per service; S3-compatible object storage; `/api/v1` from the first commit because an installed
+**Confirmed (OQ-21):** the five-service split and its language boundary stand — JVM owns the transactional
+core (identity, listing, payment), Python owns image/ML work and the operator BFF (admin, media) — **plus
+`gateway-service`**, which is edge infrastructure rather than a sixth business service. The gateway is the
+single browser origin: it owns CORS, performs authentication and coarse route-level role gating, and every
+service still enforces resource-level authorisation independently, because gateway-only enforcement leaves
+anything reachable inside the network unprotected. `/api/v1` from the first commit, because an installed
 mobile client cannot be force-updated in step with a server deploy.
 
-**Open:** async transport, notification mechanism, observability stack, deployment target and
-orchestration, CI/CD platform, email provider, and whether dynamic attribute definitions or per-category
-typed models implement the category schemas (OQ-21…OQ-31).
+**Confirmed (OQ-23):** PostgreSQL 17, database-per-service. S3-compatible object storage.
+
+**Java platform:** Java 17, Spring Boot 3.5.16, Gradle, Flyway, Testcontainers — previously undecided,
+now fixed by the service the identity fork is based on. Tokens are RS256: `identity-service` signs with
+the private key, and the gateway and every other service verify with the public key only, which also
+settles the key-distribution question the pack left open.
+
+**Confirmed (OQ-25):** asynchronous work runs on the **database-backed lease queue already proven in
+`media-service`** — claim token, lease, heartbeat, reaper — rather than introducing a broker. It carries
+content generation and attribute extraction now, and is the default for settlement, notifications and
+derivative generation unless measured load justifies a broker later.
+
+**External AI providers** — no prior decision named one. Two are now in the stack, both server-side only,
+both behind an internal adapter interface with a deterministic fake for tests and an administrator kill
+switch: **TypeSafe Jev** (`jev-latest`) as the structured decision engine, called by `listing-service`;
+and the existing swappable LLM provider registry in `media-service` for ad copy and attribute extraction.
+Neither is ever called from a browser, and neither receives account email, phone, credentials, session
+tokens, exact address, or raw image bytes.
+
+**Open:** notification mechanism, observability stack, deployment target and orchestration, CI/CD
+platform, and email provider (OQ-24, OQ-26…OQ-29, OQ-31…OQ-34).
 
 ### Regulatory
 
