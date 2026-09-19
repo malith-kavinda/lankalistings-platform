@@ -346,9 +346,9 @@ Every prompt below is prefixed with this block. It encodes the decisions above s
 | P4 | `post_ad_02_details_mobile` | MOBILE | pending |
 | P5 | `post_ad_03_questions_desktop` | DESKTOP | generated ✅ · `beb9a320157f` |
 | P6 | `post_ad_03_questions_mobile` | MOBILE | pending |
-| P7 | `post_ad_04_photos_desktop` | DESKTOP | pending |
+| P7 | `post_ad_04_photos_desktop` | DESKTOP | ⚠️ generation timed out — state unknown, verify in Stitch before re-running |
 | P8 | `post_ad_04_photos_mobile` | MOBILE | pending |
-| P9 | `post_ad_05_description_desktop` | DESKTOP | regenerate — §8.2 · `9f6cf28d985a` |
+| P9 | `post_ad_05_description_desktop` | DESKTOP | generated ✅ · `1702528a88e3` (regenerated for §8.2; superseded `9f6cf28d985a`) |
 | P10 | `post_ad_05_description_mobile` | MOBILE | pending |
 | P11 | `post_ad_06_submit_desktop` | DESKTOP | pending |
 | P12 | `post_ad_06_submit_mobile` | MOBILE | pending |
