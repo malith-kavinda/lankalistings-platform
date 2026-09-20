@@ -482,6 +482,16 @@ cannot block the seller from reaching generation, preview, or submission — and
 **Gate:** fixtures prove no unsupported field is persisted and seller edits are always retained. An
 invalid generation is discarded and retried or shown as unavailable — never silently truncated.
 
+> **Evidence from Phase 1.** Both mockup generations that had to write listing copy invented banned
+> claims — service history, inspection records, import provenance, a "94% battery health" figure, and the
+> words *genuine*, *verified* and *well-maintained* — and the second did so **in a prompt that explicitly
+> named the rule**. Writing plausible trust signals is the model's default for this genre.
+>
+> Two consequences for this phase: the §8.2 response validator is **load-bearing rather than
+> defence-in-depth**, and prompt wording alone cannot be relied on. The banned-claims check runs as a Jev
+> `noul` battery against the confirmed facts (§7.6) — a gate code consumes. The two real failures above
+> become the seed fixtures for its test set.
+
 ---
 
 ## Phase 8 — Attribute Suggestions

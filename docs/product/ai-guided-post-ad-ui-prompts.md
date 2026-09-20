@@ -350,12 +350,36 @@ Every prompt below is prefixed with this block. It encodes the decisions above s
 | P8 | `post_ad_04_photos_mobile` | MOBILE | pending |
 | P9 | `post_ad_05_description_desktop` | DESKTOP | generated ✅ · `1702528a88e3` (regenerated for §8.2; superseded `9f6cf28d985a`) |
 | P10 | `post_ad_05_description_mobile` | MOBILE | pending |
-| P11 | `post_ad_06_submit_desktop` | DESKTOP | pending |
+| P11 | `post_ad_06_submit_desktop` | DESKTOP | ⚠️ regenerate — §8.2 violation in the preview copy · `1cd333a42254` |
 | P12 | `post_ad_06_submit_mobile` | MOBILE | pending |
 | P13 | `post_ad_05_generating_desktop` | DESKTOP | pending |
 | P14 | `post_ad_ai_unavailable_desktop` | DESKTOP | pending |
 | P15 | `post_ad_submitted_desktop` | DESKTOP | pending |
 | P16 | `post_ad_submitted_mobile` | MOBILE | pending |
+
+## 1C.1 Finding — banned claims are the model's default
+
+Two of two generations that had to produce listing copy introduced claims spec §8.2 forbids, **without
+being asked to and after being told not to**:
+
+| Screen | Copy produced | Rule broken |
+|---|---|---|
+| Description (1st) | "verified with emission test records", "consistent service history from authorized inspection centers", "battery health report tested at 94%" | Invented inspection records, service history, test results |
+| Submit preview | "well-maintained", "excellent running condition", "Imported directly from Japan", "Genuine low mileage … verified with regular hybrid system checkups and service records", "94% hybrid battery health" | Invented import provenance, service history, condition claims; banned words *genuine*, *verified* |
+
+The seller entered none of it. Left to itself, a language model writing a vehicle advertisement reaches
+for exactly the trust signals a classifieds marketplace must not let it fabricate — because that is what
+good-sounding listing copy looks like in its training data.
+
+**This is a finding about Phase 7, not just about mockups.** It says:
+
+1. A negative instruction in the prompt is **not sufficient** — the second violation happened in a prompt
+   that named the rule.
+2. The §8.2 response validator is therefore **load-bearing, not belt-and-braces**. It must reject a
+   generation containing an unsupported claim, and Phase 7's definition of done needs a fixture set built
+   from these two real failures.
+3. The banned-claims check belongs in the **Jev `noul` battery** (spec §7.6), evaluated against the
+   confirmed facts — a gate the code consumes, not a hope about prompt wording.
 
 ## 1D — Review checklist
 
