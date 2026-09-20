@@ -4,11 +4,13 @@
 #   lankalistings-mobile         -> mobile/
 #   lankalistings-media-service  -> media-service/
 #   lankalistings-identity-service -> identity-service/
+#   lankalistings-gateway-service  -> gateway-service/
 frontend-web/
 management-portal/
 mobile/
 media-service/
 identity-service/
+gateway-service/
 
 # Local tooling and installers (7-Zip, Tesseract installer, scratch images)
 .tools/
@@ -27,3 +29,10 @@ package.json
 
 # Crash artifacts
 *.stackdump
+
+# Stray Expo prebuild output and editor settings. The mobile app lives in mobile/ (its own
+# repository); these were generated into the repo root by a prebuild run and are not source.
+android/
+ios/
+app.json
+.vscode/

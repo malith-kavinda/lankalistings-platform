@@ -103,7 +103,7 @@ Phase 3 fixes the schema contract. Phases 6–8 each require Phase 5's wizard sh
 | **0** Spec reconciliation ✅ | Spec v2, API-contract amendment, eight OQ resolutions | **Done** — spec v2 committed; `05` gained §12/§13 and the creation-flow surface; 8 OQs resolved through the trichotomy (37 → 29 open); grep confirms zero `PENDING_REVIEW`/camelCase/`/me/advertisements`/`jev.dev` left in the spec |
 | **1** UI generation | Canonical stepper, AI component vocabulary, versioned Stitch prompt library, full flow desktop + mobile | Every screen and state in the inventory has an exported design |
 | **2A** `identity-service` ◐ | Fork, role remap, Google OAuth, email verification, response envelope | **Fork + role remap done** — `./gradlew test`: 58 tests, 0 failures. Google OAuth, email verification and the envelope still open |
-| **2B** `gateway-service` | Single origin, cookie-aware token resolution, route × role table | Every route × role × anonymous combination has a passing test |
+| **2B** `gateway-service` ✅ | Single origin, cookie-aware token resolution, route × role table | **Done** — `./gradlew test`: 11 tests, 0 failures. CORS consolidated; identity-service's own CORS now opt-in |
 | **3** `listing-service` + schema engine | Service skeleton, Advertisement aggregate, `LL-NNNNN`, versioned schema resolver | Required/conditional resolution correct; invalid schema rejected at load |
 | **4** Nine category schemas | Full-depth schemas + reference datasets for all nine categories | Every category is postable end to end; schemas pass the resolver's validator |
 | **5** Resumable draft wizard | `frontend-web` bootstrap, sessions, autosave, Save as Draft, stages 1/2/4/6 | Create, abandon, resume on another device, submit — no answer lost |
@@ -422,6 +422,34 @@ its own 401/403 rejections, so there is a case for doing it once across both ser
 
 Gateway does authentication and coarse role gating only. Ownership and state preconditions remain the
 services' responsibility.
+
+### 2B outcome ✅
+
+| Delivered | Evidence |
+|---|---|
+| `gateway-service` on Spring Cloud **2025.0.0** (the Boot 3.5 train), starter `spring-cloud-starter-gateway-server-webflux` | `gateway-service` @ `163bab5` |
+| Cookie-first bearer resolution, falling back to the header for service-to-service callers | `163bab5` |
+| Route × role table with the narrow `super_admin` rules above `/admin/**` | `163bab5` |
+| Correlation-ID filter at the edge (05 §7) | `163bab5` |
+| CORS consolidated; identity-service's own CORS now opt-in via `CORS_ENABLED` | `b1b1558` |
+| **Suites green** | gateway **11 tests**, identity **64 tests**, 0 failures across both |
+
+**Both silent-failure constraints are encoded in code, not just in this plan.**
+
+- *No `StripPrefix` on any route.* The `refresh_token` cookie is scoped to `/api/v1/auth`; rewriting
+  the prefix would stop the browser sending it, and refresh would fail looking like an expired
+  session rather than a misconfiguration.
+- *CORS in exactly one place.* Duplicate `Access-Control-Allow-Origin` headers are rejected outright
+  by browsers, so identity-service registers no CORS configuration unless explicitly switched on.
+
+**The ordering guard is the test that matters most.** Spring evaluates authorisation matchers in
+declaration order, so `/api/v1/admin/**` sits *below* the three narrower `super_admin` rules. Moving
+it up would silently hand schema and provider control to every moderator;
+`aModeratorReachesModerationButNotSchemaOrProviderControl` is what fails if anyone does.
+
+**Note on the starter name.** Spring Cloud renamed `spring-cloud-starter-gateway` when the WebMVC
+variant landed; the WebFlux suffix is required on this train. Worth checking before scaffolding any
+further Spring Cloud component.
 
 ---
 
