@@ -366,7 +366,8 @@ history permanently.
 | Roles remapped, `MEMBER` default, wire form single-sourced in `RoleName.toWire` | `89d6ecd` |
 | Real Dockerfile replacing the IntelliJ stub that ran `top` on `ubuntu:latest` | `89d6ecd` |
 | Context-load test given its own container | `65a34b3` |
-| **Suite green** | `./gradlew test` → **58 tests, 0 failures, 0 errors, 0 skipped** |
+| Google sign-in: `oauth_identities`, ID-token verification, link-or-create | `9d7b0df` |
+| **Suite green** | `./gradlew test` → **64 tests, 0 failures, 0 errors, 0 skipped** |
 
 **Two findings worth carrying forward.**
 
@@ -377,8 +378,19 @@ history permanently.
 2. *A piped exit code hid a real failure.* The first run reported exit 0 while Gradle had actually
    printed `BUILD FAILED` — `tail` was swallowing the status. Test commands in this plan capture
    `PIPESTATUS` explicitly so a green claim means the build was green.
+3. *A second bean of a framework type breaks injection everywhere.* Publishing Google's decoder as a
+   `JwtDecoder` made the security filter chain's by-type injection ambiguous and took down every
+   context-loading test at once. Framework types with existing beans get their own wrapper type, not
+   a qualifier. `listing-service` will hit the same trap when it adds its own decoder for verifying
+   identity's tokens.
+4. *Test seams beat bean overriding.* `spring.main.allow-bean-definition-overriding` supplied through
+   `@DynamicPropertySource` is read too late in the bootstrap. A distinct bean name marked
+   `@Primary` needs no flag and no ordering assumption.
+5. *Repeated Gradle runs exhaust memory.* One full-suite run was killed for low memory after several
+   daemons accumulated. `--no-daemon --max-workers=1` is the safe form for repeated verification on
+   this machine.
 
-**Still open in 2A:** Google OAuth exchange, email verification, and the `{data, error, meta}` envelope.
+**Still open in 2A:** email verification, and the `{data, error, meta}` envelope.
 The envelope is the largest — a new wrapper, a rewritten exception handler, a correlation-ID filter,
 Jackson snake_case, and roughly 35 `jsonPath` assertions — and the gateway must emit the same shape for
 its own 401/403 rejections, so there is a case for doing it once across both services after 2B.
