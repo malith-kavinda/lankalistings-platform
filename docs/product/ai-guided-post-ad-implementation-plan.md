@@ -102,7 +102,7 @@ Phase 3 fixes the schema contract. Phases 6–8 each require Phase 5's wizard sh
 |---|---|---|
 | **0** Spec reconciliation ✅ | Spec v2, API-contract amendment, eight OQ resolutions | **Done** — spec v2 committed; `05` gained §12/§13 and the creation-flow surface; 8 OQs resolved through the trichotomy (37 → 29 open); grep confirms zero `PENDING_REVIEW`/camelCase/`/me/advertisements`/`jev.dev` left in the spec |
 | **1** UI generation | Canonical stepper, AI component vocabulary, versioned Stitch prompt library, full flow desktop + mobile | Every screen and state in the inventory has an exported design |
-| **2A** `identity-service` ◐ | Fork, role remap, Google OAuth, email verification, response envelope | **Fork + role remap done** — `./gradlew test`: 58 tests, 0 failures. Google OAuth, email verification and the envelope still open |
+| **2A** `identity-service` ✅ | Fork, role remap, Google OAuth, email verification, response envelope | **Done** — `./gradlew test`: **73 tests**, 0 failures |
 | **2B** `gateway-service` ✅ | Single origin, cookie-aware token resolution, route × role table | **Done** — `./gradlew test`: 11 tests, 0 failures. CORS consolidated; identity-service's own CORS now opt-in |
 | **3** `listing-service` + schema engine | Service skeleton, Advertisement aggregate, `LL-NNNNN`, versioned schema resolver | Required/conditional resolution correct; invalid schema rejected at load |
 | **4** Nine category schemas | Full-depth schemas + reference datasets for all nine categories | Every category is postable end to end; schemas pass the resolver's validator |
@@ -415,7 +415,43 @@ assert is that no password hash or raw token leaks in a response. Only the one a
 count failed loudly. **A renaming change makes every "assert absent" test a candidate for silent
 rot**; `listing-service` should sweep for this when it adopts the envelope.
 
-**Still open in 2A:** email verification.
+### Email verification ✅ — 2A complete
+
+| Delivered | Evidence |
+|---|---|
+| `email_verification_tokens`, digest-only storage, purpose-separated hash | identity `03d02a3` |
+| Link issued at registration; Google-created accounts skip it (Google vouched) | `03d02a3` |
+| `email_verified` claim in the access token, so `listing-service` enforces FR-3 without calling back | `03d02a3` |
+| **Suite green** | **73 tests**, 0 failures, 0 errors |
+
+**Three decisions to preserve.**
+
+1. *Resend always answers 204* — whatever the address. Reporting "no such account" would make the
+   endpoint an account-enumeration oracle against the marketplace. The cost is silence for a seller
+   who mistypes their address; the alternative is handing out a membership list.
+2. *Expired is distinguished from invalid* (410 vs 400), which is the **opposite** of the login path.
+   On a login, distinguishing causes confirms an address exists. On a verification link the holder
+   already proved they received our email, so "this expired, request a new one" leaks nothing and is
+   the difference between a seller retrying and giving up.
+3. *Issuing a new link retires outstanding ones*, so a forwarded earlier email stops working at once.
+
+Delivery sits behind `VerificationEmailSender` because the transactional email provider is still
+**OQ-29**. The logging stand-in is loud by design: a service that silently fails to send looks, to an
+operator, exactly like one where nobody clicks the links.
+
+**Two findings.**
+
+- *`@ConditionalOnMissingBean` does not work on a scanned `@Component`.* It is only reliable inside
+  auto-configuration; on a component it evaluates before other beans are known and excludes itself.
+  This was made **twice** in one session — first on the Google decoder, then on the email sender —
+  so the reason is now written into the class doc. A default implementation is displaced by
+  registering a `@Primary` one, not by a conditional.
+- *`ddl-auto: validate` earns its keep.* A `CHAR(64)` column reports as `bpchar` and fails validation
+  against a `String` mapping, taking the whole suite down at context start rather than surfacing as
+  a subtle oddity in production. Use `VARCHAR` for hash columns, matching
+  `authentication_sessions.refresh_token_hash`.
+
+**Phase 2 is complete.** Next is Phase 3, `listing-service` and the schema engine.
 The envelope is the largest — a new wrapper, a rewritten exception handler, a correlation-ID filter,
 Jackson snake_case, and roughly 35 `jsonPath` assertions — and the gateway must emit the same shape for
 its own 401/403 rejections, so there is a case for doing it once across both services after 2B.

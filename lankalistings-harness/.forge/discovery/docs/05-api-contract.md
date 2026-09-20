@@ -117,7 +117,8 @@ Grouped by owning service. Paths shown as the gateway exposes them.
 | POST | `/auth/google` | Exchange a Google credential for tokens | FR-1. **Links to an existing account on email match** (FR-2) |
 | POST | `/auth/refresh` | Rotate tokens | |
 | POST | `/auth/logout` | Revoke refresh token | |
-| POST | `/auth/verify-email` | Consume a verification token | FR-3 |
+| POST | `/auth/verify-email` | Consume a verification token | FR-3. `400 VERIFICATION_TOKEN_INVALID` if unknown or already used; `410 VERIFICATION_TOKEN_EXPIRED` if past its lifetime, so a seller knows to request another |
+| POST | `/auth/verify-email/resend` | Re-send a verification link | **Always `204`**, whether or not the address belongs to an account and whether or not it is already verified. Reporting otherwise would make this an account-enumeration oracle |
 | POST | `/auth/password-reset/request` · `/auth/password-reset/confirm` | Reset by emailed token | FR-5 |
 | GET/PATCH | `/me` | Own profile | FR-28 |
 | POST | `/me/phone/verify` | Phone verification | Candidate criterion for FR-4's badge |
