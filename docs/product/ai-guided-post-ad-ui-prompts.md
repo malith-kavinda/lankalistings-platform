@@ -341,21 +341,21 @@ Every prompt below is prefixed with this block. It encodes the decisions above s
 | Prompt | Screen | Device | Status |
 |---|---|---|---|
 | P1 | `post_ad_01_category_desktop` | DESKTOP | generated ✅ · `e245bd9ff271` |
-| P2 | `post_ad_01_category_mobile` | MOBILE | pending |
+| P2 | `post_ad_01_category_mobile` | MOBILE | generated ✅ · `9d0aab2ba2f2` |
 | P3 | `post_ad_02_details_desktop` | DESKTOP | generated ✅ · `616d32b53220` |
-| P4 | `post_ad_02_details_mobile` | MOBILE | pending |
+| P4 | `post_ad_02_details_mobile` | MOBILE | generated ✅ · `183ae9c492a0` |
 | P5 | `post_ad_03_questions_desktop` | DESKTOP | generated ✅ · `beb9a320157f` |
-| P6 | `post_ad_03_questions_mobile` | MOBILE | pending |
-| P7 | `post_ad_04_photos_desktop` | DESKTOP | ⚠️ generation timed out — state unknown, verify in Stitch before re-running |
-| P8 | `post_ad_04_photos_mobile` | MOBILE | pending |
+| P6 | `post_ad_03_questions_mobile` | MOBILE | generated ✅ · `efd3acddc420` |
+| P7 | `post_ad_04_photos_desktop` | DESKTOP | ⛔ **timed out twice** — verify in Stitch before re-running |
+| P8 | `post_ad_04_photos_mobile` | MOBILE | ⏳ not attempted — same heavy-image shape as P7 |
 | P9 | `post_ad_05_description_desktop` | DESKTOP | generated ✅ · `1702528a88e3` (regenerated for §8.2; superseded `9f6cf28d985a`) |
-| P10 | `post_ad_05_description_mobile` | MOBILE | pending |
-| P11 | `post_ad_06_submit_desktop` | DESKTOP | ⚠️ regenerate — §8.2 violation in the preview copy · `1cd333a42254` |
-| P12 | `post_ad_06_submit_mobile` | MOBILE | pending |
-| P13 | `post_ad_05_generating_desktop` | DESKTOP | pending |
-| P14 | `post_ad_ai_unavailable_desktop` | DESKTOP | pending |
-| P15 | `post_ad_submitted_desktop` | DESKTOP | pending |
-| P16 | `post_ad_submitted_mobile` | MOBILE | pending |
+| P10 | `post_ad_05_description_mobile` | MOBILE | generated ✅ · `7c8825947d02` |
+| P11 | `post_ad_06_submit_desktop` | DESKTOP | generated ✅ · `c2e2cf3c4917` (regenerated for §8.2; superseded `1cd333a42254`) |
+| P12 | `post_ad_06_submit_mobile` | MOBILE | ⏳ not attempted |
+| P13 | `post_ad_05_generating_desktop` | DESKTOP | generated ✅ · `eb3701dd798e` |
+| P14 | `post_ad_ai_unavailable_desktop` | DESKTOP | generated ✅ · `93a69c905331` |
+| P15 | `post_ad_submitted_desktop` | DESKTOP | generated ✅ · `73fa5e1840d4` |
+| P16 | `post_ad_submitted_mobile` | MOBILE | ⛔ **timed out once** — verify in Stitch before re-running |
 
 ## 1C.1 Finding — banned claims are the model's default
 
