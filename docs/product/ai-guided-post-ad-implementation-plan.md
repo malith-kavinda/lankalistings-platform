@@ -532,6 +532,50 @@ New Spring Boot service on the auth-service template.
 **Gate:** unit and integration tests cover required/conditional resolution and invalid-schema rejection
 at load time.
 
+### 3 outcome — schema engine ✅, persistence outstanding
+
+| Delivered | Evidence |
+|---|---|
+| Condition language, schema validator, deterministic resolver | listing `d0f39c1` — **32 tests** |
+| Answer validation and normalisation, `TimeConfig`, wiring test | listing `f3d69e6` — **50 tests** |
+| Persistence, `LL-NNNNN`, status machine, attribute projection, endpoints | *not started* |
+
+**Visibility is judged after the change, not before.** The wizard sets `registration_status` and
+`registration_number` on one screen. Evaluating conditions against the stored answers would reject
+the number for belonging to a field that is not yet visible — correct in isolation, wrong for the
+only request the UI actually makes. The counterpart matters too: an answer for a field that genuinely
+does not apply is *refused*, not silently dropped, or a client could set a registration number on an
+unregistered vehicle and watch it vanish with no explanation.
+
+**Cleared answers are their own list, not nulls in the answer map.** A null cannot distinguish "not
+part of this change" from "explicitly cleared", and the caller needs that distinction to know what to
+delete. `Map.copyOf` rejecting nulls is what surfaced it, but the ambiguity was the real defect.
+
+**Emptiness is not invalidity.** Whether a field is required is decided at resolve time against the
+whole draft — a `required_condition` can depend on answers to other fields — so deciding it here,
+against one field in isolation, would be wrong in exactly the conditional cases the schema exists for.
+
+**Two gaps found by checking the result rather than the build line.**
+
+- *The schema validator never compiled `validation.pattern`.* An invalid pattern therefore reached
+  `AnswerValidator` at answer time and failed a seller's request over an administrator's typo. It is
+  now a publish-time failure. `AnswerValidator`'s guard for the same fault had a comment claiming the
+  schema validator caught it — a comment describing behaviour the code did not have, which is worse
+  than no comment, because it is the reason a reader would not go looking.
+- *Nothing supplied the `Clock` that `AnswerValidator` requires,* so `listing-service` could not have
+  started. The unit tests pass because they construct the validator directly; no `@SpringBootTest`
+  exists yet because there is no datasource to start against. An `ApplicationContextRunner` test now
+  runs the real component scan without a database, and a companion test asserts the context *fails*
+  without `TimeConfig` — so the first cannot quietly pass for free, which is precisely how the
+  vacuous assertions in 2A survived.
+
+**Envelope decision.** In the 2B commit I said a third JVM service would be the point to extract a
+shared contract library. I am not doing that, and would rather say so than quietly skip it: the
+artifact repository is still **OQ-28**, so extraction means choosing a publishing mechanism before
+Phase 3 can proceed. The envelope is copied a third time and recorded here as explicit debt. The 2A
+finding applies on adoption — every "assert absent" test in `listing-service` is a rot candidate the
+moment keys are renamed.
+
 ---
 
 ## Phase 4 — Nine Category Schemas ⚠️ critical path
