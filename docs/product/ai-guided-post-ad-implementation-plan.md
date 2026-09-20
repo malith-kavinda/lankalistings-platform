@@ -102,7 +102,7 @@ Phase 3 fixes the schema contract. Phases 6–8 each require Phase 5's wizard sh
 |---|---|---|
 | **0** Spec reconciliation ✅ | Spec v2, API-contract amendment, eight OQ resolutions | **Done** — spec v2 committed; `05` gained §12/§13 and the creation-flow surface; 8 OQs resolved through the trichotomy (37 → 29 open); grep confirms zero `PENDING_REVIEW`/camelCase/`/me/advertisements`/`jev.dev` left in the spec |
 | **1** UI generation | Canonical stepper, AI component vocabulary, versioned Stitch prompt library, full flow desktop + mobile | Every screen and state in the inventory has an exported design |
-| **2A** `identity-service` | Fork, role remap, Google OAuth, email verification, response envelope | Register → verify → Google sign-in → refresh → revoke, all green |
+| **2A** `identity-service` ◐ | Fork, role remap, Google OAuth, email verification, response envelope | **Fork + role remap done** — `./gradlew test`: 58 tests, 0 failures. Google OAuth, email verification and the envelope still open |
 | **2B** `gateway-service` | Single origin, cookie-aware token resolution, route × role table | Every route × role × anonymous combination has a passing test |
 | **3** `listing-service` + schema engine | Service skeleton, Advertisement aggregate, `LL-NNNNN`, versioned schema resolver | Required/conditional resolution correct; invalid schema rejected at load |
 | **4** Nine category schemas | Full-depth schemas + reference datasets for all nine categories | Every category is postable end to end; schemas pass the resolver's validator |
@@ -356,6 +356,32 @@ history permanently.
 - `{data, error, meta}` response envelope — the fork returns bare bodies and would drift from the other
   four services.
 - Remove per-service CORS; the gateway owns it (see 2B).
+
+### 2A outcome so far
+
+| Delivered | Evidence |
+|---|---|
+| Fork into its own repo, gitignored by the root like the other four services | `identity-service` @ `89d6ecd`, 95 files, no `*.pem` tracked |
+| Package `com.al.authservice` → `lk.lankalistings.identity` | `89d6ecd` |
+| Roles remapped, `MEMBER` default, wire form single-sourced in `RoleName.toWire` | `89d6ecd` |
+| Real Dockerfile replacing the IntelliJ stub that ran `top` on `ubuntu:latest` | `89d6ecd` |
+| Context-load test given its own container | `65a34b3` |
+| **Suite green** | `./gradlew test` → **58 tests, 0 failures, 0 errors, 0 skipped** |
+
+**Two findings worth carrying forward.**
+
+1. *The inherited context test was fragile.* `IdentityServiceApplicationTests` had no Testcontainers, so
+   it connected to whatever PostgreSQL the developer happened to be running. It passed on machine state,
+   not on code. The port change surfaced it; it now owns a container like every other test here. Worth
+   checking for the same shape when `listing-service` is scaffolded from this template.
+2. *A piped exit code hid a real failure.* The first run reported exit 0 while Gradle had actually
+   printed `BUILD FAILED` — `tail` was swallowing the status. Test commands in this plan capture
+   `PIPESTATUS` explicitly so a green claim means the build was green.
+
+**Still open in 2A:** Google OAuth exchange, email verification, and the `{data, error, meta}` envelope.
+The envelope is the largest — a new wrapper, a rewritten exception handler, a correlation-ID filter,
+Jackson snake_case, and roughly 35 `jsonPath` assertions — and the gateway must emit the same shape for
+its own 401/403 rejections, so there is a case for doing it once across both services after 2B.
 
 ---
 
