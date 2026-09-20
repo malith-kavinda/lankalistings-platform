@@ -3,10 +3,12 @@
 #   lankalistings-portal         -> management-portal/
 #   lankalistings-mobile         -> mobile/
 #   lankalistings-media-service  -> media-service/
+#   lankalistings-identity-service -> identity-service/
 frontend-web/
 management-portal/
 mobile/
 media-service/
+identity-service/
 
 # Local tooling and installers (7-Zip, Tesseract installer, scratch images)
 .tools/
