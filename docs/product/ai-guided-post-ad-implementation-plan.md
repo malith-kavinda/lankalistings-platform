@@ -390,7 +390,32 @@ history permanently.
    daemons accumulated. `--no-daemon --max-workers=1` is the safe form for repeated verification on
    this machine.
 
-**Still open in 2A:** email verification, and the `{data, error, meta}` envelope.
+### The envelope, done once across both services ✅
+
+| Delivered | Evidence |
+|---|---|
+| `{data, error, meta}` on every identity-service response; snake_case wire; `SCREAMING_SNAKE` error codes | identity `298bc1d` — **64 tests** |
+| Same envelope on gateway 401/403, wired into *both* `exceptionHandling` and `oauth2ResourceServer` | gateway `b888c61` — **14 tests** |
+
+**Three contract corrections fell out of the migration**, none of which were the shape change itself:
+
+1. *Field validation is 422, not 400.* `05` §3 reserves 400 for `MALFORMED_REQUEST` — a body that
+   could not be parsed — and 422 for one that parsed but failed validation. The service had
+   conflated them, so an unreadable body and an invalid email returned the same code.
+2. *`fieldErrors` map → `details` array* of `{field, code, message}`, which is what lets a client
+   attach each error to the input that caused it.
+3. *Detail field names are converted to the wire form.* Bean validation reports `firstName`; the
+   client sent `first_name`. Reporting the Java spelling would leave a client unable to match an
+   error to its field — the entire purpose of per-field details.
+
+**Finding: snake_case turned several assertions vacuous.** Five `findValues("passwordHash")`-style
+lookups across two test classes were searching for keys that can no longer exist. Four of them
+asserted *emptiness*, so they went on reporting green while verifying nothing — and what they
+assert is that no password hash or raw token leaks in a response. Only the one asserting a positive
+count failed loudly. **A renaming change makes every "assert absent" test a candidate for silent
+rot**; `listing-service` should sweep for this when it adopts the envelope.
+
+**Still open in 2A:** email verification.
 The envelope is the largest — a new wrapper, a rewritten exception handler, a correlation-ID filter,
 Jackson snake_case, and roughly 35 `jsonPath` assertions — and the gateway must emit the same shape for
 its own 401/403 rejections, so there is a case for doing it once across both services after 2B.
