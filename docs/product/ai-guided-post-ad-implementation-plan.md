@@ -530,15 +530,16 @@ New Spring Boot service on the auth-service template.
   values project into typed attribute rows so public filters keep working.
 
 **Gate:** unit and integration tests cover required/conditional resolution and invalid-schema rejection
-at load time.
+at load time. ✅ **118 tests**, 0 failures.
 
-### 3 outcome — schema engine ✅, persistence outstanding
+### 3 outcome ✅
 
 | Delivered | Evidence |
 |---|---|
 | Condition language, schema validator, deterministic resolver | listing `d0f39c1` — **32 tests** |
 | Answer validation and normalisation, `TimeConfig`, wiring test | listing `f3d69e6` — **50 tests** |
-| Persistence, `LL-NNNNN`, status machine, attribute projection, endpoints | *not started* |
+| Four migrations, entities, `LL-NNNNN`, status machine | listing `fc3b8e1` — **95 tests** |
+| Schema loading, attribute projection, envelope, resource server, `/categories/{slug}/attributes` | **118 tests** |
 
 **Visibility is judged after the change, not before.** The wizard sets `registration_status` and
 `registration_number` on one screen. Evaluating conditions against the stored answers would reject
@@ -568,6 +569,38 @@ against one field in isolation, would be wrong in exactly the conditional cases 
   runs the real component scan without a database, and a companion test asserts the context *fails*
   without `TimeConfig` — so the first cannot quietly pass for free, which is precisely how the
   vacuous assertions in 2A survived.
+
+**Three decisions in the API layer.**
+
+1. *The public question set withholds how the platform treats each field.* `sensitivity`,
+   `generation_use`, `follow_up_priority` and `follow_up_eligible` are omitted from
+   `GET /categories/{slug}/attributes`. They describe which answers reach a provider, how the copy
+   generator uses them and how the decision service ranks them — publishing them hands anyone a map
+   of what the AI sees and how to move themselves up the follow-up queue.
+2. *A category with no published schema answers 404, exactly like one that does not exist.* An
+   administrator's half-written schema is not something the public API should confirm the existence
+   of, and it is the same reasoning as D-24 one level up.
+3. *Only `PUBLIC` answers are projected into the filter table.* The rows back public search, so
+   projecting a seller-private answer would publish it through a filter: the value would never
+   appear on a page, but anyone could narrow a search until one advertisement remained and read it
+   back. Multi-select is not projected at all — one row per field is what the unique constraint
+   enforces, and choosing between a row per value and a containment operator belongs with the
+   categories in Phase 4 that actually need it. That gap is asserted in a test so it stays a
+   decision rather than a surprise.
+
+**Schemas are validated on read, not only on publish.** A document that parsed before a rule existed
+would otherwise keep asking a question the rest of the service cannot honour. Unknown properties
+fail the load rather than being dropped: `follow_up_priorty` would otherwise parse cleanly into a
+field the decision service never ranks, with nothing anywhere to say why.
+
+**Finding: a slice-tested service can still fail to boot.** Every suite was green while the
+assembled application could not start — `RsaPublicKeyLoader` stripped whitespace with
+`replaceAll("\s", "")`, and Java 14 added `\s` as an escape for a literal space, so the
+single-backslash form compiled cleanly and stripped only spaces. Every real PEM is multi-line, so
+token verification would have failed on the first boot with `illegal base64 character a` — 0x0a, a
+newline. `ApplicationContextTest` now boots the whole context against Testcontainers and a
+generated key pair; it is the second time this class of fault has appeared, after the missing
+`Clock` bean, and the first thing to catch it both times was asking the question deliberately.
 
 **Envelope decision.** In the 2B commit I said a third JVM service would be the point to extract a
 shared contract library. I am not doing that, and would rather say so than quietly skip it: the
