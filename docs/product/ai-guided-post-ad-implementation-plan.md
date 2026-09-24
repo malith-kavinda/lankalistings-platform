@@ -694,7 +694,59 @@ wizard" — size it accordingly.
 - Implements Phase 1 stages **1, 2, 4, 6** (the non-AI stages) at both breakpoints.
 
 **Gate:** create a draft, abandon it, resume on a different device session, and submit — with no answer
-lost and no silent overwrite.
+lost and no silent overwrite. ✅ asserted in `DraftFlowIntegrationTest`.
+
+### 5 outcome — backend ✅, wizard partial
+
+| Delivered | Evidence |
+|---|---|
+| Draft API: create, answer, clear, skip, stage, details, submit | listing `f5ad118` — **273 tests** |
+| CSRF via same-origin allow-list, closing the Phase 3 prerequisite | `SameOriginFilterTest` |
+| Envelope-aware client, TanStack Query, autosave, stages 1/2/6 | frontend `bcdfe23` — build green |
+| Stage 4 Photos | **blocked** — see below |
+| Stages 3 and 5 | Phases 6 and 8 by design |
+
+**CSRF is an Origin allow-list, not a token.** A synchroniser token needs server-side state to
+compare against and this service is deliberately stateless. The check is scoped to
+cookie-authenticated writes: a browser never attaches an `Authorization` header by itself, so a
+header-bearing request cannot be forged cross-site and command-line callers are unaffected. An
+empty allow-list refuses every cookie write rather than accepting any, and a missing `Origin` is a
+refusal — absence must not read as permission.
+
+**Sessions are their own table.** The wizard writes on almost every interaction, and the
+advertisement should not take an optimistic-lock bump because someone moved between stages. It is
+also the right split at submission: an answer belongs to the advertisement forever, while "the
+model chose these three questions and the seller skipped one" describes how the ad was made.
+
+**Answers and details are separate routes.** Title, description, price and location are columns
+every category shares; folding them into the schema-validated map would mean inventing schema
+fields for them in all twelve schemas. A details save is incremental, and a null means "leave it
+alone" — treating an absent field as a clear would erase the title the moment someone edited the
+price.
+
+**Four bugs found by building the thing rather than reasoning about it.**
+
+1. *Submission checked the schema's questions but not the advertisement's own columns,* so a
+   complete set of answers transitioned the row and then met
+   `ck_advertisements_complete_once_submitted`. The seller would have seen a constraint violation
+   instead of a list of what to fill in.
+2. *Numeric answers were stored as `BigDecimal`,* which the entity refuses because it does not
+   survive the JSON dirty-check snapshot. Narrowing to `Long` was **also** wrong: Jackson reads a
+   JSON integer back as `Integer` when it fits, and `Long.equals(Integer)` is false, so the entity
+   would still have looked dirty on every flush and climbed its own version — the two-tab autosave
+   conflict the version column exists to prevent, caused by the version column.
+3. *`DraftResponse` navigated a lazy association with `open-in-view` off.* It reads the category
+   from the pinned schema instead, which by construction cannot disagree.
+4. *The draft read returned answers but not title, description or price,* so a resumed form would
+   have come back blank. Found by writing the resume screen, not by testing the API.
+
+**Blocked: photo upload has no endpoint to call.** The plan assumed media-service; media-service
+can *serve* an asset (`GET /media/assets/{id}/{purpose}`) and its POST routes belong to the OCR
+ingestion pipeline, which extracts a listing from a photograph of a printed advertisement. That is
+a different feature from a seller attaching photographs to their own listing. The stage says so
+rather than offering a picker that stores nothing. **This needs a media-service endpoint before
+Phase 5 can be called complete** — and photos are an FR requirement even though the schema does not
+make them a submission blocker.
 
 ---
 
