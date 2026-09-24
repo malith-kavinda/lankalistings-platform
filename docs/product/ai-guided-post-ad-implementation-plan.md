@@ -625,6 +625,57 @@ It is the single largest schedule risk in this plan. Mitigation: author in a rev
 the Phase 3 validator from day one, and build Phase 10's preview console early enough to review schemas
 visually rather than as raw documents.
 
+### 4 outcome ✅
+
+| Delivered | Evidence |
+|---|---|
+| 12 schemas, 134 fields — nine locked categories with Vehicles subdivided four ways | **240 tests** |
+| 10 reference datasets, 278 entries, seeded and validated | `AuthoredContentTest` — 106 cases |
+| Dataset-backed answer validation, closing the Phase 3 deferral | `AnswerValidatorTest` |
+| Options endpoint, so a client can actually render a dataset-backed field | `CategoryControllerTest` |
+
+**Authoring is generated, not hand-written.** Twelve JSON documents maintained by hand drift in the
+ways that do not announce themselves: a required field that is also follow-up eligible, a filter on
+a value no visitor can see, two fields sharing a display position. The generator asserts those at
+the point of authoring and `AuthoredContentTest` asserts them again on the files, so the checks
+survive someone editing the JSON directly.
+
+**Three engineering changes the content forced.**
+
+1. *`data_source_parent`.* A model belongs to a make, and without the link the server cannot tell a
+   model that belongs to a *different* make from one that does not exist — both are simply "in the
+   dataset". It is also what lets a client build the cascading select rather than fetching every
+   model of every make.
+2. *Dataset completeness is per-dataset.* The first cut required an `other` fallback everywhere.
+   Land extent units are a closed set, and an `other` there produces an extent nobody can compare
+   or convert. A dataset now claims `complete` deliberately, and the default — not complete — is
+   the one that keeps a seller from being stranded.
+3. *Only `PUBLIC` fields may filter or reach a provider*, asserted per schema rather than trusted.
+   Registration numbers, street addresses and application emails are `seller_private`: moderators
+   need them, search and the copy generator do not.
+
+**Two bugs the end-to-end test found that the file-level tests could not.**
+
+- *Seventeen makes had no models at all,* including `Other`. Every file-level check passed, because
+  `car-models` did contain `other` entries — just not under every make. A seller whose make was too
+  uncommon to list picked "Other" and then faced a required dropdown with nothing in it. The
+  fallback broke exactly where it was load-bearing.
+- *The seeder's idempotency key was too narrow.* It compared `(dataset, value)` while the unique
+  constraint is `(dataset, value, parent_value)`, so once one `other` existed under one make, every
+  other make's was treated as already present and silently skipped. Fixing the content alone would
+  not have fixed the symptom.
+
+**Gap recorded: `deprecated_at` is specified in §6.2 and not implemented.** A deprecated field is
+meant to stay readable for existing drafts while no longer being asked. Nothing needs it until a
+published schema loses a field, which is the admin console's job in Phase 10 — but the spec lists
+it as a field property, so its absence is a deliberate deferral rather than an oversight.
+
+**Seeding on startup is a bootstrap, not the long-term path.** A schema that differs from the
+newest published version is published as the next version, leaving the old one intact for drafts
+pinned to it. That is the right versioning behaviour and the wrong trigger: it means a bad edit
+reaches sellers as soon as a deploy lands. `app.schemas.seed-on-startup` can turn it off, and
+Phase 10's console is where publishing belongs.
+
 ---
 
 ## Phase 5 — Resumable Draft Wizard
