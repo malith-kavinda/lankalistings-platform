@@ -767,7 +767,57 @@ make them a submission blocker.
 - Implements Phase 1 stage **3**.
 
 **Gate:** contract tests prove that a timeout, a `429`, a `529`, a malformed body, or a disabled provider
-cannot block the seller from reaching generation, preview, or submission — and cannot corrupt a draft.
+cannot block the seller from reaching generation, preview, or submission — and cannot corrupt a draft. ✅ `DecisionResilienceTest` + `DraftFlowIntegrationTest`.
+
+### 6 outcome ✅
+
+| Delivered | Evidence |
+|---|---|
+| `QuestionDecisionProvider` with Jev, fallback and resilient implementations | listing `c4d28de` — **313 tests** |
+| Batched `noul`-per-field, server-side ranking, thresholding, budget truncation | `DecisionResilienceTest` |
+| Sensitivity filter on both answers **and** candidate questions | `DecisionStateAndBreakerTest` |
+| Redacted `question_decisions` trace with `decision_source` and failure reason | `V8`, `V9` |
+| Circuit breaker, bounded timeout, documented 401/422/429/529 handling | `DecisionStateAndBreakerTest` |
+
+**The model contributes a number, not a decision.** Jev returns a probability and nothing else, so
+it is never asked what to ask. The server builds the candidate set, asks one probability per
+candidate plus a readiness question in one parallel call, and ranks, thresholds and truncates in
+code. That is what makes an unknown key, an ineligible key, an already-answered key and a duplicate
+structurally impossible rather than validated away — the class of defect the draft spec had a whole
+validation section for.
+
+**Three findings from the security review, all fixed before commit.**
+
+1. *Blocking retry was a denial of service.* The backoff slept on the servlet request thread inside
+   a transaction that had already taken a database connection. With a pool of ten, ten concurrent
+   sellers during a provider slowdown would have held every connection in the service and starved
+   every other endpoint — an upstream hiccup becoming a full outage. There is now **one attempt and
+   no retry setting**, and the provider call happens outside the transaction.
+2. *The sensitivity gate covered answers but not questions.* Only `follow_up_eligible` gated
+   candidates, so a field marked `never_send_to_ai` **and** follow-up eligible kept its answer
+   private while sending its key and its label — the request quotes both. The two flags are edited
+   independently, which makes that an easy and silent mistake. Now refused by the schema validator
+   *and* filtered by the state builder, because one enforcement holds only until someone edits the
+   other file.
+3. *Provider calls were uncapped per draft.* The question budget only decrements when a question is
+   shown, so a call selecting nothing was free to repeat and a client looping the endpoint could
+   bill unbounded requests against a draft that never moves. Calls are now counted separately.
+
+**Also hardened:** the response body is capped, because a read timeout bounds the pause between
+reads rather than the total; `DecisionProperties` redacts the API key in `toString`, since a record
+derives it from every component; only the status code is logged from a rejected request, never the
+provider's reason phrase; and the fallback records *why* it was used as a constant chosen in code —
+never a provider message, which quotes the request we sent and with it the seller's answers.
+
+**`decision_source` is never returned to the seller.** "Our AI is unavailable" tells them nothing
+they can act on and undermines a listing that is about to publish perfectly well. It lives in the
+trace, which is where an operator needs it.
+
+**Deliberate deviation:** the circuit breaker is hand-rolled rather than resilience4j. The behaviour
+needed is one counter and one timestamp; a library would bring an AOP module and configuration
+surface to express it, and the failure mode either way is "use the fallback". The clock is injected
+so the open-to-half-open transition is tested by moving time rather than sleeping. Swapping it for
+resilience4j later is a contained change.
 
 ---
 
